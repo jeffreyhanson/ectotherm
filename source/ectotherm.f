@@ -385,7 +385,7 @@ c    Other stuff
       COMMON/INTERP/INTERP
       COMMON/EGGDEV/SOILNODE
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
-     &    ,contype
+     &    ,contype,contwet
       COMMON/CONTDEPTH/CONTDEPTH
                          
 C     NEED NON, # OF SOIL NODES,
@@ -1485,9 +1485,9 @@ c    end of check that daycount is 1
 
       if(conth.gt.0)then
        skinw=contwet
-       if(rainfall.eq.0)then
-        rainfall=0.01
-       endif
+c       if(rainfall.eq.0)then
+c        rainfall=0.01
+c       endif
        if(conth.gt.0)then
         if(daycount.eq.1)then
          CONTDEP = continit*10
@@ -1497,30 +1497,27 @@ c    end of check that daycount is 1
         if(contdep.lt.0.01)then
          contdep=0.01
         endif
+        IF(CONTDEP .gt. conth*10)THEN
+          CONTDEP = conth*10
+        ENDIF
        endif
       else
        rainmult=0
       endif    
 
-      if(soilmoisture.eq.1)then
-       if(pond.eq.1)then
-        IF(CONTDEP .gt. fieldcap)THEN
-          CONTDEP = fieldcap
-        ENDIF
-        skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting/3))
-        if(skinw.lt.0)then
-            skinw=0
-        endif
-       else
-        SKINW=real(ectoinput1(30),4)
-       endif
-      else
-       if(pond.eq.1)then
-        IF(CONTDEP .gt. conth*10)THEN
-         CONTDEP = conth*10
-        ENDIF
-       endif
-      endif
+C     if(soilmoisture.eq.1)then
+C      if(pond.eq.1)then
+C       skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
+C       if(skinw.lt.0)then
+C           skinw=0
+C       endif
+C       if(skinw.gt.contwet)then
+C           skinw=contwet
+C       endif
+C      else
+C       SKINW=real(ectoinput1(30),4)
+C      endif
+C     endif
 c    running bucket model so set config factor    
 c    if((aquatic.eq.1).and.(pond.eq.1))then
 c      FATOSK=1
@@ -4832,15 +4829,7 @@ c    JP=JP+1
       ZP7(I)=ZD7(I)
       call traphr(I,DTIME)
 772   continue    
-      Massleft=amass-(dayevp/1000)
-      if(massleft.le.0)then
-      massleft=0
-      contdepth=0
-      else
-      volumeleft=(massleft/andens)
-      contdepth=volumeleft/(pi*(contw/2/100)**2)
-      contdepth=contdepth*1000
-      endif
+
 
       IF(CONTDEPTH .gt. CONTH*10)THEN
           CONTDEPTH = CONTH*10

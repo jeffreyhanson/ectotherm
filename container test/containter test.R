@@ -8,15 +8,15 @@ file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
 setwd("..")
 
 microin<-"container test" # subfolder containing the microclimate input data
-# get input microclimate files and read them in
-# file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/soil.csv',paste(microin,'/soil.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'/shadsoil.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/rainfall.csv',paste(microin,'/rainfall.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/ectoin.csv',paste(microin,'/ectoin.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP.csv',sep=""),overwrite=TRUE)
-# file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES.csv',sep=""),overwrite=TRUE)
+# get input microclimate files
+file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/soil.csv',paste(microin,'/soil.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'/shadsoil.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/rainfall.csv',paste(microin,'/rainfall.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/ectoin.csv',paste(microin,'/ectoin.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES.csv',sep=""),overwrite=TRUE)
 
 # simulation settings
 live<-1 # live (metabolism) or dead animal?
@@ -53,8 +53,8 @@ shape_c<-0.6666666667
 Flshcond<-0.5 # W/mC, thermal conductivity of flesh (range: 0.412-2.8 )
 Spheat<-4185 # J/(kg-K), specific heat of flesh
 Andens<-1000 # kg/m3, density of flesh
-ABSMAX<-0.866 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
-ABSMIN<-0.866 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
+ABSMAX<-0.71 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
+ABSMIN<-0.71 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
 EMISAN<-1. # emissivity of animal
 ptcond<-0.25 # decimal % of surface contacting the substrate
 FATOSK<-0.4 # configuration factor to sky
@@ -346,9 +346,13 @@ colnames(rainfall)<-c("dates","rainfall")
 
 
 library(lattice)
-
-#with(environ, {plot(CONDEP/10~dates,type='l',col='light blue')})
-#with(environ, {plot(WATERTEMP~dates,type='l',col='blue')})
+# with(environ, {plot(CONDEP/10~dates,type='l',col='light blue')})
+# with(environ, {plot(WATERTEMP~dates,type='l',col='blue')})
+# 
+# with(environ[(environ$DAY>0)&(environ$DAY<50),], {plot(CONDEP~dates,type='l',col='light blue',ylim=c(0,80))})
+# with(environ[(environ$DAY>0)&(environ$DAY<50),], {points(WATERTEMP~dates,type='l',col='blue')})
+# 
+# with(environ[(environ$CONDEP<5)&(environ$CONDEP>2),], {plot(WATERTEMP~dates,type='l',col='blue')})
 
 #with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
 
@@ -419,7 +423,7 @@ plotmetout<-subset(metout, format(as.POSIXlt(metout$dates), "%y/%m/%d")>=daystar
 
 
 # read in observed container temps
-FTG_2008<-read.csv('Ferntree Gully Sep 2008.csv')
+FTG_2008<-read.csv(paste(microin,'/Ferntree Gully Sep 2008.csv',sep=""))
 FTG_2008$DateTime<-as.POSIXct(FTG_2008$DateTime,tz="Etc/GMT-10",format="%d/%m/%Y %H:%M") # format the date column
 
 with(plotenviron,plot(WATERTEMP~dates,type='l',xlab='time (days)',ylim=c(0,50))) #use the plot command for the very first graph

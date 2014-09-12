@@ -65,7 +65,7 @@ c    EXTERNAL GUT
      &,act14,act15,act16,act17,act18,act19,act20,fieldcap,wilting
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &for12,for13,for14,for15,for16,for17,for18,for19,for20,Vb
-      real gutfill
+      real gutfill,contwet
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,soilmoisture,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,
@@ -146,7 +146,7 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       common/vivip/viviparous,pregnant
       common/debbaby/v_baby,e_baby,EH_baby,eggmass
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
-     &    ,contype
+     &    ,contype,contwet
       Common/Rainfall/Rainfall
       common/ctmaxmin/ctmax,ctmin,ctmincum,ctminthresh,ctkill
       COMMON/EGGSOIL/EGGSOIL

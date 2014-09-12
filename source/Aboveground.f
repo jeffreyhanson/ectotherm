@@ -25,7 +25,7 @@ C    Version 8/1/06
       real zfact,kappa,E_G,k_R,delta_deb,E_H_start
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,lengthday
-     &,prevdaylength,lat,svl_met,metamorph,lengthdaydir
+     &,prevdaylength,lat,svl_met,metamorph,lengthdaydir,contwet
 
       integer frogbreed,frogstage,photostart,photofinish,batch,
      &photodirs,photodirf,breedact,breedactthres
@@ -59,7 +59,7 @@ c    Shade environmental variables for this hour
       Common/Treg/Tc
       COMMON/pond/inwater,aquatic,twater,pond_depth,feeding,pond_env
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,WETMOD,contonly,conthole
-     &    ,contype
+     &    ,contype,contwet
       COMMON/fly/flytime,flight,flyer,flytest,flyspeed,flymetab
       COMMON/DEBPAR2/zfact,kappa,E_G,k_R,delta_deb,E_H_start,breedact
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM

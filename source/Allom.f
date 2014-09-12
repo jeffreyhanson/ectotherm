@@ -18,10 +18,10 @@ C     version 7 August, 1998  set up with Charles Curtin's box turtle data
       REAL ASEMAJR,BSEMINR,CSEMINR,conthole
       Real Skint,AT,rainfall,H2O_BalPast,F12,F32,F42,F52,P
 
-      real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
+      real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH,contlast
       real customallom,shp,HC,convar 
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
-     &,phimin,phimax,twing
+     &,phimin,phimax,twing,contwet,continit,rainmult
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,f23,f24,f25,f26
 
       INTEGER IHOUR,IMODEL,LIVE,Lometry,MICRO,NM,Nodnum,NumFed,NumHrs
@@ -51,9 +51,9 @@ C     version 7 August, 1998  set up with Charles Curtin's box turtle data
       COMMON/ANPARMS/Rinsul,R1,Area,VOL,Fatcond
       Common/Dimens/ALENTH,AWIDTH,AHEIT
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
-     &    ,contype
+     &    ,contype,contwet,continit,contlast
       COMMON/CONTDEPTH/CONTDEPTH
-      Common/Rainfall/Rainfall
+      Common/Rainfall/Rainfall,rainmult
       common/pondtest/pond
 
       Data PI/3.14159/

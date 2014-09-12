@@ -7,7 +7,7 @@ system(cmnd) # run the compilation
 file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
 setwd("..")
 
-# get input microclimate files and read them in
+# get input microclimate files
 file.copy('/git/micro_australia/metout.csv','metout.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadmet.csv','shadmet.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/soil.csv','soil.csv',overwrite=TRUE)

@@ -17,14 +17,14 @@ c    the numerical integrator for transients
       real Tskin,R,WEVAP,TR,ALT,BP,H2O_BalPast
       Real TPREF,gevap,PCTEYE,WEYES,WRESP,WCUT,AEFF,CUTFA,HD,AEYES,
      *SkinW,gcut,gresp,geyes,SkinT,core
-      Real LIVE,SPHEAT,ABSMAX,ABSMIN,O2MAX,O2MIN
+      Real SPHEAT,ABSMAX,ABSMIN,O2MAX,O2MIN
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16
 
       Integer I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,I66
       Integer TRANCT
-      Integer NDAYY
+      Integer NDAYY,LIVE
       Integer IT,wingmod,wingcalc
 
       Dimension Y(10)

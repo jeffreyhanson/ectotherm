@@ -120,7 +120,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real thermal_stages,stage,behav_stages,water_stages,orig_MsM
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &    for12,for13,for14,for15,for16,for17,for18,for19,for20
-      real gutfill
+      real gutfill,contwet
       
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),FAECES(24),
      &    NWASTE(24),surviv(24),thermal_stages(8,6)
@@ -310,7 +310,7 @@ c    Other stuff
       Common/Intnum/Intnum
       COMMON/EGGDEV/SOILNODE
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
-     &    ,contype
+     &    ,contype,contwet
       COMMON/CONTDEPTH/CONTDEPTH
                          
 C     NEED NON, # OF SOIL NODES,

@@ -22,7 +22,7 @@ c    Copyright 2003 Warren Porter All rights reserved.
       Real AirVol,CO2MOL,H2O_BalPast
       REAL XBAS,ANDENS,ASILP,EMISSB,EMISSK,FLUID,G
       Real TPREF,HDD,SkinT,rainfall,HC,convar 
-      real customallom,MR_1,MR_2,MR_3,shp
+      real customallom,MR_1,MR_2,MR_3,shp,rainmult
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16
@@ -59,7 +59,7 @@ c    Copyright 2003 Warren Porter All rights reserved.
       Common/Guess/Xtry
       Common/Rainact/Rainact
       Common/Treg/Tc
-      Common/Rainfall/Rainfall
+      Common/Rainfall/Rainfall,rainmult
       common/fileio/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,I66
 
 C    DEBUGGING ONLY

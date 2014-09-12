@@ -176,12 +176,11 @@ NicheMapR_ecto <- function(niche) {
   
   # bucket model for soil moisture
   fieldcap<-ectoin[5,2]# %vol, water content at 0.1ba = 10kPa
-  wilting<-ectoin[6,2] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
-  
+  wilting<-ectoin[6,2]/3 # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
   if(soilmoisture==1){
     conth<-fieldcap/10
     contw<-50
-    contype<-1 # is 'containter' sitting on the surface, like a bucket (0) or sunk into the ground like a pond (1)
+    contype<-0 # is 'containter' sitting on the surface, like a bucket (0) or sunk into the ground like a pond (1)
     rainmult<-1 # rainfall multiplier to reflect catchment (don't make this zero unless you want a drought!)
     continit<-0 # initial container water level (cm)
     conthole<-0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. infiltration to soil, drawdown from water tank)
@@ -216,7 +215,11 @@ NicheMapR_ecto <- function(niche) {
   ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
   source('NicheMapR_ecto.R') 
   cat('running ectotherm model ... \n')
-  system.time(ectout<-ectotherm(ecto))
+  
+  ptm <- proc.time() # Start timing
+  ectout<-ectotherm(ecto)
+  print(proc.time() - ptm) # Stop the clock
+ 
   
   environ<-ectout$environ[1:(365*24*nyears),]
   enbal<-ectout$enbal[1:(365*24*nyears),]

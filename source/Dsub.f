@@ -55,7 +55,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       Real VAR,VEL,VOL,VREF,WC,WCMIN,WEVAP,XBAS,XCALC,Z,ZEN
       Real Rinsul,R1,Area,Fatcond,AirVol,CO2MOL
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,tbask,temerge
-      Real tcinit,pi,MLO2,GH2OMET,H2O_BalPast,TWING
+      Real tcinit,pi,MLO2,GH2OMET,H2O_BalPast,TWING,massleft,volumeleft
 
       REAL Enary9,Enary10,Enary11,Enary12,Enary13,Enary14,Enary15
       REAL Enary16,Enary17,Enary18,Enary19,Enary20,Enary21
@@ -73,14 +73,15 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
 
       real HC,Trad,HD,WB,DP,E,ESAT,VD,RW,TVIR,TVINC,TOTLEN,AV,AT,  
-     * DENAIR,CP,WTRPOT,HTOVPR
+     * DENAIR,CP,WTRPOT,HTOVPR,CONTDEPTH
       real PCTEYE,WEYES,WRESP,WCUT,AEFF,CUTFA,AEYES,SkinW,convar
      &,SkinT,VDAIR,VDSURF,TAVE,RHUM,x1,x2,x,testx,zbrent,enberr,reftol
+      real CONTH,CONTW,CONTVOL,CONTDEP,conthole,fieldcap,wilting,contwet
 
       INTEGER ITYM,JTYM,ICLIM,IDAY,IHOUR,JP
       INTEGER LIVE,Lometry,MICRO,NDAY,NEQ,Nodnum
-      Integer NM,NumFed,NumHrs
-      Integer IT,SCENAR,DEB1,wingmod,wingcalc
+      Integer NM,NumFed,NumHrs,soilmoisture,pond
+      Integer IT,SCENAR,DEB1,wingmod,wingcalc,WETMOD,contonly,contype
 
       Character*1 tranin
       logical succes
@@ -149,17 +150,22 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       COMMON/EVAP1/PCTEYE,WEYES,WRESP,WCUT,AEFF,CUTFA,HD,AEYES,SkinW
      &,SkinT,HC,convar
       COMMON/WCOND/TOTLEN,AV,AT
+      COMMON/CONTDEPTH/CONTDEPTH
+      COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,WETMOD,contonly,conthole
+     &,contype,contwet
+      common/soilmoist/fieldcap,wilting,soilmoisture
+      common/pondtest/pond
 
       DATA TI/0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600.,660.,
      &720.,780.,840.,900.,960.,1020.,1080.,1140.,1200.,1260.,1320.,
      &1380.,1440./
 
-c    Specific heat (J/(kg-C-min) for LSODE integrator working in minutes
-      CPMIN = SPHEAT/60.
 C    GRAMS OF MASS
       GMASS = AMASS*1000.
       RFLESH = R1
       PI = 3.141592
+      volumeleft=vol
+      massleft=amass
 
 C     TIME DEPENDENT TEMPERATURE OR HEAT GEN./UNIT VOLUME
         If((TRANIN .eq. 'n') .or. (TRANIN .eq. 'N'))then
@@ -530,7 +536,7 @@ c      Time = 0.0:  INITIALIZE
 
 C       CONVERTING TO MINUTES FOR LSODE, BECAUSE ALL HEAT FLUXES 
 C      IN WATTS (J/S)  
-        CPMIN = SPHEAT*60
+        CPMIN = SPHEAT*60.
 C      ONE LUMP MODEL
         WCMIN = AMASS*CPMIN
 
@@ -597,6 +603,32 @@ c      End of calculations for when Time > 0.
       Endif
 
       TcPAST = Tc
+      Massleft=amass-wevap/1000*60
+      if(massleft.le.0.)then
+      massleft=0.
+      contdepth=0.
+      else
+      volumeleft=(massleft/andens)
+      contdepth=volumeleft/(pi*(contw/2./100.)**2.)
+      contdepth=contdepth*1000.
+      endif
+      contdep=contdepth
+      if(contdep.lt.0.01)then
+          contdep=0.01
+          skinw=0.
+      endif
+
+      if(soilmoisture.eq.1)then
+       if(pond.eq.1)then
+        skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
+        if(skinw.lt.0)then
+            skinw=0
+        endif
+        if(skinw.gt.contwet)then
+            skinw=contwet
+        endif
+       endif
+      endif
 
 c10    FORMAT('DSUB: IHOUR,T,X,YDOT(1) = ',1X,1I4,2F7.1,1E12.4)
 c21    FORMAT(1X,'Tskin,TC,G,R,Flshcond = ',5E12.4)
