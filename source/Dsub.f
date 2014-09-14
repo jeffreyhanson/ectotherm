@@ -54,7 +54,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       Real TPAST,TR,TREF,TSKY,TskyC,TSUB,TSUBST,Tym
       Real VAR,VEL,VOL,VREF,WC,WCMIN,WEVAP,XBAS,XCALC,Z,ZEN
       Real Rinsul,R1,Area,Fatcond,AirVol,CO2MOL
-      REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,tbask,temerge
+      REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,tbask,temerge,R2
       Real tcinit,pi,MLO2,GH2OMET,H2O_BalPast,TWING,massleft,volumeleft
 
       REAL Enary9,Enary10,Enary11,Enary12,Enary13,Enary14,Enary15
@@ -479,14 +479,27 @@ C    INITIALIZING FOR SUB. WETAIR
      &Flshcond))*(HC+HR)+HC*Ta+HR*Trad)+AEFF*(HD*HTOVPR*VDAIR))+
      &((SUBTK*AV)/(ALENTH/2))*((GN*S2)/(2*Flshcond)+Tsubst))
       else
-       j=(1/(AMASS*SpHeat))*((QSOLAR+QGENET+CONVAR*(((GN*(ALENTH/2)**2)/
-     &(4*Flshcond))*(HC+HR)+HC*Ta+HR*Trad)+AEFF*(HD*HTOVPR*VDAIR))+
-     &((SUBTK*AV)/(ALENTH/2))*((GN*(ALENTH/2)**2)/(4*Flshcond)+Tsubst)) 
+      if(pond.eq.0)then
+      R2=(ALENTH/2)**2
+       j=(1/(AMASS*SpHeat))*((QSOLAR+QGENET+CONVAR*(((GN*R2)/(4*
+     &Flshcond))*(HC+HR)+HC*Ta+HR*Trad)+AEFF*(HD*HTOVPR*VDAIR))+
+     &((SUBTK*AV)/0.025)*((GN*R2)/(4*Flshcond)+Tsubst)) 
+      else
+      R2=(CONTDEP/1000/2)**2
+      j=(1/(AMASS*SpHeat))*((QSOLAR+QGENET+CONVAR*(((GN*R2)/(4*
+     &Flshcond))*(HC+HR)+HC*Ta+HR*Trad)+AEFF*(HD*HTOVPR*VDAIR))+
+     &((SUBTK*AV)/0.025)*((GN*R2)/(4*Flshcond)+Tsubst)) 
       endif
-     
+      endif
+      
+      if(pond.eq.1)then
+      kTC=(CONVAR*(TC*HC+TC*HR)+AEFF*HD*HTOVPR*VDSURF+TC*((SUBTK*AV)
+     &/0.025))/(AMASS*SpHeat)
+      else
       kTC=(CONVAR*(TC*HC+TC*HR)+AEFF*HD*HTOVPR*VDSURF+TC*((SUBTK*AV)
      &/(ALENTH/2)))/(AMASS*SpHeat)
-     
+      endif
+      
       YDOT(1)=(j-kTc)*60
       
 c     now get the skin temperature with zbrent         
@@ -603,7 +616,8 @@ c      End of calculations for when Time > 0.
       Endif
 
       TcPAST = Tc
-      Massleft=amass-wevap/1000*60
+c     wevap is g/s so convert to kg/min 
+      Massleft=amass-wevap/1000.*60.
       if(massleft.le.0.)then
       massleft=0.
       contdepth=0.

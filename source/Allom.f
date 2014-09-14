@@ -18,10 +18,10 @@ C     version 7 August, 1998  set up with Charles Curtin's box turtle data
       REAL ASEMAJR,BSEMINR,CSEMINR,conthole
       Real Skint,AT,rainfall,H2O_BalPast,F12,F32,F42,F52,P
 
-      real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH,contlast
+      real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
       real customallom,shp,HC,convar 
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
-     &,phimin,phimax,twing,contwet,continit,rainmult
+     &,phimin,phimax,twing
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,f23,f24,f25,f26
 
       INTEGER IHOUR,IMODEL,LIVE,Lometry,MICRO,NM,Nodnum,NumFed,NumHrs
@@ -51,9 +51,9 @@ C     version 7 August, 1998  set up with Charles Curtin's box turtle data
       COMMON/ANPARMS/Rinsul,R1,Area,VOL,Fatcond
       Common/Dimens/ALENTH,AWIDTH,AHEIT
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
-     &    ,contype,contwet,continit,contlast
+     &    ,contype
       COMMON/CONTDEPTH/CONTDEPTH
-      Common/Rainfall/Rainfall,rainmult
+      Common/Rainfall/Rainfall
       common/pondtest/pond
 
       Data PI/3.14159/
@@ -79,7 +79,7 @@ c      Make sure container doesn't overfill
        ENDIF
        VOL = pi*r1**2*(contdep/1000)
        AMASS = VOL*ANDENS
-       if(AMASS .lt. 0)then
+       if(AMASS .le. 0)then
         AMASS = 0
         contdep=0
        endif

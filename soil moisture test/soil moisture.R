@@ -18,7 +18,7 @@ sitedata<-read.csv(paste(workdir,"oznetsiteinfo.csv",sep=""))
 allsitenames<-as.character(sitedata$name)
 # delete site k14
 allsitenames<-allsitenames[allsitenames!="k14"]
-isite<-2
+isite<-37
 for(isite in 1:nrow(sitedata)){
   # load oznet data 
   oznetsite <- sitedata[isite,1] # CHOOSE OZNET SITE HERE!
@@ -73,6 +73,15 @@ for(isite in 1:nrow(sitedata)){
   file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP.csv',sep=""),overwrite=TRUE)
   file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES.csv',sep=""),overwrite=TRUE)
   
+file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/soil.csv',paste(microin,'/soil',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'/shadsoil',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/rainfall.csv',paste(microin,'/rainfall',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/ectoin.csv',paste(microin,'/ectoin',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES',oznetsite,'.csv',sep=""),overwrite=TRUE)
+
   # simulation settings
   live<-1 # live (metabolism) or dead animal?
   enberr<-0.0002 # tolerance for energy balance
@@ -348,14 +357,6 @@ for(isite in 1:nrow(sitedata)){
   mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
   mh<-0.5   # survivorship of hatchling in first year
   
-setwd("source/") # set the working directory where the fortran program is
-cmnd<- "rcmd SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Funskin.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f "
-#R CMD SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f
-system(cmnd) # run the compilation
-file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
-setwd("..")
-
-
   #set up call to NicheMapR function
   niche<-list(microin=microin,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet)
   source('NicheMapR_Setup_ecto.R')
@@ -416,8 +417,9 @@ setwd("..")
   plotsoil<-subset(soil, format(soil$dates, "%y/%m/%d")>= daystart & format(soil$dates, "%y/%m/%d")<=dayfin)
   plotenviron<-subset(environ, format(environ$dates, "%y/%m/%d")>= daystart & format(environ$dates, "%y/%m/%d")<=dayfin)
   
-  #  plot(environ$CONDEP~environ$dates,type='l') 
-  
+#with(environ[environ$DAY<20,],plot(WATERTEMP~dates,type='l'))
+#  plot(plotenviron$CONDEP~plotenviron$dates,type='l') 
+#plot(plotenviron$WATERTEMP~plotenviron$dates,type='l')
   
   
   d1<-as.data.frame(as.Date(metout$dates-3600*10, format="%Y-%m-%d"))
@@ -467,7 +469,8 @@ setwd("..")
          c("data","predict"), 
          fill=c("red","black"),bty="n", 
          horiz=TRUE, bg=NULL, cex=0.8)
-  #dev.off()
+abline(0,5)
+  dev.off()
   
   ## end loop for all sites
 }

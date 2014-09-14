@@ -162,7 +162,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real ectoinput,debfirst,rainfall2,grassgrowth,grasstsdm,flymetab
       real continit,wetlandTemps,wetlandDepths,conthole,tbs,causedeath
       real thermal_stages,stage,water_stages,behav_stages,repro,Thconw
-      real arrhenius,raindrink,HC,convar,fieldcap,wilting
+      real arrhenius,raindrink,HC,convar,fieldcap,wilting,TOTLEN,AV,AT
 
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &for12,for13,for14,for15,for16,for17,for18,for19,for20
@@ -315,6 +315,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       COMMON/WDSUB2/MICRO,QSOLR,TOBJ,TSKY
       Common/wTrapez/Dtime
       COMMON/WCONV/FLTYPE
+      COMMON/WCOND/TOTLEN,AV,AT
 c    Sun environmental variables for the day
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
@@ -3787,6 +3788,9 @@ c    Full sun
 
 c    had this at Tshsoi(4) for westerns swamp tortoise
        Enary7(Ihour) = Tshsoi(2)
+        if(soilmoisture.eq.1)then
+        Enary7(Ihour)=Tsoil(1)
+        endif
       else
        Enary7(Ihour)=Tsoil(1)
       endif
@@ -4407,6 +4411,9 @@ c     *   IOPT,LRW,LIW,MF,TRANCT,NDAYY
      *   IOPT,RWORK,LRW,IWORK,LIW,JAC,MF,TRANCT,NDAYY)
 C      PRINT OUT ANSWERS AT THE END OF TIME INTERVAL, TPRINT
 c      WRITE(I2,130) T,(Y(NOD),NOD=1,NEQ)
+      if(julday.eq.5)then
+          julday=5
+          endif
         DO 939 I=1,25
         TRANSAR(SCENAR,I)=TRANSIENT(I)
 939   continue
@@ -4416,7 +4423,7 @@ c      WRITE(I2,130) T,(Y(NOD),NOD=1,NEQ)
 c     endif
 929   continue
 c     ******************** End loop of 5 initial scenarios for transient************
-
+      
 
 
 c     ******************** Begin transient scenario analysis ************
