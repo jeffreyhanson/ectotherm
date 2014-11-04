@@ -681,10 +681,10 @@ c    equation 2.21 from DEB3
        endif
       endif
 
-      if(aest.eq.1)then
-      dVdt=0
-      rdot=0
-      endif
+c      if(aest.eq.1)then
+c      dVdt=0
+c      rdot=0
+c      endif
 
       if(hour.eq.1)then
        if(E_H_pres.le.E_Hb)then
@@ -722,9 +722,9 @@ c      use embryo equation for scaled reserve, U_E, from Kooijman 2009 eq. 1
       p_M = p_Mv*V_pres
       p_J = k_J*E_H_pres
 
-      if(aest.eq.1)then
-       dEdt = (p_Mv+p_J/v_pres)*(-1.)
-      endif
+c      if(aest.eq.1)then
+c       dEdt = (p_Mv+p_J/v_pres)*(-1.)
+c      endif
 
 c    diapause before pond fill
       if(frogbreed.eq.1)then
@@ -771,9 +771,9 @@ c    equation 2.20 DEB3
 
       p_R = (1.-kappa)*p_C-p_J
 
-      if(aest.eq.1)then
-      p_R=0
-      endif
+c      if(aest.eq.1)then
+c      p_R=0
+c      endif
 
       if((E_H_pres.le.E_Hp).or.(pregnant.eq.1))then
        p_B = 0.
@@ -811,9 +811,9 @@ c     end check for whether batch mode is operating
 c    end check for immature or mature
       endif
 
-      if(aest.eq.1)then
-      p_B=0
-      endif
+c      if(aest.eq.1)then
+c      p_B=0
+c      endif
 
 c    maturity
       if(E_H_pres.lt.E_Hp)then
@@ -835,9 +835,9 @@ c       use embryo equation for scaled maturity, U_H, from Kooijman 2009 eq. 3
        dE_Hdt = 0
       endif
 
-      if(aest.eq.1)then
-      dE_Hdt=0
-      endif
+c      if(aest.eq.1)then
+c      dE_Hdt=0
+c      endif
 
       if(E_H_pres.ge.E_Hp)then
        p_D = p_M+p_J+(1-k_R)*p_R

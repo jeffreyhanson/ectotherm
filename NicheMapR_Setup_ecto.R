@@ -176,8 +176,8 @@ NicheMapR_ecto <- function(niche) {
   
   # bucket model for soil moisture
   fieldcap<-ectoin[5,2]# %vol, water content at 0.1ba = 10kPa
-  wilting<-ectoin[6,2]/3 # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
-  fieldcap<-35
+  wilting<-ectoin[6,2]/2.5 # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
+  fieldcap<-30
   if(soilmoisture==1){
     conth<-fieldcap/10
     contw<-100
