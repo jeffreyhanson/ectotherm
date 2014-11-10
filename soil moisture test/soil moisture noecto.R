@@ -48,6 +48,8 @@ if(ncol(XLdat)==9){
 XLdat$DATE<- as.Date(XLdat$DATE,"%d/%m/%Y")
 # take only hourly data (data in 20min intervals)
 XLdat <- XLdat[seq(1,nrow(XLdat),60/oznetdatafreq),]
+ystart<-2007
+yfinish<-2008
 XLdat1 <- subset(XLdat,  DATE > as.Date(paste('01/01/',ystart, sep = ""), "%d/%m/%Y"))
 XLdat1 <- subset(XLdat1, DATE < as.Date(paste('01/01/',yfinish+1, sep = ""), "%d/%m/%Y"))
 
@@ -58,8 +60,6 @@ rainfall<-as.data.frame(read.csv(paste('rainfall',oznetsite,'.csv',sep="")))
 metout<-metout[,-1]
 soil<-soil[,-1]
 rainfall<-rainfall[,-1]
-ystart<-2007
-yfinish<-2008
 nyears<-yfinish-ystart+1
 tzone<-paste("Etc/GMT-",10,sep="") # doing it this way ignores daylight savings!
 dates<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="hours")

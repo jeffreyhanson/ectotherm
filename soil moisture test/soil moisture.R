@@ -21,7 +21,7 @@ allsitenames<-as.character(sitedata$name)
 # delete site k14
 allsitenames<-allsitenames[allsitenames!="k14"]
 isite<-1
-# for(isite in 1:nrow(sitedata)){
+ for(isite in 1:nrow(sitedata)){
   # load oznet data 
   oznetsite <- sitedata[isite,1] # CHOOSE OZNET SITE HERE!
   site<-subset(sitedata,name==oznetsite) # get site info for chosen site
@@ -455,7 +455,7 @@ file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'MAXSHADES',oznetsi
   
   
   #setwd(paste(workdir,"plots/",sep=""))
-#  png(filename=paste(oznetsite,".png",sep=""), width=1000,height=400)
+  png(filename=paste("soil moisture test/",oznetsite,".png",sep=""), width=1000,height=400)
   plot(XLdat1$DATE, XLdat1$SM_0_5cm, 'l', ylim = c(0,50), col = "red",
        xlab="date", ylab="moisture (% vol)")
   lines(as.Date(DATA$DATE), DATA$MOIST, 'l')
@@ -472,10 +472,10 @@ file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'MAXSHADES',oznetsi
          fill=c("red","black"),bty="n", 
          horiz=TRUE, bg=NULL, cex=0.8)
 abline(0,5)
-#  dev.off()
+  dev.off()
   
   ## end loop for all sites
-# }
+ }
 
 
 
