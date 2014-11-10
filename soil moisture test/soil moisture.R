@@ -13,8 +13,8 @@ yfinish<-2008
 basedir<-getwd()
 
 ## start loop for all sites
-workdir<-"C:/Users//My Dropbox/Soil moisture data/oznet/"
-workdir<-"C:/Users/jamesmaino/Dropbox/My Manuscripts/Plague Locust/Soil moisture data/oznet/"
+workdir<-"C:/Users/mrke/My Dropbox/Soil moisture data/oznet/"
+#workdir<-"C:/Users/jamesmaino/Dropbox/My Manuscripts/Plague Locust/Soil moisture data/oznet/"
 
 sitedata<-read.csv(paste(workdir,"oznetsiteinfo.csv",sep=""))
 allsitenames<-as.character(sitedata$name)
@@ -64,25 +64,25 @@ isite<-1
 
   ########################## start run ectotherm model to get soil moisture #################################
   
-  microin<-"soil moisture test" # subfolder containing the microclimate input data
+  microin<-"soil moisture test/" # subfolder containing the microclimate input data
   # get input microclimate files
-  file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/soil.csv',paste(microin,'/soil.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'/shadsoil.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/rainfall.csv',paste(microin,'/rainfall.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/ectoin.csv',paste(microin,'/ectoin.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP.csv',sep=""),overwrite=TRUE)
-  file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/metout.csv',paste(microin,'metout.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/shadmet.csv',paste(microin,'shadmet.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/soil.csv',paste(microin,'soil.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'shadsoil.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/rainfall.csv',paste(microin,'rainfall.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/ectoin.csv',paste(microin,'ectoin.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/DEP.csv',paste(microin,'DEP.csv',sep=""),overwrite=TRUE)
+  file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'MAXSHADES.csv',sep=""),overwrite=TRUE)
   
-file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/soil.csv',paste(microin,'/soil',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'/shadsoil',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/rainfall.csv',paste(microin,'/rainfall',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/ectoin.csv',paste(microin,'/ectoin',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/DEP.csv',paste(microin,'/DEP',oznetsite,'.csv',sep=""),overwrite=TRUE)
-file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'/MAXSHADES',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/metout.csv',paste(microin,'metout',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadmet.csv',paste(microin,'shadmet',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/soil.csv',paste(microin,'soil',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/shadsoil.csv',paste(microin,'shadsoil',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/rainfall.csv',paste(microin,'rainfall',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/ectoin.csv',paste(microin,'ectoin',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/DEP.csv',paste(microin,'DEP',oznetsite,'.csv',sep=""),overwrite=TRUE)
+file.copy('/git/micro_australia/MAXSHADES.csv',paste(microin,'MAXSHADES',oznetsite,'.csv',sep=""),overwrite=TRUE)
 
   # simulation settings
   live<-1 # live (metabolism) or dead animal?
