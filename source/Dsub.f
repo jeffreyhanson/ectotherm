@@ -634,13 +634,33 @@ c     wevap is g/s so convert to kg/min
 
       if(soilmoisture.eq.1)then
        if(pond.eq.1)then
-        skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
+
+c        CONTDEP in mm
+c        wilting in %
+c        fieldcap in %
+c        contwet is proportion
+
+         skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
+
+c       constant evaporation if water lost < 0 (see onenote/soil moisture model)
+c       decreasing evaporation (see onenote/soil moisture model)
+        if((fieldcap-CONTDEP).lt.0)then
+        skinw=1
+        else
+            skinw=(10*(fieldcap - 0.5*wilting)*0.1-(fieldcap-
+     &    CONTDEP))/(10*(fieldcap - 0.5*wilting)*0.1-0)        
+        endif
+        
+        if(skinw.gt.1)then
+            skinw= 1
+        endif        
+
         if(skinw.lt.0)then
             skinw=0
         endif
-        if(skinw.gt.contwet)then
-            skinw=contwet
-        endif
+
+        skinw = contwet*skinw
+
        endif
       endif
 
