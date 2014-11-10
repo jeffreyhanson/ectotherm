@@ -20,7 +20,7 @@ sitedata<-read.csv(paste(workdir,"oznetsiteinfo.csv",sep=""))
 allsitenames<-as.character(sitedata$name)
 # delete site k14
 allsitenames<-allsitenames[allsitenames!="k14"]
-isite<-1
+isite<-22
 # for(isite in 1:nrow(sitedata)){
   # load oznet data 
   oznetsite <- sitedata[isite,1] # CHOOSE OZNET SITE HERE!
@@ -64,7 +64,7 @@ isite<-1
 
   ########################## start run ectotherm model to get soil moisture #################################
   
-  microin<-"soil moisture test" # subfolder containing the microclimate input data
+  microin<-"soil moisture test/" # subfolder containing the microclimate input data
   # get input microclimate files
   file.copy('/git/micro_australia/metout.csv',paste(microin,'/metout.csv',sep=""),overwrite=TRUE)
   file.copy('/git/micro_australia/shadmet.csv',paste(microin,'/shadmet.csv',sep=""),overwrite=TRUE)
