@@ -167,6 +167,7 @@ condepths<-cbind(dates,condepths)
 colnames(condepths)<-c('dates','depth')
 
 # computations now done - plot the results against observations
+png(filename=paste(oznetsite,"_noecto.png",sep=""), width=1000,height=400)
 plot(XLdat1$DATE, XLdat1$SM_0_5cm, 'l', ylim = c(0,50), col = "red",
      xlab="date", ylab="moisture (% vol)")
 lines(as.Date(condepths$dates), condepths$depth, 'l')
@@ -176,4 +177,5 @@ legend("topleft", inset=.05,
        fill=c("red","black"),bty="n", 
        horiz=TRUE, bg=NULL, cex=0.8)
 abline(0,5)
+dev.off()
 }
