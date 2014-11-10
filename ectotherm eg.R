@@ -1,11 +1,11 @@
 ############# ectotherm model parameters ################################
 
-setwd("source/") # set the working directory where the fortran program is
-cmnd<- "rcmd SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Funskin.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f "
-#R CMD SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f
-system(cmnd) # run the compilation
-file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
-setwd("..")
+# setwd("source/") # set the working directory where the fortran program is
+# cmnd<- "rcmd SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Funskin.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f "
+# #R CMD SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f
+# system(cmnd) # run the compilation
+# file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
+# setwd("..")
 
 # get input microclimate files
 
@@ -35,7 +35,7 @@ FLTYPE<-0.0  # fluid type 0.0=air, 1.0=water
 SUBTK<-2.79 # substrate thermal conductivity (W/mC)
 soilnode<-4. # soil node at which eggs are laid (overridden if frogbreed is 1)
 minshade<-0. # minimum available shade (percent)
-maxshade<-70. # maximum available shade (percent)
+maxshade<-1. # maximum available shade (percent)
 REFL<-rep(0.18,timeinterval*nyears) # substrate reflectances 
 
 # morphological traits
@@ -97,11 +97,11 @@ gutfill<-75. # % gut fill at which satiation occurs - if greater than 100%, anim
 dayact<-1 # diurnal activity allowed (1) or not (0)?
 nocturn<-0 # nocturnal activity allowed (1) or not (0)?
 crepus<-0 # crepuscular activity allowed (1) or not (0)?
-burrow<-0 # shelter in burrow allowed (1) or not (0)?
+burrow<-1 # shelter in burrow allowed (1) or not (0)?
 shdburrow<-0 #
 mindepth<-2 # minimum depth (soil node) to which animal can retreat if burrowing
 maxdepth<-10 # maximum depth (soil node) to which animal can retreat if burrowing
-CkGrShad<-1 # shade seeking allowed (1) or not (0)?
+CkGrShad<-0 # shade seeking allowed (1) or not (0)?
 climb<-0 # climbing to seek cooler habitats allowed (1) or not (0)?
 fosorial<-0 # fossorial activity (1) or not (0)
 rainact<-0 # activity is limited by rainfall (1) or not (0)?
@@ -112,7 +112,7 @@ flyspeed<-5 # flying speed, m/s
 flymetab<-0.1035 # flight metabolic excess, w/g
 
 # containter simulation settings
-container<-1 # run the container model? (aquatic start of life cycle, e.g. frog or mosquito)
+container<-0 # run the container model? (aquatic start of life cycle, e.g. frog or mosquito)
 conth<-10 # cylindrical container/pond height (cm)
 contw<-100. # cylindrical container/pond diameter (cm)
 contype<-1 # is 'containter' sitting on the surface, like a bucket (0) or sunk into the ground like a pond (1)
@@ -122,7 +122,7 @@ conthole<- 0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. in
 contonly<-1 # just run the container model and quit?
 contwet<-80 # percent wet value for container
 wetmod<-0 # run the wetland model?
-soilmoisture<-1 # run the soil moisture model? (models near-surface soil moisture rather than a pond as a function of field capacity and wilting point)
+soilmoisture<-0 # run the soil moisture model? (models near-surface soil moisture rather than a pond as a function of field capacity and wilting point)
 
 # which energy budget model to use? 
 DEB<-0 # run the DEB model (1) or just heat balance, using allometric respiration below (0)
@@ -350,4 +350,4 @@ if(container==1){
 ############### plot results ######################
 library(lattice)
 
-with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~TIME | as.factor(JULDAY),ylim=c(-15,50),type = "l")})
+with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~TIME | as.factor(JULDAY),type = "l")})

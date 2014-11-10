@@ -169,7 +169,7 @@ NicheMapR_ecto <- function(niche) {
   grassgrowths<-rep(X,timeinterval*nyears)
   grasstsdms<-rep(X,timeinterval*nyears)
   julstart<-metout[1,2]
-  tannul<-as.numeric(metout[1,12])
+  tannul<-as.numeric(metout[1,11])
   monthly<-0
   tester<-0
   microyear<-1
