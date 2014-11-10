@@ -176,16 +176,16 @@ NicheMapR_ecto <- function(niche) {
   
   # bucket model for soil moisture
   fieldcap<-ectoin[5,2]# %vol, water content at 0.1ba = 10kPa
-  wilting<-ectoin[6,2]/2.5 # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
-  fieldcap<-30
+  wilting<-ectoin[6,2] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
+  fieldcap<-30 # field capacity, m3/m3*100
   if(soilmoisture==1){
-    conth<-fieldcap/10
+    conth<-fieldcap/10 # containter height, cm
     contw<-100
     contype<-1 # is 'containter' sitting on the surface, like a bucket (0) or sunk into the ground like a pond (1)
-    rainmult<-1 # rainfall multiplier to reflect catchment (don't make this zero unless you want a drought!)
+    rainmult<-0.3 # !!!!!!!!!!!!!!rainfall multiplier to reflect catchment (don't make this zero unless you want a drought!)
     continit<-0 # initial container water level (cm)
     conthole<-0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. infiltration to soil, drawdown from water tank)
-    contwet<-90 # percent wet value for container
+    contwet<- 2 # percent wet value for container
   }
   ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture)
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,eggmass,batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,svl_met,frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
