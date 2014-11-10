@@ -212,7 +212,7 @@ C       Assume a cube for the moment
 
 C     CYLINDER      
       IF (Lometry .EQ. 1) THEN
-        R1=(VOL/(pi*shp(2)))**(1./3.)
+        R1=(VOL/(pi*shp(2)*2))**(1./3.)
         ALENTH=R1*shp(2)
         Area = 2*pi*r1**2+2*pi*r1*ALENTH
         VOL = AMASS/ANDENS
