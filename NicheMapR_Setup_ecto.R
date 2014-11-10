@@ -31,10 +31,10 @@ NicheMapR_ecto <- function(niche) {
   wetlandDepths=matrix(data = 0., nrow = 24*7300, ncol = 1)
   
   cat('reading microclimate input \n')
-  metout<-read.csv(file=paste(microin,'/metout.csv',sep=""),sep=",")[,-1]
-  shadmet<-read.csv(file=paste(microin,'/shadmet.csv',sep=""),sep=",")[,-1]
-  soil<-read.csv(file=paste(microin,'/soil.csv',sep=""),sep=",")[,-1]
-  shadsoil<-read.csv(file=paste(microin,'/shadsoil.csv',sep=""),sep=",")[,-1]
+  metout<-read.csv(file=paste(microin,'metout.csv',sep=""),sep=",")[,-1]
+  shadmet<-read.csv(file=paste(microin,'shadmet.csv',sep=""),sep=",")[,-1]
+  soil<-read.csv(file=paste(microin,'soil.csv',sep=""),sep=",")[,-1]
+  shadsoil<-read.csv(file=paste(microin,'shadsoil.csv',sep=""),sep=",")[,-1]
   #   metout<-as.matrix(metout[,-1])
   #   shadmet<-as.matrix(shadmet[,-1])
   #   shadsoil<-as.matrix(shadsoil[,-1])
@@ -43,10 +43,10 @@ NicheMapR_ecto <- function(niche) {
   shadmet<-as.matrix(shadmet)
   shadsoil<-as.matrix(shadsoil)
   soil<-as.matrix(soil)
-  RAINFALL<-as.matrix(read.csv(file=paste(microin,'/rainfall.csv',sep=""),sep=","))[,2]
-  ectoin<-read.csv(file=paste(microin,'/ectoin.csv',sep=""),sep=",")
-  DEP<-as.matrix(read.csv(file=paste(microin,'/DEP.csv',sep=""),sep=","))[,2]
-  MAXSHADES<-as.matrix(read.csv(file=paste(microin,'/MAXSHADES.csv',sep=""),sep=","))[,2]
+  RAINFALL<-as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2]
+  ectoin<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")
+  DEP<-as.matrix(read.csv(file=paste(microin,'DEP.csv',sep=""),sep=","))[,2]
+  MAXSHADES<-as.matrix(read.csv(file=paste(microin,'MAXSHADES.csv',sep=""),sep=","))[,2]
   
   metout2=matrix(data = 0., nrow = 24*7300, ncol = 18) 
   soil2=matrix(data = 0., nrow = 24*7300, ncol = 12)
@@ -54,10 +54,10 @@ NicheMapR_ecto <- function(niche) {
   shadsoil2=matrix(data = 0., nrow = 24*7300, ncol = 12)
   wetlandTemps=matrix(data = 0., nrow = 24*7300, ncol = 1)
   wetlandDepths=matrix(data = 0., nrow = 24*7300, ncol = 1)
-  metout2[1:(24*365*nyears),]<-metout[1:(24*365*nyears),]
-  shadmet2[1:(24*365*nyears),]<-shadmet[1:(24*365*nyears),]
-  soil2[1:(24*365*nyears),]<-soil[1:(24*365*nyears),]
-  shadsoil2[1:(24*365*nyears),]<-shadsoil[1:(24*365*nyears),]
+  metout2[1:nrow(metout),]<-metout
+  shadmet2[1:nrow(metout),]<-shadmet
+  soil2[1:nrow(metout),]<-soil
+  shadsoil2[1:nrow(metout),]<-shadsoil
   metout<-metout2
   shadmet<-shadmet2
   soil<-soil2

@@ -8,14 +8,6 @@ file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
 setwd("..")
 
 # get input microclimate files
-# file.copy('/git/micro_australia/metout.csv','metout.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/shadmet.csv','shadmet.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/soil.csv','soil.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/shadsoil.csv','shadsoil.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/rainfall.csv','rainfall.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/ectoin.csv','ectoin.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/DEP.csv','DEP.csv',overwrite=TRUE)
-# file.copy('/git/micro_australia/MAXSHADES.csv','MAXSHADES.csv',overwrite=TRUE)
 
 file.copy('/git/micro_global/metout.csv','metout.csv',overwrite=TRUE)
 file.copy('/git/micro_global/shadmet.csv','shadmet.csv',overwrite=TRUE)
@@ -25,6 +17,8 @@ file.copy('/git/micro_global/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_global/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_global/DEP.csv','DEP.csv',overwrite=TRUE)
 file.copy('/git/micro_global/MAXSHADES.csv','MAXSHADES.csv',overwrite=TRUE)
+
+microin<-"" # subfolder containing the microclimate input data
 
 # simulation settings
 live<-1 # live (metabolism) or dead animal?
@@ -314,9 +308,9 @@ shadsoil<-as.data.frame(read.table('shadsoil.csv',sep=",",header=TRUE))[,-1]
 rainfall<-as.data.frame(nicheout$RAINFALL)
 grassgrowths<-as.data.frame(nicheout$grassgrowths)
 grasstsdms<-as.data.frame(nicheout$grasstsdms)
-environ<-as.data.frame(nicheout$environ[1:(365*24*nyears),])
-enbal<-as.data.frame(nicheout$enbal[1:(365*24*nyears),])
-masbal<-as.data.frame(nicheout$masbal[1:(365*24*nyears),])
+environ<-as.data.frame(nicheout$environ[1:(12*24),])
+enbal<-as.data.frame(nicheout$enbal[1:(12*24),])
+masbal<-as.data.frame(nicheout$masbal[1:(12*24),])
 
 yearout<-as.data.frame(nicheout$yearout)
 if(nyears>1){
@@ -330,33 +324,30 @@ if(container==1){
 }
 
 # append dates
-tzone<-paste("Etc/GMT-",10,sep="") # doing it this way ignores daylight savings!
-dates<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="hours")
-dates<-subset(dates, format(dates, "%m/%d")!= "02/29") # remove leap years
-if(DEB==1){
-  debout<-as.data.frame(nicheout$debout[1:(365*24*nyears),])
-  debout<-cbind(dates,debout)
-}
-environ<-cbind(dates,environ)
-masbal<-cbind(dates,masbal)
-enbal<-cbind(dates,enbal)
-soil<-cbind(dates,soil)
-metout<-cbind(dates,metout)
-shadsoil<-cbind(dates,shadsoil)
-shadmet<-cbind(dates,shadmet)
-
-dates2<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="days") 
-dates2<-subset(dates2, format(dates2, "%m/%d")!= "02/29") # remove leap years
-grass<-cbind(dates2,grassgrowths,grasstsdms)
-colnames(grass)<-c("dates","growth","tsdm")
-rainfall<-as.data.frame(cbind(dates2,rainfall))
-colnames(rainfall)<-c("dates","rainfall")
+# tzone<-paste("Etc/GMT-",10,sep="") # doing it this way ignores daylight savings!
+# dates<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="hours")
+# dates<-subset(dates, format(dates, "%m/%d")!= "02/29") # remove leap years
+# if(DEB==1){
+#   debout<-as.data.frame(nicheout$debout[1:(365*24*nyears),])
+#   debout<-cbind(dates,debout)
+# }
+# environ<-cbind(dates,environ)
+# masbal<-cbind(dates,masbal)
+# enbal<-cbind(dates,enbal)
+# soil<-cbind(dates,soil)
+# metout<-cbind(dates,metout)
+# shadsoil<-cbind(dates,shadsoil)
+# shadmet<-cbind(dates,shadmet)
+# 
+# dates2<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="days") 
+# dates2<-subset(dates2, format(dates2, "%m/%d")!= "02/29") # remove leap years
+# grass<-cbind(dates2,grassgrowths,grasstsdms)
+# colnames(grass)<-c("dates","growth","tsdm")
+# rainfall<-as.data.frame(cbind(dates2,rainfall))
+# colnames(rainfall)<-c("dates","rainfall")
 
 
 ############### plot results ######################
 library(lattice)
 
-with(environ, {plot(CONDEP*10~dates,type='l',col='light blue')})
-with(environ, {plot(WATERTEMP~dates,type='l',col='light blue')})
-
-with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
+with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~TIME | as.factor(JULDAY),ylim=c(-15,50),type = "l")})
