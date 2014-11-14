@@ -214,7 +214,11 @@ NicheMapR_ecto <- function(niche) {
   }
   
   ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
-  source('NicheMapR_ecto.R') 
+  if(mac==1){
+    source('NicheMapR_ecto_mac.R') 
+  }else{
+    source('NicheMapR_ecto.R') 
+  }
   cat('running ectotherm model ... \n')
   
   ptm <- proc.time() # Start timing
