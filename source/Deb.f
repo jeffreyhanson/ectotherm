@@ -258,14 +258,14 @@ c    Arrhenius temperature correction factor
      & *(1/(273+Tb)-1/TL))+EXP(TAH*(1/TH-1/(273+Tb))))
 
 c    food availability - to do
-c      X_food = grassgrowth(daycount)
+      X_food = grassgrowth(daycount)
 c      if((grassgrowth(daycount).eq.0).and.(taloc(hour).ge.5))then
 c       X_food=0.05
 c      endif
 c      if(pond_depth.eq.wilting/2)then
 c      X_food=0
 c      else
-      X_food=pond_depth/fieldcap*10.
+c      X_food=pond_depth/fieldcap*10.
 c      X_food=10.
 c       X_food=3265.
 c      endif
