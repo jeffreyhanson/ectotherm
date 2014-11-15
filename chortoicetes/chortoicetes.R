@@ -52,14 +52,14 @@ rinsul<-0. # m, insulative fat layer thickness
 # 'lometry' determines whether standard or custom shapes/surface area/volume relationships are used.
 # 0=plate,1=cyl,2=ellips,3=lizard (desert iguana),4=frog (leopard frog),
 # 5=custom (cylinder geometry is automatically invoked when container model operates)
-lometry<-3 # organism shape (see above)
+lometry<-1 # organism shape (see above)
 # 'custallom' below operates if lometry=5, and consists of 4 pairs of values representing 
 # the parameters a and b of a relationship AREA=a*mass^b, where AREA is in cm2 and mass is in g.
 # The first pair are a and b for total surface area, then a and b for ventral area, then for  
 # sillhouette area normal to the sun, then sillhouette area perpendicular to the sun
 customallom<-c(10.4713,.688,0.425,0.85,3.798,.683,0.694,.743) # custom allometry coefficients (see above)
 shape_a<-1. 
-shape_b<-1.16666666667
+shape_b<-3
 shape_c<-0.6666666667
 Flshcond<-0.5 # W/mC, thermal conductivity of flesh (range: 0.412-2.8 )
 Spheat<-4185 # J/(kg-K), specific heat of flesh
@@ -361,6 +361,33 @@ library(lattice)
 
 with(metout, {plot(SOILMOIST~dates,type='l',col='light blue')})
 with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
+
+###### chortoicetes growth and survival model ######
+
+growth.coeffs<-read.csv('Chortoicetes/growth_coeff.csv')
+grass<-metout$SOILMOIST
+grassthresh<-as.single(read.csv('ectoin.csv')[7])
+grass[grass<=grassthresh]<-0
+
+DATA_grow<-cbind(environ[,1:6],environ[10],grass)
+colnames(DATA_grow)<-c('DATE','JULDAY','YEAR','DAY','TIME','TC','ACT','grass')
+
+
+# make empty vector for development 
+grow  <- rep(0,nrow(DATA_grow))
+
+grassdays<-0 # grass days counter
+
+# growth loop
+for(i in 2:length(grow)){
+  # if grass, increment grass hours 
+  if(DATA_grow[i]>0){
+    grassdays <- grassdays + 1/24 
+  }
+  
+
+}
+
 
 ############### chortoicetes egg model #############
 
