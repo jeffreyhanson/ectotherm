@@ -362,55 +362,85 @@ library(lattice)
 with(metout, {plot(SOILMOIST~dates,type='l',col='light blue')})
 with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
 
-###### chortoicetes growth and survival model ######
-
-growth.coeffs<-read.csv('Chortoicetes/growth_coeff.csv')
+# grass presence vector
 grass<-metout$SOILMOIST
 grassthresh<-as.single(read.csv('ectoin.csv')[7])
 grass[grass<=grassthresh]<-0
+grass2<-grass
+grass2[grass2>0]<-1
 
-DATA_grow<-cbind(environ[,1:6],environ[10],grass)
-colnames(DATA_grow)<-c('DATE','JULDAY','YEAR','DAY','TIME','TC','ACT','grass')
+plot(grass~metout$dates,type='l',col='dark green')
 
+recover<-5 # time locust needs to build up resources to lay first batch (yet to be incorporated)
+ovidates<-as.data.frame(cbind(grass2[1:(length(grass2)-1)],grass2[2:length(grass2)]))
+ovidates<-cbind(dates[2:length(dates)],ovidates)
+ovdiates2<-subset(ovidates, V1-V2==-1)
+ovirows_start<-cbind(1,as.numeric(rownames(ovdiates2))) # rows at which grass growth started
+ovdiates2<-subset(ovidates, V2-V1==-1)
+ovirows_finish<-cbind(0,as.numeric(rownames(ovdiates2))) # rows at which grass growth finish
+ovirows<-rbind(ovirows_start,ovirows_finish)
 
-# make empty vector for development 
-grow  <- rep(0,nrow(DATA_grow))
+########### chortoicetes oviposition model##########
 
-grassdays<-0 # grass days counter
-
-# growth loop
-for(i in 2:length(grow)){
-  # if grass, increment grass hours 
-  if(DATA_grow[i]>0){
-    grassdays <- grassdays + 1/24 
-  }
-  
-
-}
-
+# to do, for now assume on first and last days of grass growth periods
 
 ############### chortoicetes egg model #############
 
-DATA_orig<-cbind(soil[,1:7],metout[,13:14],environ[,17],metout[,11])
-colnames(DATA_orig)<-c('DATE','JULDAY','TIME','D0cm','D2_5cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST')
+DATA<-cbind(soil[,1:7],metout[,13:14],environ[,17],metout[,11])
+colnames(DATA)<-c('DATE','JULDAY','TIME','D0cm','D2_5cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST')
 
-
-ovidates<-seq(1,365,30)
-for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30 days over the first year
-  
-  ovidate<-ovidates[m] # reorder DATA to start on new oviposition date
-  #ovidate<-1
-  if(m>1){
-    DATA<-rbind(DATA_orig[((ovidate-1)*24+1):nrow(DATA_orig),],DATA_orig[1:((ovidate-1)*24),])
+# if photo period (DATA%PHOTO) < 13 and decreasing during egg lay, then make diapause egg 
+# (lay at 2.5cm and stop development at 45% under ideal conditions)
+egglay <- function(photoperiod,previous_photoperiod, SHALtemp, DEEPtemp, SHALmoist){
+  if(photoperiod<photo_thresh && photoperiod<=previous_photoperiod){
+    #set diapause potential
+    out.diapause_pot <-TRUE
+    out.temp <- SHALtemp
+    out.moist <- SHALmoist
+    out.diapause_egg <-TRUE
   }else{
-    DATA<-DATA_orig
+    out.diapause_pot <- FALSE
+    out.temp <- DEEPtemp
+    out.moist<- SHALmoist
+    out.diapause_egg <-FALSE
   }
+  out.diapause_hours <- 0
+  out.cold_hours     <- 0
+  out.dev            <- 0
+  out.dry_hours      <- 0
+  out.in_diapause    <- FALSE
+  
+  list(moist = out.moist                  ,
+       temp = out.temp                    ,
+       diapause_pot = out.diapause_pot    ,
+       in_diapause  = out.in_diapause     ,
+       diapause_hours = out.diapause_hours,
+       cold_hours   = out.cold_hours      ,
+       dry_hours    = out.dry_hours       ,
+       diapause_egg = out.diapause_egg    ,
+       dev = out.dev)
+}
+
+# Temp dependent function for C. terminifera egg dev rate fitted from Gregg (1984) egg dev. rates 
+devrate <- function(temp){
+  if(temp<=32){
+    y = -12334*(1/(temp+273)) + 38.027 
+    return(exp(y)/24) # divide by 24 to get units in 1/h
+  } else{
+    return(devrate(32))
+  }
+}
+
+n<-0 
+p<-0
+for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successful development
+
   row.names(DATA) <- NULL 
   dev  <- rep(0,nrow(DATA))
-  
-  
+
+  if((ovirows[m,1]==1 & sum(grass2[ovirows[m,2]:(ovirows[m,2]+recover*24)])>=24*recover) | (ovirows[m,1]==0  )){ # grass present for at least time to first lay
   ############## START HERE ################# 
-  
+  n<-n+1
   #DATA<-DATA_orig
   #row.names(DATA) <- NULL 
   
@@ -426,48 +456,7 @@ for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30
   # create vector for previous day photoperiod
   DATA$PHOTOPREV <- DATA$PHOTO
   DATA$PHOTOPREV[25:nrow(DATA)]<-DATA$PHOTO[1:(nrow(DATA)-24)] 
-    
-  # Temp dependent function for C. terminifera egg dev rate fitted from Gregg (1984) egg dev. rates 
-  devrate <- function(temp){
-    if(temp<=32){
-      y = -12334*(1/(temp+273)) + 38.027 
-      return(exp(y)/24) # divide by 24 to get units in 1/h
-    } else{
-      return(devrate(32))
-    }
-  }
-  
-  # if photo period (DATA%PHOTO) < 13 and decreasing during egg lay, then make diapause egg 
-  # (lay at 2.5cm and stop development at 45% under ideal conditions)
-  egglay <- function(photoperiod,previous_photoperiod, SHALtemp, DEEPtemp, SHALmoist){
-    if(photoperiod<photo_thresh && photoperiod<=previous_photoperiod){
-      #set diapause potential
-      out.diapause_pot <-TRUE
-      out.temp <- SHALtemp
-      out.moist <- SHALmoist
-      out.diapause_egg <-TRUE
-    }else{
-      out.diapause_pot <- FALSE
-      out.temp <- DEEPtemp
-      out.moist<- SHALmoist
-      out.diapause_egg <-FALSE
-    }
-    out.diapause_hours <- 0
-    out.cold_hours     <- 0
-    out.dev            <- 0
-    out.dry_hours      <- 0
-    out.in_diapause    <- FALSE
-    
-    list(moist = out.moist                  ,
-         temp = out.temp                    ,
-         diapause_pot = out.diapause_pot    ,
-         in_diapause  = out.in_diapause     ,
-         diapause_hours = out.diapause_hours,
-         cold_hours   = out.cold_hours      ,
-         dry_hours    = out.dry_hours       ,
-         diapause_egg = out.diapause_egg    ,
-         dev = out.dev)
-  }
+
   egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
   
   # make counter for total number of consecutive egg hatches
@@ -481,7 +470,12 @@ for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30
   # make empty variable for diapause egg (TRUE\FALSE) 
   d_e <- rep(FALSE,nrow(DATA))
   # loop through each date and update egg development vector (dev)
-  for(i in 2:length(dev)){
+  if(ovirows[m,1]==0){ # check if arriving for first time or if last clutch at end of grass growth
+    start<-ovirows[m,2]+recover*24
+  }else{
+    start<-ovirows[m,2]
+  }
+  for(i in start:length(dev)){
     # if cold, increment cold hours 
     if(egg$temp[i]<cold_thresh){
       egg$cold_hours <- egg$cold_hours + 1  
@@ -528,14 +522,16 @@ for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30
     } else{  egg$dev <- dev[i-1]
     }  
     
-    # if development complete, reset (new egg lay)   
+    # if development complete, record hatch date  
     if(egg$dev>0.99){
-      egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+      #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
       egg_gen <- egg_gen + 1
       state[i]<-"fin"
+      break
       # if consecutive dry hours is more than 6 months, terminate egg and start again   
     }else if(egg$dry_hours>dry_hours_thresh){
-      egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+      #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+      break
     }
     
     # update egg development vector and diapause egg vector
@@ -543,7 +539,7 @@ for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30
     d_e[i]   <- egg$diapause_egg
   }
   
-  
+  } # end check if within recovery time
   
   dev1<-as.data.frame(dev)
   dev1<-as.data.frame(cbind(metout$dates,dev1, DATA$D10cm, DATA$MOIST))
@@ -575,24 +571,46 @@ for(m in 1:length(ovidates)){ #loop through and increment oviposition date by 30
   }
   #plot(as.Date(DATE111),SUM111,type='s',xlab="date",ylab="total egg gens.")
   
+  if(ovirows[m,1]!=1){
+    p<-p+1
+  }
+
+#   plot(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.",col="white",ylim=c(0,3))
+#   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
+#   
+#   title(main=paste("ovi_day ",m,sep=""))
+  if(n==1){
+  plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+  points(dev1$dev1~dev1$dates,type='l',col='blue')
+  }else{
+    if(p==1){
+      plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+    }
+      points(dev1$dev1~dev1$dates,type='l',col='blue')
+  }
+
   
-  plot(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.",col="white",ylim=c(0,3))
-  points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
-  
-  title(main=paste("ovi_day ",m,sep=""))
 } # end loop through ovip dates
 
 
+# 
+# 
+# 
+# 
+# 
+# 
+# # write date to csv
+# setwd("C:\\Users\\Jamos\\Dropbox\\My Manuscripts\\Plague Locust\\R scripts\\chortoicetes")
+# system("rcmd start beep.wav")
+# csveggdata = as.data.frame(cbind(as.character(as.Date(DATE111)),SUM111))
+# colnames(csveggdata)<-c("Dates", "Egg gens in period")
+# write.csv(csveggdata,file = paste(loc,"egg_gens.csv"))
 
 
-plot(dev1$moist/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-points(dev1$dev1~dev1$dates,type='l')
 
 
 
-# write date to csv
-setwd("C:\\Users\\Jamos\\Dropbox\\My Manuscripts\\Plague Locust\\R scripts\\chortoicetes")
-system("rcmd start beep.wav")
-csveggdata = as.data.frame(cbind(as.character(as.Date(DATE111)),SUM111))
-colnames(csveggdata)<-c("Dates", "Egg gens in period")
-write.csv(csveggdata,file = paste(loc,"egg_gens.csv"))
+
+
+
+
