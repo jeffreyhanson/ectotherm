@@ -84,21 +84,22 @@ contwet<-2 #
 rainmult<-.5#.11
 
 condepths<-matrix(nrow=rows,ncol=1,data = 0) # empty vector for results
+skinwets<-matrix(nrow=rows,ncol=1,data = 0) # empty vector for results
 
 # start loop through all hours of the day of all days of the simulation
 for(i in 1:(rows-1)){
   
   hr<-metout[i,3]/60 # get the current hour
   day<-floor(i/24)+1 # get the current day
-  if(hr==0){ # make rain fall at midnight in one hit (rain in mm)
-  condep<-condep+rainfall[day,2]*rainmult 
-  }
+  #if(hr==0){ # make rain fall at midnight in one hit (rain in mm)
+  condep<-condep+rainfall[day,2]*rainmult/24 
+  #}
   if(condep>maxdep){ # don't let it overflow
     condep<-maxdep
   }
   Tair<-metout[i,4] # local height air temperature
   vel<-metout[i,8] # local height wind speed
-  Tskin<-soil[i,6] # soil temp at 5cm deep
+  Tskin<-soil[i,4] # soil temp at 5cm deep
   RHair<-metout[i,6] # local height relative humidity
   L<-.05 # characterhistic dimension - made it 5cm since that is the soil depth, usually cube root of volume
   A_air<-1 # area exposed to air (1m2)
@@ -161,21 +162,25 @@ for(i in 1:(rows-1)){
     condep<-0
   }
   condepths[i]<-condep
+  skinwets[i]<-skinw
 }
 condepths<-as.data.frame(condepths)
 condepths<-cbind(dates,condepths)
 colnames(condepths)<-c('dates','depth')
-
+skinwets<-as.data.frame(skinwets)
+skinwets<-cbind(dates,skinwets)
+colnames(skinwets)<-c('dates','skinw')
+with(skinwets,plot(skinw~dates,type='l'))
 # computations now done - plot the results against observations
-png(filename=paste(oznetsite,"_noecto.png",sep=""), width=1000,height=400)
-plot(XLdat1$DATE, XLdat1$SM_0_5cm, 'l', ylim = c(0,50), col = "red",
-     xlab="date", ylab="moisture (% vol)")
-lines(as.Date(condepths$dates), condepths$depth, 'l')
-title(main=oznetsite)
-legend("topleft", inset=.05,
-       c("data","predict"), 
-       fill=c("red","black"),bty="n", 
-       horiz=TRUE, bg=NULL, cex=0.8)
-abline(0,5)
-dev.off()
+# png(filename=paste(oznetsite,"_noecto.png",sep=""), width=1000,height=400)
+# plot(XLdat1$DATE, XLdat1$SM_0_5cm, 'l', ylim = c(0,50), col = "red",
+#      xlab="date", ylab="moisture (% vol)")
+# lines(as.Date(condepths$dates), condepths$depth, 'l')
+# title(main=oznetsite)
+# legend("topleft", inset=.05,
+#        c("data","predict"), 
+#        fill=c("red","black"),bty="n", 
+#        horiz=TRUE, bg=NULL, cex=0.8)
+# abline(0,5)
+# dev.off()
 }
