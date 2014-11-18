@@ -371,7 +371,7 @@ grass2[grass2>0]<-1
 
 plot(grass~metout$dates,type='l',col='dark green')
 
-recover<-5 # time locust needs to build up resources to lay first batch (yet to be incorporated)
+recover<-5 # time locust needs to build up resources to lay first batch
 ovidates<-as.data.frame(cbind(grass2[1:(length(grass2)-1)],grass2[2:length(grass2)]))
 ovidates<-cbind(dates[2:length(dates)],ovidates)
 ovdiates2<-subset(ovidates, V1-V2==-1)
@@ -431,6 +431,7 @@ devrate <- function(temp){
   }
 }
 
+
 n<-0 
 p<-0
 for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successful development
@@ -470,7 +471,7 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
   # make empty variable for diapause egg (TRUE\FALSE) 
   d_e <- rep(FALSE,nrow(DATA))
   # loop through each date and update egg development vector (dev)
-  if(ovirows[m,1]==0){ # check if arriving for first time or if last clutch at end of grass growth
+  if(ovirows[m,1]==1){ # check if arriving for first time or if last clutch at end of grass growth
     start<-ovirows[m,2]+recover*24
   }else{
     start<-ovirows[m,2]
@@ -527,6 +528,12 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
       #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
       egg_gen <- egg_gen + 1
       state[i]<-"fin"
+      hatchdate<-i
+      if(n==1){
+        hatchdates<-hatchdate
+      }else{
+        hatchdates<-c(hatchdates,hatchdate)
+      }
       break
       # if consecutive dry hours is more than 6 months, terminate egg and start again   
     }else if(egg$dry_hours>dry_hours_thresh){
@@ -547,30 +554,6 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
   # update temp to account for diapause egg depths
   dev1$temp[d_e]<-DATA$D5cm[d_e]
   dev1$moist[d_e]<-DATA$MOIST[d_e]
-  
-  
-  # plot egg dev cycles per time period
-  fin1 <-rep(0,length(dev))
-  fin1[state=="fin"]<-1
-  
-  fin<-as.data.frame(fin1)
-  FIN<-as.data.frame(cbind(dev1$dates,fin))
-  colnames(FIN)<-c('dates','fin')
-  dayspan = length(fin1)/24
-  bin <- 12 # bins per year 
-  timeblock <-365/bin
-  DATE111 <- rep(0,dayspan/timeblock)
-  SUM111  <- rep(0,dayspan/timeblock)
-  for(i in 1:(dayspan/timeblock)){
-    aaa<- subset(FIN,
-                 (as.Date(FIN$dates)>(as.Date(paste(ystart,"-01-01",sep=""),origin="1970-01-01")+timeblock*(i-1))&
-                    (as.Date(FIN$dates)<(as.Date(paste(ystart,"-01-01",sep=""),origin="1970-01-01")+timeblock*i))), 
-                 select=fin)
-    SUM111[i]<-sum(aaa$fin)
-    DATE111[i]<-as.Date(paste(ystart,"-01-01",sep=""),origin="1970-01-01")+timeblock*(i-1)
-  }
-  #plot(as.Date(DATE111),SUM111,type='s',xlab="date",ylab="total egg gens.")
-  
   if(ovirows[m,1]!=1){
     p<-p+1
   }
@@ -607,10 +590,97 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
 # write.csv(csveggdata,file = paste(loc,"egg_gens.csv"))
 
 
+pars_grow<-read.csv('chortoicetes/growth_coeff.csv')[,2]
+
+dmass <- function(pars_grow,mass, temp){ #units of mg dry weight/day!
+  if(temp>39){
+    temp<-39
+  }
+  if(temp<25.9){
+    temp<-25.9
+  }
+  # change in mass, as a function of fitted parameters, mass, and temp C
+  dm<- mass*(pars_grow[2]+pars_grow[3]*temp**1+
+               pars_grow[4]*temp**2+
+               pars_grow[5]*temp**3+
+               pars_grow[6]*temp**4+
+               pars_grow[7]*temp**5)
+  if(temp<25.0){
+    dm<-0
+  }
+  return(dm)
+}
+
+pars_survive<-read.csv('chortoicetes/survive_coeff.csv')[,2]
+
+dsurvival<-function(pars_survive,survival, temp){ # units suvival prob/day
+  # change in proportion surviving as a function of fitted pars, proportion surviving, and temp C  
+  if(temp>39){
+    temp<-39
+  }
+  if(temp<25.9){
+    temp<-25.9
+  }
+  dy <- -survival*(      pars_survive[2]*temp**1+
+                           pars_survive[3]*temp**2+
+                           pars_survive[4]*temp**3+
+                           pars_survive[5]*temp**4)
+  
+  return(dy)}
 
 
+n<-0 
+p<-0
+for(m in 1:length(hatchdates)){ #loop through hatch dates and test for successful reproduction
+  
+  row.names(DATA) <- NULL 
+  masses  <- rep(0,nrow(DATA))
+  
+  ############## START HERE ################# 
+  n<-n+1
+  start<-hatchdates[m]
+  drymass<-exp(pars_grow[1]) # fitted initial mass of 1 mg (egg mass)
+  masses[1]<-mass
+  for(i in (start+1):length(masses)){
+    ddrymass<-dmass(pars_grow,drymass, environ[i,6])
+    masses[i]<-masses[i-1]+ddrymass/24.
+    drymass<-masses[i]
+    # if development complete, record hatch date 
+    if(grass2[i]==1){
+      if(masses[i]>55){
+        #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+        if(grass[i]==1){
+          reprodate<-i
+          if(n==1){
+            reprodates<-reprodate
+          }else{
+            reprodates<-c(reprodates,reprodate)
+          }
+          break
+        }else{
+          break
+        }
+        
+        
+        
+      }
+    }else{
+      break
+    }
+  } # end loop through hatch dates 
+  
+  #   plot(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.",col="white",ylim=c(0,3))
+  #   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
+  #   
+  #   title(main=paste("ovi_day ",m,sep=""))
+  if(n==1){
+    plot(environ$TC~dev1$dates,type='l',col='orange',ylim=c(0,60))
+    points(grass~dev1$dates,type='l',col='green')
+    points(masses~dev1$dates,type='l',col='blue')
+  }else{
+    points(masses~dev1$dates,type='l',col='blue')
+  }
 
-
-
+}
 
 
