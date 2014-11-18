@@ -44,7 +44,7 @@ NicheMapR_ecto <- function(niche) {
   shadsoil<-as.matrix(shadsoil)
   soil<-as.matrix(soil)
   RAINFALL<-as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2]
-  ectoin<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")
+  ectoin<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[,-1]
   DEP<-as.matrix(read.csv(file=paste(microin,'DEP.csv',sep=""),sep=","))[,2]
   MAXSHADES<-as.matrix(read.csv(file=paste(microin,'MAXSHADES.csv',sep=""),sep=","))[,2]
   
@@ -62,7 +62,7 @@ NicheMapR_ecto <- function(niche) {
   shadmet<-shadmet2
   soil<-soil2
   shadsoil<-shadsoil2
-  metout.names<-c("JULDAY","TIME","TALOC","TAREF","RHLOC","RH","VLOC","VREF","TS","T2","TDEEP","ZEN","SOLR","TSKYC","DEW","FROST","SNOWFALL","SNOWDEP")
+  metout.names<-c("JULDAY","TIME","TALOC","TAREF","RHLOC","RH","VLOC","VREF","TS","SOILMOIST","TDEEP","ZEN","SOLR","TSKYC","DEW","FROST","SNOWFALL","SNOWDEP")
   colnames(metout)<-metout.names
   colnames(shadmet)<-metout.names
   soil.names<-c("JULDAY","TIME",paste("D",DEP,"cm", sep = ""))
@@ -70,13 +70,13 @@ NicheMapR_ecto <- function(niche) {
   colnames(shadsoil)<-soil.names
   
   # habitat
-  ALT<-ectoin[2] # altitude (m)
+  ALT<-ectoin[1] # altitude (m)
   OBJDIS<-1.0 # distance from object (e.g. bush)
   OBJL<-0.0001
   PCTDIF<-0.1 # percent of sunlight that is diffuse (decimal %)
   EMISSK<-1.0 # emissivity of the sky (decimal %)
   EMISSB<-1.0 # emissivity of the substrate (decimal %)
-  ABSSB<-1-ectoin[3] # solar absorbtivity of the substrate (decimal %)
+  ABSSB<-1-ectoin[2] # solar absorbtivity of the substrate (decimal %)
   shade<-minshade # shade (%)
   
   # animal properties
@@ -165,7 +165,7 @@ NicheMapR_ecto <- function(niche) {
   etaO<-matrix(c(yXE/mu_E*-1,0,1/mu_E,yPE/mu_E,0,0,-1/mu_E,0,0,yVE/mu_E,-1/mu_E,0),nrow=4)
   w_N<-CHON%*%N_waste
   
-  lat<-ectoin[5]
+  lat<-ectoin[4]
   grassgrowths<-rep(X,timeinterval*nyears)
   grasstsdms<-rep(X,timeinterval*nyears)
   julstart<-metout[1,2]
@@ -175,8 +175,8 @@ NicheMapR_ecto <- function(niche) {
   microyear<-1
   
   # bucket model for soil moisture
-  fieldcap<-ectoin[6]# %vol, water content at 0.1ba = 10kPa
-  wilting<-ectoin[7] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
+  fieldcap<-ectoin[5]# %vol, water content at 0.1ba = 10kPa
+  wilting<-ectoin[6] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
   fieldcap<-30 # field capacity, m3/m3*100
   if(soilmoisture==1){
     conth<-fieldcap/10 # containter height, cm
