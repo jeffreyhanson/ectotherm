@@ -580,8 +580,8 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
 } # end loop through ovip dates
 
 
-  plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-  points(devs$dev1~dev1$dates,type='l',col='blue')
+  #plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+  #points(devs$dev1~dev1$dates,type='l',col='blue')
 
 # 
 # 
