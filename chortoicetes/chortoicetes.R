@@ -562,19 +562,26 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
 #   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
 #   
 #   title(main=paste("ovi_day ",m,sep=""))
-  if(n==1){
-  plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-  points(dev1$dev1~dev1$dates,type='l',col='blue')
-  }else{
-    if(p==1){
-      plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-    }
-      points(dev1$dev1~dev1$dates,type='l',col='blue')
-  }
-
+#   if(n==1){
+#   plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+#   points(dev1$dev1~dev1$dates,type='l',col='blue')
+#   }else{
+#     if(p==1){
+#       plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+#     }
+#       points(dev1$dev1~dev1$dates,type='l',col='blue')
+#   }
+#if(n==1){
+#  devs<-subset(dev1,dev>0)
+#}else{
+#  devs<-rbind(devs,dev1)
+#}
   
 } # end loop through ovip dates
 
+
+  plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+  points(devs$dev1~dev1$dates,type='l',col='blue')
 
 # 
 # 
@@ -673,14 +680,24 @@ for(m in 1:length(hatchdates)){ #loop through hatch dates and test for successfu
   #   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
   #   
   #   title(main=paste("ovi_day ",m,sep=""))
-  if(n==1){
-    plot(environ$TC~dev1$dates,type='l',col='orange',ylim=c(0,60))
-    points(grass~dev1$dates,type='l',col='green')
-    points(masses~dev1$dates,type='l',col='blue')
-  }else{
-    points(masses~dev1$dates,type='l',col='blue')
-  }
-
+#   if(n==1){
+#     plot(environ$TC~dev1$dates,type='l',col='orange',ylim=c(0,60))
+#     points(grass~dev1$dates,type='l',col='green')
+#     points(masses~dev1$dates,type='l',col='blue')
+#   }else{
+#     points(masses~dev1$dates,type='l',col='blue')
+#   }
+devs1<-as.data.frame(cbind(dev1$dates,masses))
+colnames(devs1)<-c('dates','mass')
+devs<-subset(devs1,mass>0)
+if(n==1){
+ gens<-devs
+}else{
+ gens<-rbind(gens,devs)
+}
 }
 
 
+     plot(environ$TC~dev1$dates,type='l',col='orange',ylim=c(0,60))
+     points(grass~dev1$dates,type='l',col='green')
+     points(gens$mass~gens$dates,type='p',col='blue',cex=0.1)
