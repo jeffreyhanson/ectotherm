@@ -73,3 +73,15 @@ for(temp in unique(survival$temp.C)){
 }
 
 legend("topright",as.character(leg), col = cl, lty = 1, bg = NULL, bty = 'n', title = "temp (C)")
+
+lme4$coefficients
+
+dsurvival<-function(pars,survival, temp){
+  # change in proportion surviving as a function of fitted pars, proportion surviving, and temp C  
+  dy <- -survival*(      pars[2]*temp**1+
+                         pars[3]*temp**2+
+                         pars[4]*temp**3+
+                         pars[5]*temp**4)
+  return(dy)}
+  
+  

@@ -1,4 +1,4 @@
-
+setwd('C:/git/ectotherm')
 # load data from Clissold thesis and Gregg 1983
 growth <- read.table('Chortoicetes/growth vs temp.txt', header=T)
 
@@ -35,6 +35,23 @@ for(temp in unique(growth$temp.C)){
   leg = c(leg, temp)
 }
 
+temp <- 10
+
+
 legend("topright",as.character(leg), col = cl, lty = 1, bg = NULL, bty = 'n', title = "temp (C)")
 
 write.csv(lme5$coefficients,'Chortoicetes/growth_coeff.csv')
+pars <- lme5$coefficients
+
+dmass <- function(pars,mass, temp){
+  # change in mass, as a function of fitted parameters, mass, and temp C
+  dm<- mass*(pars[2]+pars[3]*temp**1+
+                     pars[4]*temp**2+
+                     pars[5]*temp**3+
+                     pars[6]*temp**4+
+                     pars[7]*temp**5)
+  # should we stop growth under and above these temps?
+  return(dm)
+}
+
+
