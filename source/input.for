@@ -120,7 +120,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real thermal_stages,stage,behav_stages,water_stages,orig_MsM
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &    for12,for13,for14,for15,for16,for17,for18,for19,for20
-      real gutfill,contwet
+      real gutfill,contwet,shdgrass
       
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),FAECES(24),
      &    NWASTE(24),surviv(24),thermal_stages(8,6)
@@ -199,7 +199,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       DIMENSION enary41(25),enary42(25),enary43(25),Enary44(25)
       DIMENSION enary45(25),enary46(25),enary47(25),enary48(25)
 
-      DIMENSION TSOILS(25),TSHOIL(25)
+      DIMENSION TSOILS(25),TSHOIL(25),shdgrass(25)
       DIMENSION TRANSIENT(365*25*20),TRANSAR(5,25)
 
       DIMENSION V(24),ED(24),wetmass(24),wetfood(24)
@@ -218,7 +218,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
      &wetlandTemps2(24*7300),wetlandDepths2(24*7300)
       DIMENSION SOIL22(24*7300,12),SHADSOIL2(24*7300,12)
       DIMENSION debout2(24*7300,18),debmod2(93)
-     &,deblast2(13),v_baby1(24),e_baby1(24),ectoinput2(126),
+     &,deblast2(13),v_baby1(24),e_baby1(24),ectoinput2(127),
      &rainfall2(7300),yearout2(80)
       dimension yearsout2(20,45)
       DIMENSION customallom(8),etaO(4,3),JM_JO(4,4),shp(3),EH_baby1(24)    
@@ -244,7 +244,8 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       Common/wTrapez/Dtime
       COMMON/WCONV/FLTYPE
 c    Sun environmental variables for the day
-      COMMON/ENVAR1/QSOL,RH,TskyC,soil2,SOIL3,TIME,Taloc,TREF,rhref
+      COMMON/ENVAR1/QSOL,RH,TskyC,soil2,SOIL3,TIME,Taloc,TREF,rhref,
+     &shdgrass 
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
 c    Shade environmental arrays
       common/shenv1/Tshski,Tshlow
@@ -370,7 +371,7 @@ C     NEED NON, # OF SOIL NODES,
 
       OPEN(1,FILE='ectoinput.csv')
       read(1,*)LABEL
-      DO 11 i=1,123
+      DO 11 i=1,127
       read(1,*)label,ectoinput2(i)
 11    continue
       close(1)

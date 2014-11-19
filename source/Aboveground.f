@@ -25,7 +25,7 @@ C    Version 8/1/06
       real zfact,kappa,E_G,k_R,delta_deb,E_H_start
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,lengthday
-     &,prevdaylength,lat,svl_met,metamorph,lengthdaydir,contwet
+     &,prevdaylength,lat,svl_met,metamorph,lengthdaydir,contwet,shdgrass
 
       integer frogbreed,frogstage,photostart,photofinish,batch,
      &photodirs,photodirf,breedact,breedactthres
@@ -38,7 +38,7 @@ C    Version 8/1/06
       DIMENSION TIME(25),QSOL(25),RH(25),TskyC(25),SOIL1(25)
       DIMENSION SOIL3(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
       Dimension TSOIL(25),TSHSOI(25),Tshski(25),Tshlow(25),ZSOIL(10)
-      Dimension RHREF(25),pond_env(20,365,25,2)
+      Dimension RHREF(25),pond_env(20,365,25,2),SHDGRASS(25)
 
 
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
@@ -49,6 +49,7 @@ C    Version 8/1/06
      &,sidex,WQSOL,wingmod,phimin,phimax,twing,wingcalc,F12,F32,F42,F52
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,f23,f24,f25,f26
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/WSOLAR/ASIL,Shade
       COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR

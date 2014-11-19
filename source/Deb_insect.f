@@ -73,7 +73,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
      &,act14,act15,act16,act17,act18,act19,act20,stage_rec
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &    for12,for13,for14,for15,for16,for17,for18,for19,for20
-      real cri_o,cri_m,cri,contwet
+      real cri_o,cri_m,cri,contwet,shdgrass
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,startday,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,reset,
@@ -97,12 +97,12 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       DIMENSION etaO(4,3),JM_JO(4,4),fec(100)
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),
      &    FAECES(24),NWASTE(24)
-      dimension rainfall2(7300),debfirst(13),ectoinput(126)
+      dimension rainfall2(7300),debfirst(13),ectoinput(127)
       dimension grassgrowth(7300),grasstsdm(7300),wetlandTemps(24*7300)
      &    ,wetlandDepths(24*7300),pond_env(20,365,25,2),tbs(24*7300)
 
       DIMENSION QSOL(25),RH(25),TskyC(25),soil1(25),rhref(25)
-      DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25)
+      DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25),shdgrass(25)
 
       Data PI/3.14159/
 
@@ -124,6 +124,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       COMMON/COUNTDAY/COUNTDAY,daycount
       COMMON/DEPTHS/DEPSEL,Tcores
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
      &,minED,annfood,food,longev,completion,complete,fec1,fec2,
      &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,

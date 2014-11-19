@@ -27,7 +27,7 @@ c    A number of structural problems corrected.
       Real QUIT,TSHLOW,TSHSKI,TSOILS,TSHOIL
       REAL WC,ZEN,PCTDIF,ABSSB,ABSAN,ASILN,FATOBJ
       Real Xbas,TPREF,maxshd
-      Real ctmax,ctmin,refshd
+      Real ctmax,ctmin,refshd,shdgrass
       real customallom,MR_1,MR_2,MR_3,shp
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
@@ -46,7 +46,7 @@ c    A number of structural problems corrected.
       Dimension QSOL(25),RH(25),TskyC(25),SOIL1(25),SOIL3(25)
       Dimension Taloc(25),Time(25),TREF(25),TSUB(25),VREF(25),Z(25)
       DIMENSION TSHLOW(25),TSHSKI(25),TSOILS(25),TSHOIL(25)
-      DIMENSION customallom(8),shp(3),rhref(25)
+      DIMENSION customallom(8),shp(3),rhref(25),shdgrass(25)
       
       common/gut/gutfull,gutfill
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
@@ -61,6 +61,7 @@ c    A number of structural problems corrected.
       COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/WDSUB2/MICRO,QSOLR,TOBJ,TSKY
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
       COMMON/WSOLAR/ASIL,Shade

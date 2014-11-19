@@ -73,7 +73,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
 
       real HC,Trad,HD,WB,DP,E,ESAT,VD,RW,TVIR,TVINC,TOTLEN,AV,AT,  
-     * DENAIR,CP,WTRPOT,HTOVPR,CONTDEPTH
+     * DENAIR,CP,WTRPOT,HTOVPR,CONTDEPTH,shdgrass
       real PCTEYE,WEYES,WRESP,WCUT,AEFF,CUTFA,AEYES,SkinW,convar
      &,SkinT,VDAIR,VDSURF,TAVE,RHUM,x1,x2,x,testx,zbrent,enberr,reftol
       real CONTH,CONTW,CONTVOL,CONTDEP,conthole,fieldcap,wilting,contwet
@@ -102,7 +102,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       DIMENSION Enary37(25),enary38(25),enary39(25),enary40(25)
       DIMENSION enary41(25),enary42(25),enary43(25),Enary44(25)
       DIMENSION enary45(25),enary46(25),enary47(25),enary48(25)
-      Dimension TRANSAR(5,25)
+      Dimension TRANSAR(5,25),shdgrass(25)
       DIMENSION customallom(8),shp(3)
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),
      &    FAECES(24),NWASTE(24)
@@ -123,6 +123,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       COMMON/WSOLAR/ASIL,Shade
       COMMON/Behav2/NumFed,NumHrs,Lometry,nodnum,customallom,shp 
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/REVAP1/Tlung,DELTAR,EXTREF,RQ,MR_1,MR_2,MR_3,DEB1
       COMMON/REVAP2/GEVAP,AirVol,CO2MOL,gwatph
@@ -634,33 +635,13 @@ c     wevap is g/s so convert to kg/min
 
       if(soilmoisture.eq.1)then
        if(pond.eq.1)then
-
-c        CONTDEP in mm
-c        wilting in %
-c        fieldcap in %
-c        contwet is proportion
-
-         skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
-
-c       constant evaporation if water lost < 0 (see onenote/soil moisture model)
-c       decreasing evaporation (see onenote/soil moisture model)
-        if((fieldcap-CONTDEP).lt.0)then
-        skinw=1
-        else
-            skinw=(10*(fieldcap - 0.5*wilting)*0.1-(fieldcap-
-     &    CONTDEP))/(10*(fieldcap - 0.5*wilting)*0.1-0)        
-        endif
-        
-        if(skinw.gt.1)then
-            skinw= 1
-        endif        
-
+        skinw=contwet*EXP((CONTDEP-fieldcap)/(wilting))
         if(skinw.lt.0)then
             skinw=0
         endif
-
-        skinw = contwet*skinw
-
+        if(skinw.gt.contwet)then
+            skinw=contwet
+        endif
        endif
       endif
 

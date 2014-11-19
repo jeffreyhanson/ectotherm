@@ -65,7 +65,7 @@ c    EXTERNAL GUT
      &,act14,act15,act16,act17,act18,act19,act20,fieldcap,wilting
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &for12,for13,for14,for15,for16,for17,for18,for19,for20,Vb
-      real gutfill,contwet
+      real gutfill,contwet,shdgrass
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,soilmoisture,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,
@@ -89,10 +89,10 @@ c    EXTERNAL GUT
       DIMENSION etaO(4,3),JM_JO(4,4),fec(100)
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),FAECES
      &    (24),NWASTE(24),rhref(25),pond_env(20,365,25,2)
-      dimension rainfall2(7300),debfirst(13),ectoinput(126),
+      dimension rainfall2(7300),debfirst(13),ectoinput(127),
      &    wetlandTemps(7300*24),wetlandDepths(7300*24)
       dimension grassgrowth(7300),grasstsdm(7300),tbs(24*7300)
-      DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25)
+      DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25),shdgrass(25)
 
       Data PI/3.14159/
 
@@ -115,6 +115,7 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/COUNTDAY/COUNTDAY,daycount
       COMMON/DEPTHS/DEPSEL,Tcores
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
      &,minED,annfood,food,longev,completion,complete,fec1,fec2,
      &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,

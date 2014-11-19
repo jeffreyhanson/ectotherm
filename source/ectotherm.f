@@ -156,7 +156,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26,surv,gam
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,gutfull,surviv
       real flytime,flyspeed,rhref,wingtemp,E_Hmoult1,E_Hmet,E_Hecl
-      real p_Am1,p_AmIm,disc
+      real p_Am1,p_AmIm,disc,shdgrass
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
      &    E_Hpup,breedtempthresh,deathstage,prevstage,maxshades
       real ectoinput,debfirst,rainfall2,grassgrowth,grasstsdm,flymetab
@@ -210,7 +210,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       integer metab_mode,stages,deadead,startday,reset,forage
       integer hourcount,wetmod,contonly,contype,shdburrow,stage3,tranny
 
-      integer dehydrated,f1count,counter,soilmoisture
+      integer dehydrated,f1count,counter,soilmoisture,grasshade
 
       CHARACTER*130 labloc,labshd,metsun,metshd
       CHARACTER*1 ANS1,BURROW,Dayact,Climb,CkGrShad,Crepus,SPEC,Rainact
@@ -271,7 +271,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       DIMENSION INACTIVE(25)
       DIMENSION EggSoil(25),EggShsoi(25)
       DIMENSION INTERP(1440)
-      DIMENSION SHD(25)
+      DIMENSION SHD(25),shdgrass(25)
 
       DIMENSION V(24),ED(24),wetmass(24),wetfood(24)
      &,wetstorage(24),svl(24),E_H(24),Vold(24),Vpup(24),Epup(24),
@@ -279,7 +279,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       DIMENSION wetgonad(24),cumrepro(24),
      &    hs(24),ms(24),cumbatch(24),q(24)
       DIMENSION repro(24),food(50),Acthr(52)
-      DIMENSION hour2(25),ectoinput1(126)
+      DIMENSION hour2(25),ectoinput1(127)
       DIMENSION ATSOIL(25,10),ATSHSOI(25,10)
       DIMENSION fec(100),lx(100),mx(100)
 
@@ -293,7 +293,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
      &grassgrowth1(7300),wetlandTemps1(24*7300)
      &,wetlandDepths1(24*7300),yearsout1(20,45)
       DIMENSION customallom(8),etaO(4,3),JM_JO(4,4),shp(3),EH_baby1(24)
-      dimension rainfall2(7300),debfirst(13),ectoinput(126)    
+      dimension rainfall2(7300),debfirst(13),ectoinput(127)    
 
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND 
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
@@ -318,6 +318,7 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       COMMON/WCOND/TOTLEN,AV,AT
 c    Sun environmental variables for the day
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
 c    Shade environmental arrays
       common/shenv1/Tshski,Tshlow
@@ -858,6 +859,8 @@ c    zeroing annual outputs of fecundity and activity
      &    real(shadmet1(micros2+i2-1,14),4)
       QSOL(i-(countday-1)*25-(iyear-1)*365*25)=
      &real(metout1(micros2+i2-1,13),4)
+      shdgrass(i-(countday-1)*25-(iyear-1)*365*25)=
+     &real(metout1(micros2+i2-1,9),4)
         else
       TIME(i-(countday-1)*25-(iyear-1)*365*25)=1440
       TALOC(i-(countday-1)*25-(iyear-1)*365*25)=
@@ -884,6 +887,8 @@ c    zeroing annual outputs of fecundity and activity
      &    real(shadmet1(micros2+i2-2,14),4)
       QSOL(i-(countday-1)*25-(iyear-1)*365*25)=
      &real(metout1(micros2+i2-2,13),4)
+      shdgrass(i-(countday-1)*25-(iyear-1)*365*25)=
+     &real(metout1(micros2+i2-2,9),4)
         endif
 1804    continue
         do 1805 j=3,12
@@ -932,6 +937,7 @@ c    zeroing annual outputs of fecundity and activity
         TSHLOW(i-(countday-1)*25)=real(shadmet1(micros2+i2-1,4),4)
         TSHSKI(i-(countday-1)*25)=real(shadmet1(micros2+i2-1,14),4)
         QSOL(i-(countday-1)*25)=real(metout1(micros2+i2-1,13),4)
+        shdgrass(i-(countday-1)*25)=real(metout1(micros2+i2-1,9),4)
         else
         TIME(i-(countday-1)*25)=1440
         TALOC(i-(countday-1)*25)=real(metout1(micros2+i2-2,3),4)
@@ -945,6 +951,7 @@ c    zeroing annual outputs of fecundity and activity
         TSHLOW(i-(countday-1)*25)=real(shadmet1(micros2+i2-2,4),4)
         TSHSKI(i-(countday-1)*25)=real(shadmet1(micros2+i2-2,14),4)
         QSOL(i-(countday-1)*25)=real(metout1(micros2+i2-2,13),4)
+        shdgrass(i-(countday-1)*25)=real(metout1(micros2+i2-2,9),4)
         endif
 1801    continue
         do 1802 j=3,12
@@ -1243,6 +1250,7 @@ c    check if bucket model has run (or if WET0D was run) and, if so, switch off 
        fieldcap=real(ectoinput1(124),4)
        wilting=real(ectoinput1(125),4)
        soilmoisture=int(ectoinput1(126))
+       grasshade=int(ectoinput1(127))
        do 800 i=1,10
         zsoil(i)=real(dep1(i),4)  
 800    continue
@@ -1268,6 +1276,7 @@ c    check if bucket model has run (or if WET0D was run) and, if so, switch off 
         TSHLOW(i)=real(shadmet1(i,4),4)
         TSHSKI(i)=real(shadmet1(i,14),4)
         QSOL(i)=real(metout1(i,13),4)
+        shdgrass(i)=real(metout1(i,9),4)
        else
         dayjul(i)=int(metout1(24,1))
 
@@ -1288,6 +1297,7 @@ c    check if bucket model has run (or if WET0D was run) and, if so, switch off 
         TSHLOW(i)=real(shadmet1(24,4),4)
         TSHSKI(i)=real(shadmet1(24,14),4)
         QSOL(i)=real(metout1(24,13),4)
+        shdgrass(i)=real(metout1(24,9),4)
        endif
 801    continue
        do 802 j=3,12
@@ -2112,6 +2122,10 @@ c    Initializing retry counter
       ntry = 1
 c    Resetting shade for any thermoregulation that may have happened in a prior hour
       shade = refshd
+      if(grasshade.eq.1)then
+          shade=shdgrass(ihour)
+      endif
+      
 c    Resetting depth selection
       Depsel(Ihour) = 0.00
       newdep = 0.0

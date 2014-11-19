@@ -21,13 +21,13 @@ c    copyright Warren P. Porter 2006 All rights reserved.
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
-      real twater,pond_depth,pond_env
+      real twater,pond_depth,pond_env,shdgrass
 
       Integer IHOUR,NON,NDAY,IDAY,wingmod,minnode,inwater,feeding
       integer aquatic
 
       Dimension Depsel(25*365*20),Tcores(25),TSOIL(25),TSHSOI(25)
-     &,ZSOIL(10)
+     &,ZSOIL(10),shdgrass(25)
          Dimension node(10),pond_env(20,365,25,2)
       DIMENSION QSOL(25),RH(25),TskyC(25),SOIL1(25),SOIL3(25),rhref(25)
       DIMENSION TIME(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
@@ -48,6 +48,7 @@ c    copyright Warren P. Porter 2006 All rights reserved.
       Common/soln/Enb
       Common/Treg/Tc
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/TPREFR/TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask
      &,temerge

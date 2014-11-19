@@ -14,7 +14,7 @@ c    This subroutine adjusts the amount of shade.
       Real Qsolrf,QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       Real Tskin,R,WEVAP,TR,ALT,BP,VEGHYT,D,MAXSHD,H2O_BalPast
       Real Tpref,xbas,temerge
-      real customallom,shp
+      real customallom,shp,shdgrass
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
@@ -26,7 +26,7 @@ c    This subroutine adjusts the amount of shade.
       Dimension TSOIL(25),ZSOIL(10),TSHSOI(25)
       Dimension QSOL(25),RH(25),TskyC(25),SOIL1(25),SOIL3(25)
       Dimension Taloc(25),Time(25),TREF(25),TSUB(25),VREF(25),Z(25)
-      DIMENSION customallom(8),shp(3),rhref(25)
+      DIMENSION customallom(8),shp(3),rhref(25),shdgrass(25)
 
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
@@ -38,6 +38,7 @@ c    This subroutine adjusts the amount of shade.
       COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/WDSUB2/MICRO,QSOLR,TOBJ,TSKY
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+     & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
       COMMON/WSOLAR/ASIL,Shade

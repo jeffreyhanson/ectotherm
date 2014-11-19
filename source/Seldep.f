@@ -18,14 +18,14 @@ c    parameters the animal experiences.
       Real QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF
       Real TSUB,VREF,Z,Tannul
       Real ANDENS,ASILP,EMISSB,EMISSK,FLUID,G
-      Real MICRO,TOBJ,TSKY,pond_env
+      Real MICRO,TOBJ,TSKY,pond_env,shdgrass
       Real Intercept,TWING,twater,pond_depth,rhref,tbask,temerge
       Real TMAXPR,TMINPR,ACTLVL,AMTFUD,XBAS,TPREF,ctmin,ctmax
 
       Integer I,IDEP,Ihour,NON,goodsoil,inwater,aquatic,feeding,
      &    ctmincum,ctminthresh,ctkill,minnode
 
-      DIMENSION TSOIL(10),ZSOIL(10),pond_env(20,365,25,2)
+      DIMENSION TSOIL(10),ZSOIL(10),pond_env(20,365,25,2),shdgrass(25)
       DIMENSION QSOL(25),RH(25),TskyC(25),TIME(25),rhref(25),
      * SOIL1(25),SOIL3(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
 
@@ -34,7 +34,8 @@ C    NEED NON, # OF SOIL NODES,
       COMMON/FUN3/AL,TA,VEL,PTCOND,SUBTK,DEPSUB,TSUBST
       COMMON/FUN4/Tskin,R,WEVAP,TR,ALT,BP,H2O_BalPast
       Common/Treg/Tc,TWING
-      COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
+      COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref,
+     &shdgrass 
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
       COMMON/WDSUB/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR,
      *  MICRO,QSOLR,TOBJ,TSKY
