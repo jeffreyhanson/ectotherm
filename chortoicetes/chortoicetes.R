@@ -453,8 +453,8 @@ for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successf
   DATA$PHOTOPREV <- DATA$PHOTO
   DATA$PHOTOPREV[25:nrow(DATA)]<-DATA$PHOTO[1:(nrow(DATA)-24)] 
   
-  egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-  
+  #egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+  egg <- egglay(DATA$PHOTO[ovirows[m,2]],DATA$PHOTOPREV[ovirows[m,2]-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
   # make counter for total number of consecutive egg hatches
   egg_gen <- 1
   # make empty vector for development 
