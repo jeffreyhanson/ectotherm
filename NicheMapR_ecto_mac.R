@@ -28,8 +28,8 @@ ectotherm <- function(ecto) {
                 debout=matrix(data = 0., nrow = 24*7300, ncol = 20), 
                 yearout=matrix(data = 0., nrow = 1, ncol = 80),
                 yearsout=matrix(data = 0., nrow = 20, ncol = 45))
-
-  
+  dyn.unload('ectotherm.so')
+    
   environ <- matrix(data = 0., nrow = 24*7300, ncol = 20)
   enbal <- matrix(data = 0., nrow = 24*7300, ncol = 14)
   masbal <- matrix(data = 0., nrow = 24*7300, ncol = 21)
