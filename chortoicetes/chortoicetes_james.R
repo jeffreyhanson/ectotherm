@@ -38,7 +38,7 @@ yfinish<-read.csv('ectoin.csv')[8,2]
 nyears<-ceiling(nrow(read.csv('rainfall.csv'))/365) # number of years the simulation runs for (work out from input data)
 write_input<-0 # write input into 'csv input' folder? (1 yes, 0 no)
 longlat<-c(read.csv('ectoin.csv')[3,2],read.csv('ectoin.csv')[4,2])
-grasshade<-0 # use grass shade values from microclimate model as min shade values (1) or not (0)? (simulates effect of grass growth on shading, as a function of soil moisture)
+grasshade<-1 # use grass shade values from microclimate model as min shade values (1) or not (0)? (simulates effect of grass growth on shading, as a function of soil moisture)
 
 # habitat settings
 FLTYPE<-0.0  # fluid type 0.0=air, 1.0=water 
@@ -365,8 +365,8 @@ library(lattice)
 
 # grass presence vector
 grass<-metout$SOILMOIST
-grassthresh<-as.single(read.csv('ectoin.csv')[6,2])+1
-grassthresh<-5
+grassthresh<-as.single(read.csv('ectoin.csv')[6,2])
+#grassthresh<-2
 grass[grass<=grassthresh]<-0
 grass2<-grass
 grass2[grass2>0]<-1
@@ -381,7 +381,6 @@ ovirows_start<-cbind(1,as.numeric(rownames(ovdiates2))) # rows at which grass gr
 ovdiates2<-subset(ovidates, V2-V1==-1)
 ovirows_finish<-cbind(0,as.numeric(rownames(ovdiates2))) # rows at which grass growth finish
 ovirows<-rbind(ovirows_start,ovirows_finish)
-ovirows<-rbind(c(0,recover),ovirows) # add first day of sim as an oviposition date
 
 ########### chortoicetes oviposition model##########
 
@@ -391,6 +390,7 @@ ovirows<-rbind(c(0,recover),ovirows) # add first day of sim as an oviposition da
 
 DATA1<-cbind(soil[,1:7],metout[,13:14],environ[,17],metout[,11])
 colnames(DATA1)<-c('DATE','JULDAY','TIME','D0cm','D2_5cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST')
+
 
 # if photo period (DATA%PHOTO) < 13 and decreasing during egg lay, then make diapause egg 
 # (lay at 2.5cm and stop development at 45% under ideal conditions)
@@ -443,153 +443,153 @@ diapause_hours_thresh <- 7*7*24 # h,  above this threshold of cumulative diapaus
 DATA<-DATA1
 
 gethatch<-function(ovirows, stagefreq1){
-  n<-0 
-  p<-0
-  for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successful development
-    DATA<-DATA1
-    row.names(DATA) <- NULL 
-    dev  <- rep(0,nrow(DATA))
-    # set developmental thresholds
-    # create vector for previous day photoperiod
-    DATA$PHOTOPREV <- DATA$PHOTO
-    DATA$PHOTOPREV[25:nrow(DATA)]<-DATA$PHOTO[1:(nrow(DATA)-24)] 
-    
-    #egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-    egg <- egglay(DATA$PHOTO[ovirows[m,2]],DATA$PHOTOPREV[ovirows[m,2]-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-    # make counter for total number of consecutive egg hatches
-    egg_gen <- 1
-    # make empty vector for development 
-    dev  <- rep(0,nrow(DATA))
-    # make empty vectore for diapause potential
-    dp   <- rep(0,nrow(DATA))
-    # make empty state variable
-    state <- rep("empty",nrow(DATA))
-    # make empty variable for diapause egg (TRUE\FALSE) 
-    d_e <- rep(FALSE,nrow(DATA))
-    if(ovirows[m,2]+recover*24<=length(grass2) & ((ovirows[m,1]==1 & sum(grass2[ovirows[m,2]:(ovirows[m,2]+recover*24)])>=24*recover) | (ovirows[m,1]==0  ))){ # grass present for at least time to first lay
-      ############## START HERE ################# 
-      n<-n+1
-      #DATA<-DATA_orig
-      #row.names(DATA) <- NULL 
-      
-      
-      
-      
-      # loop through each date and update egg development vector (dev)
-      if(ovirows[m,1]==1){ # check if arriving for first time or if last clutch at end of grass growth
-        start<-ovirows[m,2]+recover*24
-      }else{
-        start<-ovirows[m,2]
-      }
-      for(i in start:length(dev)){
-        # if cold, increment cold hours 
-        if(egg$temp[i]<cold_thresh){
-          egg$cold_hours <- egg$cold_hours + 1  
-        }
-        # if dry, increment dry hours, if moist, reset dry hours
-        if(egg$moist[i]<dry_thresh){
-          egg$dry_hours <- egg$dry_hours + 1  
-        }else{egg$dry_hours <- 0}  
-        #if too long in cold conditions or in diapause, avert diapause potential 
-        if(egg$cold_hours>cold_hours_thresh|| egg$diapause_hours>diapause_hours_thresh){
-          egg$diapause_pot <- FALSE
-        }
-        
-        if(egg$diapause_pot){
-          dp[i]<-1
-        }  else{ dp[i] <- 0
-        }
-        
-        # If egg has diapause potential and at 45% dev, then egg is in diapause
-        if(dev[i-1]>0.45 && dev[i-1]<0.46 && egg$diapause_pot == TRUE){ 
-          egg$diapause_hours  <- egg$diapause_hours + 1
-          egg$in_diapause <- TRUE
-        } else{ egg$in_diapause <- FALSE
-        }
-        # if not quiescent (Q1:dry and 30% dev)
-        if(egg$moist[i]<dry_thresh && dev[i-1]>0.30 && dev[i-1]<0.31){
-          egg$Q1 <- TRUE
-          egg$Q2 <- FALSE
-          state[i]<- "Q1"
-          stagefreq1[i,Q2col]<-stagefreq1[i, Q2col]+1
-          # else is not Q2:not diapause, dry, 45% dev  
-        }else if(!egg$in_diapause && egg$moist[i]<dry_thresh && dev[i-1]>0.45 && dev[i-1]<0.46){
-          egg$Q1 <- FALSE 
-          egg$Q2 <- TRUE
-          state[i] <- "Q2"
-          stagefreq1[i,Q2col]<-stagefreq1[i,Q2col]+1
-        }else{egg$Q1 <- FALSE
-              egg$Q2 <- FALSE
-              state[i]<- "diapause"
-              stagefreq1[i,Diapausecol]<-stagefreq1[i,Diapausecol]+1
-        }
-        # nor in diapause  (cold_hours <720, diapuase = 1, and 45% dev) 
-        if(!(egg$Q1||egg$Q2||egg$in_diapause)){
-          # increment development at a 0.08 increase rate per day at 32C or use temp correct factor
-          egg$dev <- dev[i-1] + devrate(egg$temp[i]) 
-          state[i]<-"dev"
-          stagefreq1[i,Eggdevcol]<-stagefreq1[i,Eggdevcol]+1
-          # else in diapause/quiescent, so do not increment 
-        } else{  egg$dev <- dev[i-1]
-        }  
-        
-        # if development complete, record hatch date  
-        if(egg$dev>0.99){
-          #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-          egg_gen <- egg_gen + 1
-          state[i]<-"fin"
-          hatchdate<-i
-          if(n==1){
-            hatchdates<-hatchdate
-          }else{
-            hatchdates<-c(hatchdates,hatchdate)
-          }
-          break
-          # if consecutive dry hours is more than 6 months, terminate egg and start again   
-        }else if(egg$dry_hours>dry_hours_thresh){
-          #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-          stagefreq1[i,Deathcol]<-stagefreq1[i,Deathcol]+1
-          break
-        }
-        
-        # update egg development vector and diapause egg vector
-        dev[i]   <- egg$dev
-        d_e[i]   <- egg$diapause_egg
-      }
-      
-    } # end check if within recovery time
-    
-    dev1<-as.data.frame(dev)
-    dev1<-as.data.frame(cbind(metout$dates,dev1, DATA$D10cm, DATA$MOIST))
-    colnames(dev1)<-c('dates','dev1','temp', 'moist')
-    # update temp to account for diapause egg depths
-    dev1$temp[d_e]<-DATA$D5cm[d_e]
-    dev1$moist[d_e]<-DATA$MOIST[d_e]
-    if(ovirows[m,1]!=1){
-      p<-p+1
+n<-0 
+p<-0
+for(m in 1:nrow(ovirows)){ #loop through oviposition dates and test for successful development
+  DATA<-DATA1
+  row.names(DATA) <- NULL 
+  dev  <- rep(0,nrow(DATA))
+  # set developmental thresholds
+  # create vector for previous day photoperiod
+  DATA$PHOTOPREV <- DATA$PHOTO
+  DATA$PHOTOPREV[25:nrow(DATA)]<-DATA$PHOTO[1:(nrow(DATA)-24)] 
+  
+  #egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+  egg <- egglay(DATA$PHOTO[ovirows[m,2]],DATA$PHOTOPREV[ovirows[m,2]-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+  # make counter for total number of consecutive egg hatches
+  egg_gen <- 1
+  # make empty vector for development 
+  dev  <- rep(0,nrow(DATA))
+  # make empty vectore for diapause potential
+  dp   <- rep(0,nrow(DATA))
+  # make empty state variable
+  state <- rep("empty",nrow(DATA))
+  # make empty variable for diapause egg (TRUE\FALSE) 
+  d_e <- rep(FALSE,nrow(DATA))
+  if(ovirows[m,2]+recover*24<=length(grass2) & ((ovirows[m,1]==1 & sum(grass2[ovirows[m,2]:(ovirows[m,2]+recover*24)])>=24*recover) | (ovirows[m,1]==0  ))){ # grass present for at least time to first lay
+  ############## START HERE ################# 
+  n<-n+1
+  #DATA<-DATA_orig
+  #row.names(DATA) <- NULL 
+  
+  
+  
+
+  # loop through each date and update egg development vector (dev)
+  if(ovirows[m,1]==1){ # check if arriving for first time or if last clutch at end of grass growth
+    start<-ovirows[m,2]+recover*24
+  }else{
+    start<-ovirows[m,2]
+  }
+  for(i in start:length(dev)){
+    # if cold, increment cold hours 
+    if(egg$temp[i]<cold_thresh){
+      egg$cold_hours <- egg$cold_hours + 1  
+    }
+    # if dry, increment dry hours, if moist, reset dry hours
+    if(egg$moist[i]<dry_thresh){
+      egg$dry_hours <- egg$dry_hours + 1  
+    }else{egg$dry_hours <- 0}  
+    #if too long in cold conditions or in diapause, avert diapause potential 
+    if(egg$cold_hours>cold_hours_thresh|| egg$diapause_hours>diapause_hours_thresh){
+      egg$diapause_pot <- FALSE
     }
     
-    #   plot(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.",col="white",ylim=c(0,3))
-    #   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
-    #   
-    #   title(main=paste("ovi_day ",m,sep=""))
-    #   if(n==1){
-    #   plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-    #   points(dev1$dev1~dev1$dates,type='l',col='blue')
-    #   }else{
-    #     if(p==1){
-    #       plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
-    #     }
-    #       points(dev1$dev1~dev1$dates,type='l',col='blue')
-    #   }
-     if(n==1){
-      devs<-subset(dev1,dev>0)
-     }else{
-      devs<-rbind(devs,dev1)
-     }
+    if(egg$diapause_pot){
+      dp[i]<-1
+    }  else{ dp[i] <- 0
+    }
     
-  } # end loop through ovip dates
-  return(list(hatchdates=hatchdates,devs=devs, stagefreq=stagefreq1))
+    # If egg has diapause potential and at 45% dev, then egg is in diapause
+    if(dev[i-1]>0.45 && dev[i-1]<0.46 && egg$diapause_pot == TRUE){ 
+      egg$diapause_hours  <- egg$diapause_hours + 1
+      egg$in_diapause <- TRUE
+    } else{ egg$in_diapause <- FALSE
+    }
+    # if not quiescent (Q1:dry and 30% dev)
+    if(egg$moist[i]<dry_thresh && dev[i-1]>0.30 && dev[i-1]<0.31){
+      egg$Q1 <- TRUE
+      egg$Q2 <- FALSE
+      state[i]<- "Q1"
+      stagefreq1[i,Q2col]<-stagefreq1[i, Q2col]+1
+      # else is not Q2:not diapause, dry, 45% dev  
+    }else if(!egg$in_diapause && egg$moist[i]<dry_thresh && dev[i-1]>0.45 && dev[i-1]<0.46){
+      egg$Q1 <- FALSE 
+      egg$Q2 <- TRUE
+      state[i] <- "Q2"
+      stagefreq1[i,Q2col]<-stagefreq1[i,Q2col]+1
+    }else{egg$Q1 <- FALSE
+      egg$Q2 <- FALSE
+      state[i]<- "diapause"
+      stagefreq1[i,Diapausecol]<-stagefreq1[i,Diapausecol]+1
+    }
+    # nor in diapause  (cold_hours <720, diapuase = 1, and 45% dev) 
+    if(!(egg$Q1||egg$Q2||egg$in_diapause)){
+      # increment development at a 0.08 increase rate per day at 32C or use temp correct factor
+      egg$dev <- dev[i-1] + devrate(egg$temp[i]) 
+      state[i]<-"dev"
+      stagefreq1[i,Eggdevcol]<-stagefreq1[i,Eggdevcol]+1
+      # else in diapause/quiescent, so do not increment 
+    } else{  egg$dev <- dev[i-1]
+    }  
+    
+    # if development complete, record hatch date  
+    if(egg$dev>0.99){
+      #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+      egg_gen <- egg_gen + 1
+      state[i]<-"fin"
+      hatchdate<-i
+      if(n==1){
+        hatchdates<-hatchdate
+      }else{
+        hatchdates<-c(hatchdates,hatchdate)
+      }
+      break
+      # if consecutive dry hours is more than 6 months, terminate egg and start again   
+    }else if(egg$dry_hours>dry_hours_thresh){
+      #egg <- egglay(DATA$PHOTO[i],DATA$PHOTOPREV[i-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+      stagefreq1[i,Deathcol]<-stagefreq1[i,Deathcol]+1
+      break
+    }
+    
+    # update egg development vector and diapause egg vector
+    dev[i]   <- egg$dev
+    d_e[i]   <- egg$diapause_egg
+  }
+  
+  } # end check if within recovery time
+  
+  dev1<-as.data.frame(dev)
+  dev1<-as.data.frame(cbind(metout$dates,dev1, DATA$D10cm, DATA$MOIST))
+  colnames(dev1)<-c('dates','dev1','temp', 'moist')
+  # update temp to account for diapause egg depths
+  dev1$temp[d_e]<-DATA$D5cm[d_e]
+  dev1$moist[d_e]<-DATA$MOIST[d_e]
+  if(ovirows[m,1]!=1){
+    p<-p+1
+  }
+
+#   plot(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.",col="white",ylim=c(0,3))
+#   points(SUM111~as.Date(DATE111,origin="1970-01-01"),type='s',xlab="date",ylab="total egg gens.")
+#   
+#   title(main=paste("ovi_day ",m,sep=""))
+#   if(n==1){
+#   plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+#   points(dev1$dev1~dev1$dates,type='l',col='blue')
+#   }else{
+#     if(p==1){
+#       plot(grass/100~dev1$dates,type='l',col='green',ylim=c(0,1))
+#     }
+#       points(dev1$dev1~dev1$dates,type='l',col='blue')
+#   }
+# if(n==1){
+#  devs<-subset(dev1,dev>0)
+# }else{
+#  devs<-rbind(devs,dev1)
+# }
+  
+} # end loop through ovip dates
+return(list(hatchdates=hatchdates,devs=0, stagefreq=stagefreq1))
 }
 
 
@@ -646,21 +646,22 @@ dsurvival<-function(pars_survive,survival, temp){ # units suvival prob/day
   return(dy)}
 
 getinstarfrommass<-function(mass){
-  if(mass<2.88){
-    instar<-"N1"
-  }else if(mass<5.56){
-    instar<-"N2"
-  }else if(mass<11.71){
-    instar<-"N3"
-  }else if(mass<25.53){
-    instar<-"N4"
-  }else if(mass<55.){
-    instar<-"N5"
-  }else if(mass>=55.){
-    instar<-"Adult"
-  }
-  return(instar)
+if(mass<2.88){
+  instar<-"N1"
+}else if(mass<5.56){
+  instar<-"N2"
+}else if(mass<11.71){
+  instar<-"N3"
+}else if(mass<25.53){
+  instar<-"N4"
+}else if(mass<55.35){
+  instar<-"N5"
+}else if(mass>=55.35){
+  instar<-"Adult"
 }
+return(instar)
+}
+
 
 getgen<-function(hatchdates, stagefreq1){
   n<-0 
@@ -698,10 +699,10 @@ getgen<-function(hatchdates, stagefreq1){
           p<-p+1
           if(p==1){
             reprodates<-c(reprodate,reprodate+7*24,reprodate+14*24) # three pods
-            #reprodates<-c(reprodate) # one pod
+            #reprodates<-c(reprodate,reprodate+7*24,reprodate+14*24) # one pod
           }else{
             reprodates<-c(reprodates,c(reprodate,reprodate+7*24,reprodate+14*24)) # three pods
-            #reprodates<-c(reprodates,reprodate) # one pod
+            #reprodates<-c(reprodates,c(reprodate,reprodate+7*24,reprodate+14*24)) # one pod
           }
           break
         }
@@ -748,6 +749,7 @@ stagefreq<-rep(0,nrow(DATA1)*length(stagefreqnames))
 dim(stagefreq)<-c(nrow(DATA1),length(stagefreqnames))
 
 
+# 
 # for(g in 1:100){
 #   if(g==1){
 #     hatchings<-gethatch(ovirows)
@@ -786,7 +788,8 @@ dim(stagefreq)<-c(nrow(DATA1),length(stagefreqnames))
 #     break
 #   }
 # }
-#       
+
+
 # plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
 # points(grass~environ$dates,type='l',col='green')
 # points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
@@ -798,119 +801,61 @@ dim(stagefreq)<-c(nrow(DATA1),length(stagefreqnames))
 hatchings<-gethatch(ovirows, stagefreq)
 hatchdates<-hatchings$hatchdates
 dev1<-as.data.frame(hatchings$devs)
-plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
-points(dev1$dev1~dev1$dates,type='p',col='blue',cex=0.1)
+#plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
+#points(dev1$dev1~dev1$dates,type='p',col='blue',cex=0.1)
+
 generations<-getgen(hatchdates, hatchings$stagefreq)
 reprodates1<-generations$reprodates
 gens1<-generations$gens
-plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
-points(gens1$mass/55~gens1$dates,type='p',col='orange',cex=0.1)
+#points(gens1$mass/55~gens1$dates,type='p',col='orange',cex=0.1)
 
 hatchings2<-gethatch(cbind(0,reprodates1), generations$stagefreq)
 hatchdates2<-hatchings2$hatchdates
 dev2<-as.data.frame(hatchings2$devs)
 #points(dev2$dev1~dev2$dates,type='p',col='light blue',cex=0.1)
+
 generations<-getgen(hatchdates2,hatchings2$stagefreq)
 reprodates2<-generations$reprodates
 gens2<-generations$gens
-points(gens2$mass/55~gens2$dates,type='p',col='red',cex=0.1)
+#points(gens2$mass/55~gens2$dates,type='p',col='red',cex=0.1)
 
 hatchings3<-gethatch(cbind(0,reprodates2), generations$stagefreq)
 hatchdates3<-hatchings3$hatchdates
 dev3<-as.data.frame(hatchings3$devs)
 #points(dev3$dev1~dev2$dates,type='p',col='light blue',cex=0.1)
 generations<-getgen(hatchdates3,hatchings3$stagefreq)
-reprodates3<-generations$reprodates
-gens3<-generations$gens
-points(gens3$mass/55~gens3$dates,type='p',col='red',cex=0.1)
-
-hatchings4<-gethatch(cbind(0,reprodates3), generations$stagefreq)
-hatchdates4<-hatchings4$hatchdates
-dev4<-as.data.frame(hatchings4$devs)
-#points(dev3$dev1~dev2$dates,type='p',col='light blue',cex=0.1)
-generations<-getgen(hatchdates4,hatchings4$stagefreq)
-gens4<-generations$gens
-points(gens4$mass/55~gens4$dates,type='p',col='red',cex=0.1)
-
-
-colors<-rainbow(6)
-stagefreqDF<-as.data.frame(stagefreq)
-names(stagefreqDF)<-stagefreqnames
-eggs<-rowSums(generations$stagefreq[,Eggdevcol:Diapausecol]) # summ all nymphs to get total nymphs
-nymphs <- rowSums(generations$stagefreq[,N1col:N5col]) # summ all egg stages to get all eggs
-nymphs1 <- generations$stagefreq[,N1col] # summ all egg stages to get all eggs
-nymphs2 <- generations$stagefreq[,N2col] # summ all egg stages to get all eggs
-nymphs3 <- generations$stagefreq[,N3col] # summ all egg stages to get all eggs
-nymphs4 <- generations$stagefreq[,N4col] # summ all egg stages to get all eggs
-nymphs5 <- generations$stagefreq[,N5col] # summ all egg stages to get all eggs
-adults <- generations$stagefreq[,Adultcol] # summ all egg stages to get all eggs
-diapause <- generations$stagefreq[,Diapausecol] # summ all egg stages to get all eggs
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs1)))),ylab='count',xlab='')
-lines( DATA1$DATE, nymphs1, 'l', col = colors[1])
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs2)))),ylab='count',xlab='')
-lines(DATA1$DATE, nymphs2  , 'l', col = colors[1])
-lines( DATA1$DATE, nymphs3, 'l', col = colors[3])
-lines(DATA1$DATE, nymphs4  , 'l', col = colors[4])
-lines( DATA1$DATE, nymphs5, 'l', col = colors[5])
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(adults)))),ylab='count',xlab='')
-lines( DATA1$DATE, adults, 'l', col = colors[6])
-lines(DATA1$DATE, diapause  , 'l', col = colors[3])
-lines(DATA1$DATE, eggs  , 'l', col = colors[3])
-lines( DATA1$DATE, nymphs, 'l', col = colors[1])
-
-legend("topleft",c('eggs','grass','nymphs'), , col = colors, lty = 1, bg = NULL, bty = 'n', title = "instar")
-
-
-
-
-
-hatchings<-gethatch(ovirows)
-hatchdates<-hatchings$hatchdates
-dev1<-as.data.frame(hatchings$devs)
-#plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
-#points(dev1$dev1~dev1$dates,type='p',col='blue',cex=0.1)
-
-generations<-getgen(hatchdates)
-reprodates1<-generations$reprodates
-gens1<-generations$gens
-#points(gens1$mass/55~gens1$dates,type='p',col='orange',cex=0.1)
-
-hatchings2<-gethatch(cbind(0,reprodates1))
-hatchdates2<-hatchings2$hatchdates
-dev2<-as.data.frame(hatchings2$devs)
-#points(dev2$dev1~dev2$dates,type='p',col='light blue',cex=0.1)
-
-generations<-getgen(hatchdates2)
-reprodates2<-generations$reprodates
-gens2<-generations$gens
-#points(gens2$mass/55~gens2$dates,type='p',col='red',cex=0.1)
-
-hatchings3<-gethatch(cbind(0,reprodates2))
-hatchdates3<-hatchings3$hatchdates
-dev3<-as.data.frame(hatchings3$devs)
-#points(dev3$dev1~dev2$dates,type='p',col='light blue',cex=0.1)
-generations<-getgen(hatchdates3)
 gens3<-generations$gens
 #points(gens3$mass/55~gens2$dates,type='p',col='red',cex=0.1)
 
+colors<-rainbow(2)
+stagefreqDF<-as.data.frame(stagefreq)
+names(stagefreqDF)<-stagefreqnames
+nymphs<-rowSums(generations$stagefreq[,Eggdevcol:Diapausecol]) # summ all nymphs to get total nymphs
+eggs <- rowSums(generations$stagefreq[,N1col:N5col]) # summ all egg stages to get all eggs
+plot( DATA1$DATE, nymphs, 'l', col = colors[1])
+lines(DATA1$DATE, eggs  , 'l', col = colors[2])
+legend("topright",c('eggs','nymphs'), , col = colors, lty = 1, bg = NULL, bty = 'n', title = "instar")
 
-gens<-rbind(gens1,gens2,gens3)
 
-
-
-
-plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-points(grass~environ$dates,type='l',col='green')
-points(gens$mass~gens$dates,type='p',col='blue',cex=0.1)
-success<-as.data.frame(subset(gens,mass>55))
-success$dates
-
-plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-points(grass~environ$dates,type='l',col='green')
-points(gens1$mass~gens1$dates,type='p',col='blue',cex=0.1)
-plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-points(grass~environ$dates,type='l',col='green')
-points(gens2$mass~gens2$dates,type='p',col='blue',cex=0.1)
-plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-points(grass~environ$dates,type='l',col='green')
-points(gens3$mass~gens3$dates,type='p',col='blue',cex=0.1)
+# gens<-rbind(gens1,gens2,gens3)
+# 
+# 
+# 
+# 
+#      plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+#      points(grass~environ$dates,type='l',col='green')
+#      points(gens$mass~gens$dates,type='p',col='blue',cex=0.1)
+# success<-as.data.frame(subset(gens,mass>55))
+# success$dates
+# 
+# 
+# # code for plotting separate "generations"
+# plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+# points(grass~environ$dates,type='l',col='green')
+# points(gens1$mass~gens1$dates,type='p',col='blue',cex=0.1)
+# plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+# points(grass~environ$dates,type='l',col='green')
+# points(gens2$mass~gens2$dates,type='p',col='blue',cex=0.1)
+# plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+# points(grass~environ$dates,type='l',col='green')
+# points(gens3$mass~gens3$dates,type='p',col='blue',cex=0.1)
