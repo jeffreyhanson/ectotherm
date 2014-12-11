@@ -65,7 +65,7 @@ c    EXTERNAL GUT
      &,act14,act15,act16,act17,act18,act19,act20,fieldcap,wilting
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &for12,for13,for14,for15,for16,for17,for18,for19,for20,Vb
-      real gutfill,contwet,shdgrass
+      real gutfill,contwet,shdgrass,grass
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,soilmoisture,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,
@@ -91,7 +91,7 @@ c    EXTERNAL GUT
      &    (24),NWASTE(24),rhref(25),pond_env(20,365,25,2)
       dimension rainfall2(7300),debfirst(13),ectoinput(127),
      &    wetlandTemps(7300*24),wetlandDepths(7300*24)
-      dimension grassgrowth(7300),grasstsdm(7300),tbs(24*7300)
+      dimension grassgrowth(7300),grasstsdm(7300),tbs(24*7300),SOIL1(25)
       DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25),shdgrass(25)
 
       Data PI/3.14159/
@@ -259,7 +259,14 @@ c    Arrhenius temperature correction factor
      & *(1/(273+Tb)-1/TL))+EXP(TAH*(1/TH-1/(273+Tb))))
 
 c    food availability - to do
-      X_food = grassgrowth(daycount)
+      grass=soil1(hour)
+      if(grass.lt.(wilting/2.+1))then
+          grass=0.
+      else
+          grass=grass/fieldcap*10.
+      endif
+      
+      X_food = grass
 c      if((grassgrowth(daycount).eq.0).and.(taloc(hour).ge.5))then
 c       X_food=0.05
 c      endif
@@ -268,7 +275,7 @@ c      X_food=0
 c      else
 c      X_food=pond_depth/fieldcap*10.
 c      X_food=10.
-c       X_food=3265.
+c      X_food=3265.
 c      endif
       
       if(clutchsize.lt.1)then
@@ -1625,4 +1632,3 @@ c     endif
       stage_rec(hour)=stage
       RETURN   
       END
-
