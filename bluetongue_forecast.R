@@ -53,13 +53,13 @@ FATOSK<-0.4 # configuration factor to sky
 FATOSB<-0.4 # configuration factor to substrate
 
 # physiological traits
-TMAXPR<-35.6 # degrees C, voluntary thermal maximum (upper body temperature for foraging)
-TMINPR<-31.1 # degrees C, voluntary thermal minimum (lower body temperature for foraging)
-TBASK<-20.# degrees C, minimum basking temperature 
+TMAXPR<-38.7 # degrees C, voluntary thermal maximum (upper body temperature for foraging) # Koenig
+TMINPR<-28.1 # degrees C, voluntary thermal minimum (lower body temperature for foraging) # guess
+TBASK<-14.4# degrees C, minimum basking temperature 
 TEMERGE<-10.0 # degrees C, temperature at which animal will move to a basking site 
 ctmax<-45.0 # degrees C, critical thermal maximum (used by program to determine depth selected when inactive and burrowing)
 ctmin<-3.5 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
-TPREF<-34 # preferred body temperature (animal will attempt to regulate as close to this value as possible) (mean 31.9, range 29.4-34.3, Bennett, A.F. & John-Alder, H. (1986) Thermal Relations of Some Australian Skinks (Sauria: Scincidae). Copeia, 1986, 57-64.), mode in Pamula Fig. 3.14 around 33.5
+TPREF<-31.9 # preferred body temperature (animal will attempt to regulate as close to this value as possible) Koenig
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
 skinwet<-0.2 # %, percentage of total surface area acting like a free water surface for evaporation 
 extref<-20. # %, oxygen extraction efficiency (based on 35 deg C for a number of reptiles, from Perry, S.F., 1992. Gas exchange strategies in reptiles and the origin of the avian lung. In: Wood, S.C., Weber, R.E., Hargens, A.R., Millard, R.W. (Eds.), Physiological Adaptations in Vertebrates: Respiration, Circulation, andMetabo -  lism. Marcel Dekker, Inc., New York, pp. 149-167.)
@@ -119,9 +119,10 @@ with(environ, points(DEP/10~dates,type = "l",col="brown"))
 abline(TMAXPR,0,lty=2,col='red')
 abline(TMINPR,0,lty=2,col='blue')
 abline(TBASK,0,lty=2,col='light blue')
+abline(TPREF,0,lty=2,col='orange')
 
 forecast<-cbind(bomforecast[,3:4],environ[,1],environ[,6:7],environ[,9:10],bomforecast[,10:12],metout[,4:9],metout[,13:17],soil[,4:13])
 colnames(forecast)<-c("lon","lat","date","bodytemp","shade","depth","activity","atmos_pressure","precip","cloud_cover","Tair_local"," Tair_1.2m","RH_local","RH_1.2m","wind_local","wind_1.2m","solar_angle","solar.Wm2","Tsky","DEW","FROST","Soil0cm","Soil2.5cm","Soil5cm","Soil10cm","Soil15cm","Soil20cm","Soil30cm","Soil50cm","Soil100cm","Soil200cm")
-write.csv(forecast,"skink_forecast.csv")
+write.csv(forecast,"bluetongue_forecast.csv")
 
 

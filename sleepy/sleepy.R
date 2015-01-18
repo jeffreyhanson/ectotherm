@@ -84,15 +84,15 @@ phimax<- phi # degrees, max wing angle (90 = vertical relative to body)
 phimin<- phi # degrees, min wing angle (90 = vertical relative to body
 
 # physiological traits
-TMAXPR<-39.4 # degrees C, voluntary thermal maximum (upper body temperature for foraging and also burrow depth selection) # Licht 1966 thermal gradient
-TMINPR<-20.0 # degrees C, voluntary thermal minimum (lower body temperature for foraging) # Kearney Obs (PhD field trip)
-TBASK<-20.0 # degrees C, minimum basking temperature (14. deg C, Fraser 1985 thesis, min of A in Fig. 7.3)
+TMAXPR<-39. # degrees C, voluntary thermal maximum (upper body temperature for foraging and also burrow depth selection)
+TMINPR<-26. # degrees C, voluntary thermal minimum (lower body temperature for foraging)
+TBASK<-26. # degrees C, minimum basking temperature (14. deg C, Fraser 1985 thesis, min of A in Fig. 7.3)
 TEMERGE<-8.5 # degrees C, temperature at which animal will move to a basking site
 ctmax<-43.  # degrees C, critical thermal maximum (animal will die if ctkill = 1 and this threshold is exceeded)
 ctmin<-3.5 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
 ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
 ctkill<-0 #if 1, animal dies when it hits critical thermal limits
-TPREF<-34. # preferred body temperature (animal will attempt to regulate as close to this value as possible) # Licht 1966 thermal gradient
+TPREF<-33.5 # preferred body temperature (animal will attempt to regulate as close to this value as possible)
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
 skinwet<-0.35 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
 extref<-20. # %, oxygen extraction efficiency (need to check, but based on 35 deg C for a number of reptiles, from Perry, S.F., 1992. Gas exchange strategies in reptiles and the origin of the avian lung. In: Wood, S.C., Weber, R.E., Hargens, A.R., Millard, R.W. (Eds.), Physiological Adaptations in Vertebrates: Respiration, Circulation, andMetabo -  lism. Marcel Dekker, Inc., New York, pp. 149-167.)
@@ -104,8 +104,8 @@ raindrink<-5. # daily rainfall (mm) required for animal to rehydrate from drinki
 gutfill<-75. # % gut fill at which satiation occurs - if greater than 100%, animal always tries to forage
 
 # behavioural traits
-dayact<-0 # diurnal activity allowed (1) or not (0)?
-nocturn<-1 # nocturnal activity allowed (1) or not (0)?
+dayact<-1 # diurnal activity allowed (1) or not (0)?
+nocturn<-0 # nocturnal activity allowed (1) or not (0)?
 crepus<-0 # crepuscular activity allowed (1) or not (0)?
 burrow<-1 # shelter in burrow allowed (1) or not (0)?
 shdburrow<-0 #
@@ -141,7 +141,7 @@ DEB<-1 # run the DEB model (1) or just heat balance, using allometric respiratio
 # run so that metabolic heat generation and respiratory water loss can be calculated.
 # Metabolic rate, MR (ml O2/h, STP) at a given body mass (g) and body temperature, Tb (deg C)
 # MR=MR1*M^MR2*10^(MR3*Tb) based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
-amass<-2. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
+amass<-300. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
 MR_1<-0.013
 MR_2<-0.8
 MR_3<-0.038
@@ -151,22 +151,22 @@ MR_3<-0.038
 fract<-1
 f<-1.
 MsM<-186.03*6. # J/cm3 produces a stomach volume of 5.3 cm3/100 g, as measured for Disosaurus dorsalis, adjusted for Egernia cunninghami
-z<-1.235*fract
-delta<- 0.2977
+z<-7.174*fract
+delta<- 0.217
 kappa_X<-0.85#0.85
-v_dotref<-0.05868/24.
-kappa<-0.9415 
-p_Mref<-47.26/24.
-E_G<-7536
+v_dotref<-0.05591/24.
+kappa<-0.8501 
+p_Mref<-45.14/24.
+E_G<-7189
 k_R<-0.95
 k_J<-0.00628/24.
-E_Hb<-280.6*fract^3
+E_Hb<-6.533e+04*fract^3
 E_Hj<-E_Hb*fract^3
-E_Hp<-567*fract^3
-h_aref<-4.502e-07/(24.^2) #3.61e-11/(24.^2) 
+E_Hp<-1.375e+05*fract^3
+h_aref<-3.61e-13/(24.^2) #3.61e-11/(24.^2) 
 s_G<-0.01
 
-E_Egg<-6425*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
+E_Egg<-1.04e+06*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
 svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding

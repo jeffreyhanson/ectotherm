@@ -166,8 +166,8 @@ NicheMapR_ecto <- function(niche) {
   w_N<-CHON%*%N_waste
   
   lat<-ectoin[4]
-  grassgrowths<-rep(X,timeinterval*nyears)
-  grasstsdms<-rep(X,timeinterval*nyears)
+  grassgrowths<-X#rep(X,timeinterval*nyears)
+  grasstsdms<-X#rep(X,timeinterval*nyears)
   julstart<-metout[1,2]
   tannul<-as.numeric(metout[1,11])
   monthly<-0
@@ -190,6 +190,16 @@ NicheMapR_ecto <- function(niche) {
   ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade)
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,eggmass,batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,svl_met,frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
+  
+  if(ystrt>0){
+    metout<-c(metout[((ystrt)*365*24+1):(20*365*24),],metout[1:((ystrt)*365*24),])
+    shadmet<-c(shadmet[((ystrt)*365*24+1):(20*365*24),],shadmet[1:((ystrt)*365*24),])
+    soil<-c(soil[((ystrt)*365*24+1):(20*365*24),],soil[1:((ystrt)*365*24),])
+    shadsoil<-c(shadsoil[((ystrt)*365*24+1):(20*365*24),],shadsoil[1:((ystrt)*365*24),])
+    MAXSHADES<-c(MAXSHADES[((ystrt)*365+1):(20*365)],MAXSHADES[1:((ystrt)*365)])
+    RAINFALL<-c(RAINFALL[((ystrt)*365+1):(20*365)],RAINFALL[1:((ystrt)*365)])
+    grassgrowths<-c(grassgrowths[((ystrt)*365+1):(20*365)],grassgrowths[1:((ystrt)*365)])
+  }
   
   if(write_input==1){
     cat('writing input csv files \n')

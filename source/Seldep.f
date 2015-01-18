@@ -91,9 +91,9 @@ C    WRITE(0,*)'MAXDEPTH,MINDEPTH = ',ZMAX,ZMIN
 
       DO 13 IDEP = minnode,NON
 c      ctmax burrow
-c      IF ((TSOIL(IDEP) .GT. CTMIN).and.(TSOIL(IDEP) .LT. tmaxpr))THEN
-      IF ((TSOIL(IDEP) .GT. CTMIN).and.(TSOIL(IDEP) .LT. 
-     & (ctmax-(ctmax-tmaxpr)/2)))THEN    
+      IF ((TSOIL(IDEP) .GT. CTMIN).and.(TSOIL(IDEP) .LT. tmaxpr))THEN
+c      IF ((TSOIL(IDEP) .GT. CTMIN).and.(TSOIL(IDEP) .LT. 
+c     & (ctmax-(ctmax-tmaxpr)/2)))THEN    
     
             Ta = TSOIL(IDEP)
             newdep = ZSOIL(IDEP)
@@ -158,8 +158,8 @@ C      IT'S WARM ENOUGH TO DIGEST, FIND THE BEST, SHALLOWEST DEPTH in next secti
 C    IT'S WARM ENOUGH TO DIGEST, FIND THE BEST, SHALLOWEST DEPTH
       DO 10 IDEP = minnode,NON
 c     ctmax burrow 
-c        IF (TSOIL(IDEP) .GT. tmaxpr)THEN
-        IF (TSOIL(IDEP) .GT. (ctmax-(ctmax-tmaxpr)/2))THEN
+        IF (TSOIL(IDEP) .GT. tmaxpr)THEN
+c        IF (TSOIL(IDEP) .GT. (ctmax-(ctmax-tmaxpr)/2))THEN
 C        Look deeper
 C        Next bit added by M. Kearney to deal with warm deep soil temps
           If (IDEP .eq. NON) then

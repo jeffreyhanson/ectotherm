@@ -193,12 +193,12 @@ c    check if first day of simulation
         MsM=orig_MsM
        endif
       endif
-
+       clutchsize=FLOOR(0.1696*(SVL(hour)/10)-16.855)
 c      clutch size below for sleepy lizards
       if(SVL(hour).lt.300)then
        clutchsize=1
       endif
-
+      
       if((daycount.lt.startday).or.((countday.lt.startday).and.
      &    (v_init.le.3e-9)).or.(deadead.eq.1))then
        dead=1
@@ -259,14 +259,15 @@ c    Arrhenius temperature correction factor
      & *(1/(273+Tb)-1/TL))+EXP(TAH*(1/TH-1/(273+Tb))))
 
 c    food availability - to do
-      grass=soil1(hour)
-      if(grass.lt.(wilting/2.+1))then
-          grass=0.
-      else
-          grass=grass/fieldcap*10.
-      endif
+c      grass=soil1(hour)
+c      if(grass.lt.(wilting/2.+1))then
+c          grass=0.
+c      else
+c          grass=grass/fieldcap*10.
+c      endif
       
-      X_food = grass
+      X_food = grassgrowth(daycount)
+
 c      if((grassgrowth(daycount).eq.0).and.(taloc(hour).ge.5))then
 c       X_food=0.05
 c      endif
@@ -287,7 +288,11 @@ C      clutchsize=1
 C     else
        clutchenergy = E_egg*clutchsize
 C     endif
-      
+      if((cumbatch(hour)/clutchenergy).gt.1)then
+      MsM=0
+      else
+      MsM=orig_MsM
+      endif
       if(countday.eq.150)then
       continue
       endif
@@ -1394,6 +1399,7 @@ c       dMsdt = p_Xm*v_pres**(2./3.)*0*(X_food/(halfsat+X_food))-
 c     &       p_Xm*v_pres**(2./3.)*f*(Ms_pres/(MsM*v_pres))
 c    endif
       gutfull=ms_pres/(MsM*v_pres)
+c      write(0,*) gutfull
       if(gutfull.gt.1)then
       gutfull=1
       endif

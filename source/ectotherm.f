@@ -408,13 +408,14 @@ C     NEED NON, # OF SOIL NODES,
       COMMON/ASOIL/ATSOIL,ATSHSOI
       COMMON/TRANSGUT/TRANS_START
       COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
-     &,minED,annfood,food,gutfull,longev,completion,complete,fec1,fec2,
+     &,minED,annfood,food,longev,completion,complete,fec1,fec2,
      &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,
      &fec15,fec16,fec17,fec18,fec19,fec20,act1,act2,act3,act4,act5,act6,
      &act7,act8,act9,act10,act11,act12,act13,act14,act15,act16,act17,
      &act18,act19,act20,fec,surv,for1,for2,for3,for4,for5,for6,for7,for8
      &,for9,for10,for11,for12,for13,for14,for15,for16,for17,for18,for19,
      &for20
+      common/gut/gutfull,gutfill
       COMMON/ANNUALACT/ANNUALACT
       COMMON/z/tknest,Thconw
       COMMON/DEBPAR1/clutchsize,andens_deb,d_V,eggdryfrac,w_E,mu_E,
@@ -2645,7 +2646,7 @@ c     too dehydrated for activity
         dehydrated=0
        endif    
 
-c    gutfill=0.75
+c      gutfill=0.75
        if(gutfull.lt.gutfill)then
 c     IF((PctDess.ge.minwater-1).and.(minwater.gt.0))then
 c         forage=0
@@ -2653,7 +2654,6 @@ c     else
            forage=1
 c     endif
        endif 
-
        if((gutfull.ge.gutfill).and.(aquatic.eq.0))then
 c     gut close to full - stay home
         If ((Burrow .eq. 'Y') .or. (Burrow .eq. 'y')) then
