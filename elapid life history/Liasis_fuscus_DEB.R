@@ -101,7 +101,7 @@ PTUREA<-0. # %, water in excreted nitrogenous waste
 FoodWater<-82#82 # 82%, water content of food (from Shine's thesis, clover)
 minwater<-15 # %, minimum tolerated dehydration (% of wet mass) - prohibits foraging if greater than this
 raindrink<-5. # daily rainfall (mm) required for animal to rehydrate from drinking (zero means standing water always available)
-gutfill<-0.5 # % gut fill at which satiation occurs - if greater than 100%, animal always tries to forage
+gutfill<-0.2 # % gut fill at which satiation occurs - if greater than 100%, animal always tries to forage
 
 # behavioural traits
 dayact<-1 # diurnal activity allowed (1) or not (0)?
@@ -150,36 +150,36 @@ MR_3<-0.038
 
 fract<-1
 f<-1
-MsM<-186.03*6. # J/cm3 produces a stomach volume of 5.3 cm3/100 g, as measured for Disosaurus dorsalis, adjusted for Egernia cunninghami
-z<-12.73*fract
-delta<- 0.05804
+MsM<-7245./2 # J/cm3 for water python to 50% of body mass so 50g/100g of body mass - for full size python of 3.24kg, 1620g*0.3gdryconv*25000J/gdry=12150000 per 1677 cm3 = 7245 J/cm3
+z<-12.55*fract
+delta<- 0.05672
 kappa_X<-0.85#0.85
-v_dotref<-0.05862/24.
-kappa<-0.7059
-p_Mref<-13.22/24.
-E_G<-7863
+v_dotref<-0.05603/24.
+kappa<-0.8576
+p_Mref<-18.04/24.
+E_G<-7847
 k_R<-0.95
-k_J<-0.0001433/24.
-E_Hb<-7.929e+04*fract^3
+k_J<-0.0008131/24.
+E_Hb<-2.985e+04*fract^3
 E_Hj<-E_Hb*fract^3
-E_Hp<-3.746e+06*fract^3
-h_aref<-1.106e-09/(24.^2) #3.61e-11/(24.^2) 
+E_Hp<-1.073e+06*fract^3
+h_aref<-1.141e-09/(24.^2) #3.61e-11/(24.^2) 
 s_G<-0.01
 
-E_Egg<-3.608e+05*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
+E_Egg<-3.193e+05*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
 svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
-p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
-K<-30 # half-saturation constant
+p_Xm<-3240*5/2 # J/h.cm2, maximum intake rate when feeding, Rattus colletti 61 gwet * 0.3 %dry * 25000 J/gdry = 457500 J, V of full size python 1678 cm3, so one rat 3240 J/cm2, could conceivably eat 5 rats in an hour so  
+K<-1000 # half-saturation constant
 X<-.3 # food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
 rats<-c(222,203,153,187,189,106,117,38,196,159,76,127,150,168,9,0,6,106)
 ratyears<-c(1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2005,2007,2008,2009,2010)
 ratdays<-(ratyears-1991)*365+182.5
 ratfun<-approxfun(ratdays,rats,method="linear",rule = 2)
-X<-ratfun(seq(1,365*20,1))
+XX<-ratfun(seq(1,365*20,1))
 #X[is.na(X)]<-rats[1]
-X<-X/300+.1
-X<-X[(365*(20-nyears)+1):7300]
+XX<-XX/max(XX)*45.75+5 # standardize for max density 1 rat per m2 at Fogg Dam in good years, average rat 60g wet so 0.3*25000*61 J/m2 = 457500/10000 J/cm2 = 45.75 J/cm
+XX<-XX[(365*(20-nyears)+1):7300]
 #X<-X*0+0.5
 # for insect model
 metab_mode<-0 # 0 = off, 1 = holometabolous with Dyar's rule scaling, 2 = holometabolous linear scaling, 3 = hemimetabolous with Dyar's rule scaling, 4 = hemimetabolous linear scaling
@@ -314,10 +314,10 @@ mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
 
 for(ystrt in 0:19){
-ystrt<-4 # shift starting year forward
+#ystrt<-0 # shift starting year forward
 
 #set up call to NicheMapR function
-niche<-list(ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+niche<-list(XX=XX,ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -370,10 +370,21 @@ colnames(rainfall)<-c("dates","rainfall")
 
 ############### plot results ######################
 library(lattice)
+svl_mat<-subset(debout,CUMREPRO>0)[1,11]
+age_mat<-subset(debout,CUMREPRO>0)[1,4]
+yearvect<-debout$DAY/365+debout$TIME/24/365
+with(debout, {plot(WETMASS~yearvect,type = "l",ylab = "wet mass (g)",col='blue',xlim=c(0,15),ylim=c(0,4000),main=ystart+ystrt)})
+with(debout, {points(WETMASS_STD~yearvect,type = "l",ylab = "wet mass (g)",col='dark green',ylim=c(0,3000))})
+with(debout, {plot((SVL/10)~yearvect,type = "l",ylab = "SVL (cm)",col='red',ylim=c(0,210))})
+mat<-subset(cbind(debout,yearvect),CUMREPRO>0)[1,]
+with(mat, {points((SVL/10)~yearvect,type = "p",cex=2,pch=19,ylab = "SVL (cm)",col='red',ylim=c(0,210))})
 
-with(debout, {plot(WETMASS~dates,type = "l",ylab = "wet mass (g)",col='blue',ylim=c(0,3000),main=ystart+ystrt)})
-with(debout, {points(WETMASS_STD~dates,type = "l",ylab = "wet mass (g)",col='light blue',ylim=c(0,3000))})
-with(debout, {points(SVL~dates,type = "l",ylab = "wet mass (g)",col='red',ylim=c(0,3000))})
+#points(as.numeric(ISOdate(2007,1,1,tz=tzone)),3000,type='h',lty=2)
+#points(as.numeric(ISOdate(1998,1,1,tz=tzone)),3000,type='h',lty=2)
+#points(as.numeric(ISOdate(2001,1,1,tz=tzone)),3000,type='h',lty=2)
+
+
+yearout<-cbind(yearout,svl_mat,age_mat)
 #with(debout, {points(CUMBATCH/1000~dates,type = "l",ylab = "wet mass (g)",col='pink',ylim=c(0,5000))})
 if(ystrt==0){
 yearout_loop<-yearout
@@ -384,7 +395,21 @@ yearsout_loop<-yearsout
 }
 
 } # end loop through years
+
 head(subset(debout,CUMREPRO>0))
+
+
+
+
+
+
+
+
+
+
+
+months<-debout$DAY/30.5
+plot(debout$SVL/10~months,type = "l",ylab = "svl (cm)",col='red',xlim=c(0,144),ylim=c(70,210))
 
 plot(debout$WETMASS/debout$SVL)
 
