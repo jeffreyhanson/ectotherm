@@ -62,7 +62,7 @@ NicheMapR_ecto <- function(niche) {
   shadmet<-shadmet2
   soil<-soil2
   shadsoil<-shadsoil2
-  metout.names<-c("JULDAY","TIME","TALOC","TAREF","RHLOC","RH","VLOC","VREF","TS","SOILMOIST","TDEEP","ZEN","SOLR","TSKYC","DEW","FROST","SNOWFALL","SNOWDEP")
+  metout.names<-c("JULDAY","TIME","TALOC","TAREF","RHLOC","RH","VLOC","VREF","SOILMOIST3","POOLDEP","TDEEP","ZEN","SOLR","TSKYC","DEW","FROST","SNOWFALL","SNOWDEP")
   colnames(metout)<-metout.names
   colnames(shadmet)<-metout.names
   soil.names<-c("JULDAY","TIME",paste("D",DEP,"cm", sep = ""))
@@ -165,9 +165,15 @@ NicheMapR_ecto <- function(niche) {
   etaO<-matrix(c(yXE/mu_E*-1,0,1/mu_E,yPE/mu_E,0,0,-1/mu_E,0,0,yVE/mu_E,-1/mu_E,0),nrow=4)
   w_N<-CHON%*%N_waste
   
+    wilting<-ectoin[6] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
+
   lat<-ectoin[4]
-  grassgrowths<-X#rep(X,timeinterval*nyears)
-  grasstsdms<-X#rep(X,timeinterval*nyears)
+  grassgrowths<-as.data.frame(metout)
+  grassgrowths<-subset(grassgrowths,TIME==720)
+  grassgrowths<-grassgrowths[,9]
+  grassgrowths[grassgrowths<wilting]<-0
+  grassgrowths<-as.numeric(grassgrowths)*2*X#rep(X,timeinterval*nyears)#
+  grasstsdms<-as.numeric(grassgrowths)*2*X#rep(X,timeinterval*nyears)#
   julstart<-metout[1,2]
   tannul<-as.numeric(metout[1,11])
   monthly<-0
@@ -176,7 +182,6 @@ NicheMapR_ecto <- function(niche) {
   
   # bucket model for soil moisture
   fieldcap<-ectoin[5]# %vol, water content at 0.1ba = 10kPa
-  wilting<-ectoin[6] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
   fieldcap<-30 # field capacity, m3/m3*100
   if(soilmoisture==1){
     conth<-fieldcap/10 # containter height, cm
@@ -187,15 +192,16 @@ NicheMapR_ecto <- function(niche) {
     conthole<-0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. infiltration to soil, drawdown from water tank)
     contwet<- 2 # percent wet value for container
   }
+  
   ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade)
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,eggmass,batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,svl_met,frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
   
   if(ystrt>0){
-    metout<-c(metout[((ystrt)*365*24+1):(20*365*24),],metout[1:((ystrt)*365*24),])
-    shadmet<-c(shadmet[((ystrt)*365*24+1):(20*365*24),],shadmet[1:((ystrt)*365*24),])
-    soil<-c(soil[((ystrt)*365*24+1):(20*365*24),],soil[1:((ystrt)*365*24),])
-    shadsoil<-c(shadsoil[((ystrt)*365*24+1):(20*365*24),],shadsoil[1:((ystrt)*365*24),])
+    metout<-rbind(metout[((ystrt)*365*24+1):(20*365*24),],metout[1:((ystrt)*365*24),])
+    shadmet<-rbind(shadmet[((ystrt)*365*24+1):(20*365*24),],shadmet[1:((ystrt)*365*24),])
+    soil<-rbind(soil[((ystrt)*365*24+1):(20*365*24),],soil[1:((ystrt)*365*24),])
+    shadsoil<-rbind(shadsoil[((ystrt)*365*24+1):(20*365*24),],shadsoil[1:((ystrt)*365*24),])
     MAXSHADES<-c(MAXSHADES[((ystrt)*365+1):(20*365)],MAXSHADES[1:((ystrt)*365)])
     RAINFALL<-c(RAINFALL[((ystrt)*365+1):(20*365)],RAINFALL[1:((ystrt)*365)])
     grassgrowths<-c(grassgrowths[((ystrt)*365+1):(20*365)],grassgrowths[1:((ystrt)*365)])

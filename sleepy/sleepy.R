@@ -45,7 +45,7 @@ FLTYPE<-0.0  # fluid type 0.0=air, 1.0=water
 SUBTK<-2.79 # substrate thermal conductivity (W/mC)
 soilnode<-4. # soil node at which eggs are laid (overridden if frogbreed is 1)
 minshade<-0. # minimum available shade (percent)
-maxshade<-70. # maximum available shade (percent)
+maxshade<-60. # maximum available shade (percent)
 REFL<-rep(0.18,timeinterval*nyears) # substrate reflectances 
 
 # morphological traits
@@ -94,7 +94,7 @@ ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
 ctkill<-0 #if 1, animal dies when it hits critical thermal limits
 TPREF<-33.5 # preferred body temperature (animal will attempt to regulate as close to this value as possible)
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
-skinwet<-0.35 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
+skinwet<-0.15 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
 extref<-20. # %, oxygen extraction efficiency (need to check, but based on 35 deg C for a number of reptiles, from Perry, S.F., 1992. Gas exchange strategies in reptiles and the origin of the avian lung. In: Wood, S.C., Weber, R.E., Hargens, A.R., Millard, R.W. (Eds.), Physiological Adaptations in Vertebrates: Respiration, Circulation, andMetabo -  lism. Marcel Dekker, Inc., New York, pp. 149-167.)
 PFEWAT<-73. # %, fecal water (from Shine's thesis, mixed diet 75% clover, 25% mealworms)
 PTUREA<-0. # %, water in excreted nitrogenous waste
@@ -109,7 +109,7 @@ nocturn<-0 # nocturnal activity allowed (1) or not (0)?
 crepus<-0 # crepuscular activity allowed (1) or not (0)?
 burrow<-1 # shelter in burrow allowed (1) or not (0)?
 shdburrow<-0 #
-mindepth<-2 # minimum depth (soil node) to which animal can retreat if burrowing
+mindepth<-3 # minimum depth (soil node) to which animal can retreat if burrowing
 maxdepth<-10 # maximum depth (soil node) to which animal can retreat if burrowing
 CkGrShad<-1 # shade seeking allowed (1) or not (0)?
 climb<-0 # climbing to seek cooler habitats allowed (1) or not (0)?
@@ -170,8 +170,9 @@ E_Egg<-1.04e+06*fract^3# J, initial energy of one egg # this includes the residu
 svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
-K<-0.01 # half-saturation constant
-X<-10 # food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
+p_Am<-v_dotref*E_m
+K<-p_Am/p_Xm # half-saturation constant
+X<-3#11.7 # max food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
 
 # for insect model
 metab_mode<-0 # 0 = off, 1 = holometabolous with Dyar's rule scaling, 2 = holometabolous linear scaling, 3 = hemimetabolous with Dyar's rule scaling, 4 = hemimetabolous linear scaling
@@ -305,8 +306,9 @@ ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
 mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
 
+ystrt<-0 # year to start the simulation (if zero, starts at first year, but if greater than 1, runs at year ystart+1 and then loops back to the rest after)
 #set up call to NicheMapR function
-niche<-list(soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+niche<-list(ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -316,7 +318,7 @@ shadmet<-as.data.frame(nicheout$shadmet)[1:(nyears*365*24),]
 soil<-as.data.frame(nicheout$soil)[1:(nyears*365*24),]
 shadsoil<-as.data.frame(nicheout$shadsoil)[1:(nyears*365*24),]
 rainfall<-as.data.frame(nicheout$RAINFALL)
-grassgrowths<-as.data.frame(nicheout$grassgrowths)
+grassgrowths<-as.data.frame(nicheout$grassgrowths)[1:(nyears*365),]
 grasstsdms<-as.data.frame(nicheout$grasstsdms)
 environ<-as.data.frame(nicheout$environ[1:(365*24*nyears),])
 enbal<-as.data.frame(nicheout$enbal[1:(365*24*nyears),])
@@ -371,7 +373,7 @@ if(raindrink==0){
 
 
 plotrainfall <- subset(rainfall,format(dates, "%y")>0)
-with(plotrainfall,plot(rainfall~dates,type='l',col='blue'))
+#with(plotrainfall,plot(rainfall~dates,type='l',col='blue'))
 
 plotmetout2<-subset(metout,format(metout$dates, "%y")>0)
 
@@ -411,13 +413,13 @@ addTrans <- function(color,trans)
   return(res)
 }
 
-with(debout, {plot(WETMASS~dates,type = "l",ylab = "wet mass (g)/grass")})
-
-with(debout, {plot((WETMASS-WETMASS*(Body_cond/100))~dates,type = "l",xlab = "day of year",ylab = "wet mass (g)")})
+with(debout, {plot(WETMASS~dates,type = "l",ylab = "wet mass (g)/grass",ylim=c(0,1200))})
+points(grassgrowths*100~dates2,type='l',col='green')
+with(debout, {plot((WETMASS-WETMASS*(Body_cond/100))~dates,type = "l",xlab = "day of year",ylab = "wet mass (g)",col='blue')})
 
 with(debout, {points(WETMASS~dates,type = "l",ylab = "wet mass (g)/grass growth")})
 # grass presence vector
-grass<-metout$SOILMOIST
+grass<-metout$SOILMOIST3
 grassthresh<-as.single(read.csv('ectoin.csv')[6,2])/2+1
 grass[grass<=grassthresh]<-0
 grass2<-grass
@@ -461,8 +463,8 @@ rbPal <- colorRampPalette(c('turquoise','gold1'))
 
 plotenviron_forage <- subset(plotenviron3,  subset=(ACT>1 & substr(dates,1,4)==curyear))
 plotenviron_all <- subset(plotenviron3,  subset=(ACT>=0 & substr(dates,1,4)==curyear))
-plotmetout<-cbind(metout,grass)
-plotmetout <- subset(plotmetout,  subset=(substr(dates,1,4)==curyear))
+#plotmetout<-cbind(metout,grass)
+plotmetout <- subset(metout,  subset=(substr(dates,1,4)==curyear))
 Tbs<-t(as.numeric(as.matrix(c(plotenviron_bask$TC,plotenviron_bask$TC))))
 Tbs<-as.data.frame(t(Tbs))
 colnames(Tbs)<-'Tb'
@@ -484,7 +486,7 @@ with(desic, {points(desic~day, xlim=c(startdy,finishdy),ylim=c(0,25),xlab = "day
 
 with(plotenviron_night, {plot(TIME+2~JULDAY, xlim=c(startdy,finishdy),ylim=c(0,25),xlab = "day of year",ylab = "hour of day",cex=0.5,col=addTrans("dark grey",50),pch=16)})
 with(plotenviron_bask, {points(TIME~JULDAY, xlim=c(startdy,finishdy),ylim=c(0,25),xlab = "day of year",ylab = "hour of day",cex=1.,col=plotenviron_bask$Col,pch=15)})
-with(plotmetout, {points(grass/2~plotmetout$JULDAY, type = "h",col='blue')})
+with(plotmetout, {points(SOILMOIST3*10~plotmetout$JULDAY, type = "h",col='blue')})
 with(desic, {points(desic~day, xlim=c(startdy,finishdy),ylim=c(0,25),xlab = "day of year",ylab = "hour of day",lwd=2,pch=15,col='blue',type='l',lty=2)})
 
 
@@ -593,7 +595,7 @@ for(i in 1:121){
     write.table(sleepy,file = paste('/NicheMapR_Working/projects/sleepy lizards/waddle/',waddlefiles[i,3],sep=""),row.names=F,sep=",") 
   }
   curyear<-max(sleepy$Year,na.rm=TRUE)
-  if(curyear==2010){
+  if(curyear==2009){
     k<-k+1
     plotrainfall <- subset(rainfall,substr(dates,1,4)==curyear)
     plotenviron_bask <- subset(plotenviron3,  subset=(ACT>=1 & TC>=TBASK & substr(dates,1,4)==curyear))

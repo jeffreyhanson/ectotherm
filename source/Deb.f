@@ -193,7 +193,9 @@ c    check if first day of simulation
         MsM=orig_MsM
        endif
       endif
-       clutchsize=FLOOR(0.1696*(SVL(hour)/10)-16.855)
+
+c     for water pythons
+c       clutchsize=FLOOR(0.1696*(SVL(hour)/10)-16.855)
 c      clutch size below for sleepy lizards
       if(SVL(hour).lt.300)then
        clutchsize=1
@@ -267,6 +269,9 @@ c          grass=grass/fieldcap*10.
 c      endif
       
       X_food = grassgrowth(daycount)
+c      if(X_food.lt.wilting*100)then
+c        X_food=0
+c      endif
 
 c      if((grassgrowth(daycount).eq.0).and.(taloc(hour).ge.5))then
 c       X_food=0.05
@@ -288,11 +293,9 @@ C      clutchsize=1
 C     else
        clutchenergy = E_egg*clutchsize
 C     endif
-      if((cumbatch(hour)/clutchenergy).gt.1)then
-      MsM=0
-      else
-      MsM=orig_MsM
-      endif
+c      if((cumbatch(hour)/clutchenergy).gt.1)then
+c      X_food=0
+c      endif
       if(countday.eq.150)then
       continue
       endif
@@ -384,7 +387,7 @@ c    breedtempcum=7*24
 c     southern hemisphere        
         if(photostart.eq.1)then
          if((julday.eq.357).or.(firstday.eq.1))then
-         breeding=1
+          breeding=1
          endif
         endif
         if(photostart.eq.2)then
@@ -1032,6 +1035,7 @@ c       otherwise start it filling up
           stage=3
        endif
       endif
+
 
 c    if(dvdt.lt.0)then
 c     V(hour)=V_pres

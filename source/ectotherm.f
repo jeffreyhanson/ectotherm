@@ -2630,7 +2630,7 @@ c    endif
 c     too dehydrated for activity
         dehydrated=1
         If ((Burrow .eq. 'Y') .or. (Burrow .eq. 'y')) then
-         minnode=9
+         minnode=8
          shdburrow=0
          if(shdburrow.eq.1)then
           shade=maxshd

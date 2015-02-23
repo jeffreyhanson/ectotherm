@@ -373,11 +373,25 @@ library(lattice)
 svl_mat<-subset(debout,CUMREPRO>0)[1,11]
 age_mat<-subset(debout,CUMREPRO>0)[1,4]
 yearvect<-debout$DAY/365+debout$TIME/24/365
-with(debout, {plot(WETMASS~yearvect,type = "l",ylab = "wet mass (g)",col='blue',xlim=c(0,15),ylim=c(0,4000),main=ystart+ystrt)})
+with(debout, {plot(WETMASS~yearvect,type = "l",ylab = "wet mass (g)",col='blue',xlim=c(0,15),xlab='time (years)',ylim=c(0,4000),main=ystart+ystrt)})
 with(debout, {points(WETMASS_STD~yearvect,type = "l",ylab = "wet mass (g)",col='dark green',ylim=c(0,3000))})
+
+yearvect2<-seq(0,(20-1/365),1/365)
+
+
+points(grass$growth*10~yearvect2,type='l',col='brown')
+RAINFALL2<-rainfall[,2]
+points(RAINFALL2*2~yearvect2,type='h',col='light blue')
+if(ystrt==0){
+SVLS<-cbind(yearvect,debout$SVL/10)
+SVLmat<-subset(cbind(debout,yearvect),CUMREPRO>0)[1,]
+}else{
+SVLS<-cbind(SVLS,debout$SVL/10)
+SVLmat<-rbind(SVLmat,subset(cbind(debout,yearvect),CUMREPRO>0)[1,])
+}
 with(debout, {plot((SVL/10)~yearvect,type = "l",ylab = "SVL (cm)",col='red',ylim=c(0,210))})
 mat<-subset(cbind(debout,yearvect),CUMREPRO>0)[1,]
-with(mat, {points((SVL/10)~yearvect,type = "p",cex=2,pch=19,ylab = "SVL (cm)",col='red',ylim=c(0,210))})
+with(mat, {points((SVL/10)~yearvect,type = "p",cex=2,pch=19,ylab = "SVL (cm)",xlab='time (years)',col='red',ylim=c(0,210))})
 
 #points(as.numeric(ISOdate(2007,1,1,tz=tzone)),3000,type='h',lty=2)
 #points(as.numeric(ISOdate(1998,1,1,tz=tzone)),3000,type='h',lty=2)
@@ -396,6 +410,14 @@ yearsout_loop<-yearsout
 
 } # end loop through years
 
+XX3<-ratfun(seq(1,365*20,365))
+plot(SVLS[,2]~SVLS[,1],type = "l",ylab = "SVL (cm)",xlab="age (years)",col='red',ylim=c(70,210),xlim=c(0,12))
+points((SVLmat[1,11]/10)~SVLmat[1,22],type = "p",cex=1.5,pch=19,ylab = "SVL (cm)",xlab='time (years)',col='black',ylim=c(0,210))
+for(i in 2:20){
+  points(SVLS[,i+1]~SVLS[,1],type = "l",ylab = "SVL (cm)",col='red',ylim=c(0,210))
+  points((SVLmat[i,11]/10)~SVLmat[i,22],type = "p",cex=1.5,pch=19,ylab = "SVL (cm)",xlab='time (years)',col='black',ylim=c(0,210))
+  
+}
 head(subset(debout,CUMREPRO>0))
 
 
