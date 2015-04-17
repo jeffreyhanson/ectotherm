@@ -311,7 +311,7 @@ stage<-3
 ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
 mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
-wilting<-1
+wilting<-1 # redundant
 ystrt<-0
 
 #set up call to NicheMapR function
