@@ -3689,11 +3689,12 @@ c    have TC, now call DEB model to get next hour's V, E, mass and repro (but do
         H2O_URINE=NWASTE(ihour)/PTUREA-NWASTE(ihour)
         URINEFLUX=NWASTE(ihour)/PTUREA
        endif
-       if(grassgrowth(daycount).eq.0)then
+       if(grassgrowth(daycount).lt.0)then
         FoodWaterCur=0.
        else
         FoodWaterCur=FoodWater
        endif
+       FoodWaterCur=grassgrowth(daycount)
        if(FoodWaterCur.eq.0)then
         H2O_FREE=0.
         WETFOODFLUX=dryfood(ihour)

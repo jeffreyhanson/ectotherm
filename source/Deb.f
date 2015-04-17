@@ -196,10 +196,12 @@ c    check if first day of simulation
 
 c     for water pythons
 c       clutchsize=FLOOR(0.1696*(SVL(hour)/10)-16.855)
+c     for snow skinks
+       clutchsize=FLOOR(0.1574*SVL(hour)-6.3066)
 c      clutch size below for sleepy lizards
-      if(SVL(hour).lt.300)then
-       clutchsize=1
-      endif
+c      if(SVL(hour).lt.300)then
+c       clutchsize=1
+c      endif
       
       if((daycount.lt.startday).or.((countday.lt.startday).and.
      &    (v_init.le.3e-9)).or.(deadead.eq.1))then
@@ -268,7 +270,7 @@ c      else
 c          grass=grass/fieldcap*10.
 c      endif
       
-      X_food = grassgrowth(daycount)
+c      X_food = grassgrowth(daycount)
 c      if(X_food.lt.wilting*100)then
 c        X_food=0
 c      endif

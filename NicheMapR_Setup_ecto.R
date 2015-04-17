@@ -1,6 +1,6 @@
 NicheMapR_ecto <- function(niche) {
   
-  
+  vlsci<-0
   if(lometry==3){
     shape_a<-1.
     shape_b<-1.
@@ -29,7 +29,7 @@ NicheMapR_ecto <- function(niche) {
   
   wetlandTemps=matrix(data = 0., nrow = 24*7300, ncol = 1)
   wetlandDepths=matrix(data = 0., nrow = 24*7300, ncol = 1)
-  
+  if(vlsci==0){
   cat('reading microclimate input \n')
   metout<-read.csv(file=paste(microin,'metout.csv',sep=""),sep=",")[,-1]
   shadmet<-read.csv(file=paste(microin,'shadmet.csv',sep=""),sep=",")[,-1]
@@ -68,7 +68,7 @@ NicheMapR_ecto <- function(niche) {
   soil.names<-c("JULDAY","TIME",paste("D",DEP,"cm", sep = ""))
   colnames(soil)<-soil.names
   colnames(shadsoil)<-soil.names
-  
+  } # end vlsci check
   # habitat
   ALT<-ectoin[1] # altitude (m)
   OBJDIS<-1.0 # distance from object (e.g. bush)
@@ -165,15 +165,28 @@ NicheMapR_ecto <- function(niche) {
   etaO<-matrix(c(yXE/mu_E*-1,0,1/mu_E,yPE/mu_E,0,0,-1/mu_E,0,0,yVE/mu_E,-1/mu_E,0),nrow=4)
   w_N<-CHON%*%N_waste
   
-    wilting<-ectoin[6] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
+    #wilting<-ectoin[6] # %vol, water content at 15ba = 1500kPa (wiki for thresholds)
 
   lat<-ectoin[4]
+  if(soilmoisture==1){
   grassgrowths<-as.data.frame(metout)
   grassgrowths<-subset(grassgrowths,TIME==720)
   grassgrowths<-grassgrowths[,9]
-  grassgrowths[grassgrowths<wilting]<-0
-  grassgrowths<-as.numeric(grassgrowths)*2*X#rep(X,timeinterval*nyears)#
-  grasstsdms<-as.numeric(grassgrowths)*2*X#rep(X,timeinterval*nyears)#
+  grassgrowths[grassgrowths>wilting]<-FoodWater
+  minmoist<-min(grassgrowths[grassgrowths<FoodWater])
+  grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater
+  grassgrowths<-grassgrowths/100
+  grasstsdms<-grassgrowths
+  #minmoist<-min(grassgrowths)
+  #grassgrowths<-(as.numeric(grassgrowths)-minmoist)
+  #maxmoist<-max(grassgrowths)
+  #grassgrowths[grassgrowths<wilting]<-0
+  #grassgrowths<-grassgrowths/maxmoist*X#rep(X,timeinterval*nyears)#
+  #grasstsdms<-grassgrowths/maxmoist*X#rep(X,timeinterval*nyears)#
+  }else{
+    grassgrowths<-rep(FoodWater,nrow(metout))
+    grasstsdms<-grassgrowths
+  }
   julstart<-metout[1,2]
   tannul<-as.numeric(metout[1,11])
   monthly<-0
@@ -197,6 +210,7 @@ NicheMapR_ecto <- function(niche) {
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,eggmass,batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,svl_met,frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
   
+  origjulday<-metout[,1]
   if(ystrt>0){
     metout<-rbind(metout[((ystrt)*365*24+1):(20*365*24),],metout[1:((ystrt)*365*24),])
     shadmet<-rbind(shadmet[((ystrt)*365*24+1):(20*365*24),],shadmet[1:((ystrt)*365*24),])
@@ -206,6 +220,10 @@ NicheMapR_ecto <- function(niche) {
     RAINFALL<-c(RAINFALL[((ystrt)*365+1):(20*365)],RAINFALL[1:((ystrt)*365)])
     grassgrowths<-c(grassgrowths[((ystrt)*365+1):(20*365)],grassgrowths[1:((ystrt)*365)])
   }
+  metout[,1]<-origjulday
+  shadmet[,1]<-origjulday
+  soil[,1]<-origjulday
+  shadsoil[,1]<-origjulday
   
   if(write_input==1){
     cat('writing input csv files \n')
@@ -230,10 +248,15 @@ NicheMapR_ecto <- function(niche) {
   }
   
   ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
+  if(vlsci==1){
+    setwd("/vlsci/VR0212/shared/NicheMapR_Working/ectotherm")
+    source('NicheMapR_ecto.R')
+  }else{
   if(mac==1){
     source('NicheMapR_ecto_mac.R') 
   }else{
     source('NicheMapR_ecto.R') 
+  }
   }
   cat('running ectotherm model ... \n')
   

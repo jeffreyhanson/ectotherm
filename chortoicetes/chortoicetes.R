@@ -12,6 +12,13 @@ file.copy('/git/micro_australia/metout.csv','metout.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadmet.csv','shadmet.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/soil.csv','soil.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadsoil.csv','shadsoil.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/soilpot.csv','soilpot.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/humid.csv','humid.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/soilmoist.csv','soilmoist.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/shadpot.csv','shadpot.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/shadhumid.csv','shadhumid.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/shadpot.csv','shadpot.csv',overwrite=TRUE)
+
 file.copy('/git/micro_australia/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/DEP.csv','DEP.csv',overwrite=TRUE)
@@ -304,9 +311,11 @@ stage<-3
 ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
 mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
+wilting<-1
+ystrt<-0
 
 #set up call to NicheMapR function
-niche<-list(soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+niche<-list(wilting=wilting,ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -360,18 +369,20 @@ colnames(rainfall)<-c("dates","rainfall")
 ############### plot results ######################
 library(lattice)
 
-#with(metout, {plot(SOILMOIST~dates,type='l',col='light blue')})
-#with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
+
 
 # grass presence vector
-grass<-metout$SOILMOIST
-grassthresh<-as.single(read.csv('ectoin.csv')[6,2])+1
-grassthresh<-5
+soilpot<-read.csv(file=paste(microin,'soilpot.csv',sep=""),sep=",")
+soilmoist<-read.csv(file=paste(microin,'soilmoist.csv',sep=""),sep=",")
+grass<-soilpot$PT5cm
+grassthresh<--1500
 grass[grass<=grassthresh]<-0
 grass2<-grass
-grass2[grass2>0]<-1
+grass2[grass2>grassthresh & grass2<0]<-1
 
-#plot(grass~metout$dates,type='l',col='dark green')
+with(soilmoist, {plot(WC3cm~dates,type='l',col='light blue')})
+with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
+plot(grass2~metout$dates,type='l',col='dark green')
 
 recover<-7 # time locust needs to build up resources to lay first batch
 ovidates<-as.data.frame(cbind(grass2[1:(length(grass2)-1)],grass2[2:length(grass2)]))
@@ -389,7 +400,7 @@ ovirows<-rbind(c(0,recover),ovirows) # add first day of sim as an oviposition da
 
 ############### chortoicetes egg model #############
 
-DATA1<-cbind(soil[,1:7],metout[,13:14],environ[,17],metout[,11])
+DATA1<-cbind(soil[,1:7],metout[,13:14],environ[,17],soilmoist[,4]*100)
 colnames(DATA1)<-c('DATE','JULDAY','TIME','D0cm','D2_5cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST')
 
 # if photo period (DATA%PHOTO) < 13 and decreasing during egg lay, then make diapause egg 
@@ -798,12 +809,12 @@ dim(stagefreq)<-c(nrow(DATA1),length(stagefreqnames))
 hatchings<-gethatch(ovirows, stagefreq)
 hatchdates<-hatchings$hatchdates
 dev1<-as.data.frame(hatchings$devs)
-plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
+plot(grass2/10~environ$dates,type='l',col='green',ylim=c(0,1))
 points(dev1$dev1~dev1$dates,type='p',col='blue',cex=0.1)
 generations<-getgen(hatchdates, hatchings$stagefreq)
 reprodates1<-generations$reprodates
 gens1<-generations$gens
-plot(grass/100~environ$dates,type='l',col='green',ylim=c(0,1))
+plot(grass2/10~environ$dates,type='l',col='green',ylim=c(0,1))
 points(gens1$mass/55~gens1$dates,type='p',col='orange',cex=0.1)
 
 hatchings2<-gethatch(cbind(0,reprodates1), generations$stagefreq)

@@ -2,7 +2,7 @@
 
 setwd("source/") # set the working directory where the fortran program is
 cmnd<- "rcmd SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Funskin.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f "
-#R CMD SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f
+#      R CMD SHLIB ectotherm.f Aboveground.f Allom.f ANCORR.f Belowground.f BURROWIN.f COND.f CONFAC.f Deb_baby.f DRYAIR.f Dsub.f Fun.f Funskin.f Gear.f JAC.f Met.f Osub.f RADIN.f RADOUT.f Resp.f Seldep.f Sevap.f SHADEADJUST.f Solar.f Thermo~1.f Timcon.f Traphr.f VAPPRS.f WATER.f WETAIR.f ZBRAC.f ZBRENT.f CONV.f Breed.f DEVRESET.f Wings.f Trapzd.f Wing_Solar.f Rytrec.f QTRAP.f Qromb.f Polint.f Parect.f Func.f Btrflalom.f Adjrec.f funwing.f ZBRACwing.f ZBRENTwing.f Deb_insect.f Deb.f
 system(cmnd) # run the compilation
 file.copy('ectotherm.dll','../ectotherm.dll',overwrite=TRUE)
 setwd("..")
@@ -89,7 +89,7 @@ TMINPR<-26. # degrees C, voluntary thermal minimum (lower body temperature for f
 TBASK<-26. # degrees C, minimum basking temperature (14. deg C, Fraser 1985 thesis, min of A in Fig. 7.3)
 TEMERGE<-8.5 # degrees C, temperature at which animal will move to a basking site
 ctmax<-43.  # degrees C, critical thermal maximum (animal will die if ctkill = 1 and this threshold is exceeded)
-ctmin<-3.1 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
+ctmin<-3.5 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
 ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
 ctkill<-0 #if 1, animal dies when it hits critical thermal limits
 TPREF<-33.5 # preferred body temperature (animal will attempt to regulate as close to this value as possible)
@@ -141,7 +141,7 @@ DEB<-1 # run the DEB model (1) or just heat balance, using allometric respiratio
 # run so that metabolic heat generation and respiratory water loss can be calculated.
 # Metabolic rate, MR (ml O2/h, STP) at a given body mass (g) and body temperature, Tb (deg C)
 # MR=MR1*M^MR2*10^(MR3*Tb) based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
-amass<-20. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
+amass<-300. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
 MR_1<-0.013
 MR_2<-0.8
 MR_3<-0.038
@@ -171,7 +171,7 @@ svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
 p_Am<-v_dotref*E_m
-K<-500#p_Am/p_Xm # half-saturation constant
+K<-1#p_Am/p_Xm # half-saturation constant
 X<-11.7#3#11.7 # max food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
 wilting<-0.11
 
@@ -267,7 +267,7 @@ daylengthstart<- 12.5 # threshold daylength for initiating breeding
 daylengthfinish<- 13. # threshold daylength for terminating breeding
 photodirs <- 1 # is the start daylength trigger during a decrease (0) or increase (1) in day length?
 photodirf <- 0 # is the finish daylength trigger during a decrease (0) or increase (1) in day length?
-startday<-1 # make it 90 for T. rugosa loop day of year at which DEB model starts
+startday<-90 # make it 90 for T. rugosa loop day of year at which DEB model starts
 breedtempthresh<-200 # body temperature threshold below which breeding will occur
 breedtempcum<-24*7 # cumulative time below temperature threshold for breeding that will trigger breeding
 
@@ -297,10 +297,10 @@ v_init<-(3.82^3)*fract^3 #hatchling
 E_init<-E_m
 E_H_init<-E_Hb+5
 stage<-1
-v_init<-(7.063^3)*fract^3*0.85
-E_init<-E_m
-E_H_init<-E_Hp+1
-stage<-3
+# v_init<-(7.063^3)*fract^3*0.85
+# E_init<-E_m
+# E_H_init<-E_Hp+1
+# stage<-3
 
 # mortality rates
 ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
@@ -689,13 +689,13 @@ for(i in 1:121){
     
     
     lm_Tb<-with(correl2,(lm(Tb_pred~Tb_obs)))
-    #with(correl2,(plot(Tb_pred~Tb_obs)))
-    #abline(1,1)
+    with(correl2,(plot(Tb_pred~Tb_obs)))
+    abline(1,1)
     lm_Tb_R2<-summary(lm_Tb)$r.squared
     lm_Tb_rmsd<-sqrt(mean(((correl2$Tb_obs-correl2$Tb_pred)^2),na.rm=TRUE))
-    #text(11,40,paste("r2=",round(lm_Tb_R2,2),"\n","rmsd=",round(lm_Tb_rmsd,2),sep=""))
-    #act.obs<-ifelse(correl2$steps>threshold.act,1,0)
-    #act.pred<-ifelse(correl2$act>0,1,0)
+    
+    act.obs<-ifelse(correl2$steps>threshold.act,1,0)
+    act.pred<-ifelse(correl2$act>0,1,0)
     #confus<-confusion(act.pred,act.obs)
     confus<-confusion(act.obs,act.pred)
     
@@ -736,8 +736,7 @@ for(i in 1:121){
     pdf(filename,paper="A4r",width=15,height=11) # doing this means you're going to make a pdf - comment this line out if you want to see them in R
     par(mfrow = c(2,2)) # set up for 5 plots in 2 columns
     par(oma = c(2,2,2,2) + 0.1) # margin spacing stuff
-    par(mar = c(3,3,1,1) + 0.1) # margin spacing stuff 
-    par(mgp = c(3,1,0) ) # margin spacing stuff 
+    par(mar = c(2,2,2,2) + 0.1) # margin spacing stuff 
     # layout(matrix(c(1,2,3,4), 2, 2, byrow = TRUE),
     #        widths = c(lcm(10),lcm(10)), heights = c(lcm(8),lcm(8)))
     startdy<-240
@@ -829,24 +828,17 @@ for(i in 1:121){
     plotpred<-subset(environ, format(environ$dates, "%y/%m/%d")>= daystart & format(environ$dates, "%y/%m/%d")<=dayfin)
     plotdeb<-subset(debout, format(debout$dates, "%y/%m/%d")>= daystart & format(environ$dates, "%y/%m/%d")<=dayfin)
     plotmetout<-subset(metout, format(metout$dates, "%y/%m/%d")>= daystart & format(metout$dates, "%y/%m/%d")<=dayfin)
-#    with(plotpred, {plot(TC~dates,type = "l",ylim=c(0,40))})
+    with(plotpred, {plot(TC~dates,type = "l",ylim=c(0,40))})
     #with(plotmetout, {points(TAREF~dates,type = "l",col='grey')})
     plotlizard2<-plotlizard
     colnames(plotlizard2)[1] <- "dates"
     plotlizard2<-merge(plotlizard2,plotpred,all=TRUE) # merge to avoid continuous line between sample gaps
-#    with(plotlizard2, {points(Temperature~dates,type = "l",col=addTrans("red",150))})
-#    with(plotdeb, {points(Body_cond~dates,type = "l",col='blue',lty=2,lwd=2)})
-#    with(plotrainfall2, {points(RAINFALL~dates, type = "h",col='blue')})
+    with(plotlizard2, {points(Temperature~dates,type = "l",col=addTrans("red",150))})
+    with(plotdeb, {points(Body_cond~dates,type = "l",col='blue',lty=2,lwd=2)})
+    with(plotrainfall2, {points(RAINFALL~dates, type = "h",col='blue')})
     #with(plotgrass, {points(growth~dates, type = "l",col='dark green')})
-#    with(plotenviron, {points(CONDEP~dates, type = "l",col='light blue')})
+    with(plotenviron, {points(CONDEP~dates, type = "l",col='light blue')})
     
-    with(correl2,(plot(Tb_pred~Tb_obs,ylim=c(0,40),xlim=c(0,40))))
-    abline(1,1)
-    #lm_Tb_R2<-summary(lm_Tb)$r.squared
-    #lm_Tb_rmsd<-sqrt(mean(((correl2$Tb_obs-correl2$Tb_pred)^2),na.rm=TRUE))
-    text(11,40,paste("r2=",round(lm_Tb_R2,2),"\n","rmsd=",round(lm_Tb_rmsd,2),sep=""))
-    act.obs<-ifelse(correl2$steps>threshold.act,1,0)
-    act.pred<-ifelse(correl2$act>0,1,0)  
     title(main=paste(sleepy_id," sex=",sexliz$Sex," ",curyear,sep=" "),outer=T)
     dev.off()
     

@@ -26,6 +26,13 @@ file.copy('/git/micro_australia/MAXSHADES.csv','MAXSHADES.csv',overwrite=TRUE)
 # file.copy('/git/micro_global/DEP.csv','DEP.csv',overwrite=TRUE)
 # file.copy('/git/micro_global/MAXSHADES.csv','MAXSHADES.csv',overwrite=TRUE)
 
+field_Tb<-as.data.frame(read.csv('c:/NicheMapR_Working/projects/alpine skinks/Zak_guthega_Tb.csv',stringsAsFactors=FALSE))
+field_Tb$Liz.TB<-as.numeric(field_Tb$Liz.TB)
+active_Tb<-subset(field_Tb,Lizard.position=='exp' | Lizard.position=='Exposed')
+hist(active_Tb$Liz.TB,plot=TRUE)
+
+for(mindepth in 2:9){
+
 microin<-"" # subfolder containing the microclimate input data
 
 # simulation settings
@@ -84,14 +91,14 @@ phimax<- phi # degrees, max wing angle (90 = vertical relative to body)
 phimin<- phi # degrees, min wing angle (90 = vertical relative to body
 
 # physiological traits
-TMAXPR<-34.2 #34 ** degrees C, voluntary thermal maximum (upper body temperature for foraging) max field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TMINPR<-23.9 #26.0 # ** degrees C, voluntary thermal minimum (lower body temperature for foraging) min lab gradient Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TBASK<-17.4#26.#23.1 # degrees C, minimum basking temperature, min field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TEMERGE<-15 # degrees C, temperature at which animal will move to a basking site *based on Kerr and Bull 2004
+TMAXPR<-36.3 #34 ** degrees C, voluntary thermal maximum (upper body temperature for foraging) max field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
+TMINPR<-25 #26.0 # ** degrees C, voluntary thermal minimum (lower body temperature for foraging) min lab gradient Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
+TBASK<-14.6#26.#23.1 # degrees C, minimum basking temperature, min field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
+TEMERGE<-10 # degrees C, temperature at which animal will move to a basking site *based on Kerr and Bull 2004
 ctmax<-39.8 # ** degrees C, critical thermal maximum (used by program to determine depth selected when inactive and burrowing) Spellerberg 1972 Temperature tolerances of southeast Australian reptiles examined in relation to reptile thermoregulatory behaviour and distribution. Oecologia (Berl.) 9:23-46.
-ctmin<-4.0 # ** degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing) Spellerberg 1972 Temperature tolerances of southeast Australian reptiles examined in relation to reptile thermoregulatory behaviour and distribution. Oecologia (Berl.) 9:23-46.
+ctmin<-3.2 # ** degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing) Spellerberg 1972 Temperature tolerances of southeast Australian reptiles examined in relation to reptile thermoregulatory behaviour and distribution. Oecologia (Berl.) 9:23-46.
 ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
-ctkill<-1 #if 1, animal dies when it hits critical thermal limits
+ctkill<-0 #if 1, animal dies when it hits critical thermal limits
 TPREF<-30.0 # ** preferred body temperature (animal will attempt to regulate as close to this value as possible) Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
 skinwet<-0.1#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
@@ -109,8 +116,10 @@ nocturn<-0 # nocturnal activity allowed (1) or not (0)?
 crepus<-0 # crepuscular activity allowed (1) or not (0)?
 burrow<-1 # shelter in burrow allowed (1) or not (0)?
 shdburrow<-0 #
-mindepth<-2 # minimum depth (soil node) to which animal can retreat if burrowing
-maxdepth<-10 # maximum depth (soil node) to which animal can retreat if burrowing
+#mindepth<-7 # minimum depth (soil node) to which animal can retreat if burrowing
+maxdepth<-mindepth # maximum depth (soil node) to which animal can retreat if burrowing
+#     mindepth<-2
+#   maxdepth<-10
 CkGrShad<-1 # shade seeking allowed (1) or not (0)?
 climb<-0 # climbing to seek cooler habitats allowed (1) or not (0)?
 fosorial<-0 # fossorial activity (1) or not (0)
@@ -306,8 +315,10 @@ ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
 mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
 wilting<-1
+ystrt<-0
 #set up call to NicheMapR function
-niche<-list(wilting=wilting,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+
+niche<-list(ystrt=ystrt,wilting=wilting,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -350,17 +361,22 @@ metout<-cbind(dates,metout)
 shadsoil<-cbind(dates,shadsoil)
 shadmet<-cbind(dates,shadmet)
 
-dates2<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="days") 
-dates2<-subset(dates2, format(dates2, "%m/%d")!= "02/29") # remove leap years
-grass<-cbind(dates2,grassgrowths,grasstsdms)
-colnames(grass)<-c("dates","growth","tsdm")
-rainfall<-as.data.frame(cbind(dates2,rainfall))
-colnames(rainfall)<-c("dates","rainfall")
+#dates2<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="days") 
+#dates2<-subset(dates2, format(dates2, "%m/%d")!= "02/29") # remove leap years
+#grass<-cbind(dates2,grassgrowths,grasstsdms)
+#colnames(grass)<-c("dates","growth","tsdm")
+#rainfall<-as.data.frame(cbind(dates2,rainfall))
+#colnames(rainfall)<-c("dates","rainfall")
 
 
 ############### plot results ######################
 library(lattice)
 
+filename<-paste("c:/git/ectotherm/",colnames(soil)[mindepth+3],".pdf",sep="")
+  #filename<-paste("c:/git/ectotherm/D1.5_200cm.pdf",sep="")
+pdf(filename,paper="A4r",width=15,height=11) # doing this means you're going to make a pdf - comment this line out if you want to see them in R
+par(mfrow=c(2,1))
+par(mar = c(2,2,1,2) + 0.1) # margin spacing stuff 
 
 plotenviron<-subset(environ,YEAR==1)
 forage<-subset(plotenviron,ACT==2)
@@ -370,20 +386,29 @@ with(night,plot(TIME/60~JULDAY,pch=15,cex=2,ylab='hour of day',ylim=c(0,23),xlab
 with(forage,points((TIME-1)~JULDAY,pch=15,cex=2,col='grey'))
 with(plotenviron, plot(TC~dates,ylim=c(-15,40),type = "l"))
 
-with(plotenviron, plot(TC~dates,ylim=c(0,40),type = "l",col='grey'))
-abline(TMAXPR,0,lty=2,col='red',lwd=2)
-abline(TMINPR,0,lty=2,col='blue',lwd=2)
-abline(ctmin,0,lty=2,col='cyan',lwd=2)
-abline(TPREF,0,lty=2,col='orange',lwd=2)
+#with(plotenviron, plot(TC~dates,ylim=c(-10,40),type = "l",col='grey'))
+#abline(TMAXPR,0,lty=2,col='red',lwd=2)
+#abline(TMINPR,0,lty=2,col='blue',lwd=2)
+#abline(ctmin,0,lty=2,col='cyan',lwd=2)
+#abline(TPREF,0,lty=2,col='orange',lwd=2)
 
-with(plotenviron, points(ACT*5~dates,type = "l",col="orange"))
-with(plotenviron, points(SHADE/10~dates,type = "l",col="green"))
+#with(plotenviron, points(ACT*5~dates,type = "l",col="orange"))
+#with(plotenviron, points(SHADE/10~dates,type = "l",col="green"))
 with(plotenviron, points(DEP/10~dates,type = "l",col="brown"))
 #with(metout, points(TAREF~dates,type = "l",col="blue"))
 abline(TMAXPR,0,lty=2,col='red',lwd=2)
 abline(TMINPR,0,lty=2,col='blue',lwd=2)
 abline(ctmin,0,lty=2,col='cyan',lwd=2)
 abline(TPREF,0,lty=2,col='orange',lwd=2)
+
+dev.off()
+  
+  write.csv(environ,paste(colnames(soil)[mindepth+3],"_environ.csv",sep=""))
+  #write.csv(environ,"D1.5_200cm_environ.csv")
+
+}
+    write.csv(metout,"metout.csv")
+      write.csv(soil,"soil.csv")
 
 brks<-c(seq(19.25,38.75,1.5))
 julTC<-subset(plotenviron,format(environ$dates,'%m')=="07")

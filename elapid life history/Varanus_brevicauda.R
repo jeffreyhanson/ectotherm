@@ -45,7 +45,7 @@ FLTYPE<-0.0  # fluid type 0.0=air, 1.0=water
 SUBTK<-2.79 # substrate thermal conductivity (W/mC)
 soilnode<-4. # soil node at which eggs are laid (overridden if frogbreed is 1)
 minshade<-0. # minimum available shade (percent)
-maxshade<-90. # maximum available shade (percent)
+maxshade<-70. # maximum available shade (percent)
 REFL<-rep(0.18,timeinterval*nyears) # substrate reflectances 
 
 # morphological traits
@@ -61,14 +61,14 @@ lometry<-3 # organism shape (see above)
 customallom<-c(10.4713,.688,0.425,0.85,3.798,.683,0.694,.743) # custom allometry coefficients (see above)
 shape_a<-1. 
 shape_b<-3
-shape_c<-3
+shape_c<-0.6666666667
 Flshcond<-0.5 # W/mC, thermal conductivity of flesh (range: 0.412-2.8 )
 Spheat<-4185 # J/(kg-K), specific heat of flesh
 Andens<-1000 # kg/m3, density of flesh
-ABSMAX<-0.85 # ** decimal %, maximum solar absorptivity 
-ABSMIN<-0.85 # ** decimal %, maximum solar absorptivity 
+ABSMAX<-0.866 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
+ABSMIN<-0.866 # ** decimal %, maximum solar absorptivity (Christian, K.A., Bedford, G.S. & Shannahan, S.T. (1996) Solar absorptance of some Australian lizards and its relationship to temperature. Australian Journal of Zoology, 44.)
 EMISAN<-1. # emissivity of animal
-ptcond<-0.33 # decimal % of surface contacting the substrate
+ptcond<-0.1 # decimal % of surface contacting the substrate
 FATOSK<-0.4 # configuration factor to sky
 FATOSB<-0.4 # configuration factor to substrate
 
@@ -84,22 +84,22 @@ phimax<- phi # degrees, max wing angle (90 = vertical relative to body)
 phimin<- phi # degrees, min wing angle (90 = vertical relative to body
 
 # physiological traits
-TMAXPR<-34.2 #34 ** degrees C, voluntary thermal maximum (upper body temperature for foraging) max field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TMINPR<-23.9 #26.0 # ** degrees C, voluntary thermal minimum (lower body temperature for foraging) min lab gradient Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TBASK<-17.4#26.#23.1 # degrees C, minimum basking temperature, min field active Tb Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
-TEMERGE<-15 # degrees C, temperature at which animal will move to a basking site *based on Kerr and Bull 2004
-ctmax<-39.8 # ** degrees C, critical thermal maximum (used by program to determine depth selected when inactive and burrowing) Spellerberg 1972 Temperature tolerances of southeast Australian reptiles examined in relation to reptile thermoregulatory behaviour and distribution. Oecologia (Berl.) 9:23-46.
-ctmin<-4.0 # ** degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing) Spellerberg 1972 Temperature tolerances of southeast Australian reptiles examined in relation to reptile thermoregulatory behaviour and distribution. Oecologia (Berl.) 9:23-46.
+TMAXPR<-39.8 # degrees C, voluntary thermal maximum (upper body temperature for foraging and also burrow depth selection) # Licht 1966 thermal gradient
+TMINPR<-32.4 # degrees C, voluntary thermal minimum (lower body temperature for foraging) # Kearney Obs (PhD field trip)
+TBASK<-20.0 # degrees C, minimum basking temperature (14. deg C, Fraser 1985 thesis, min of A in Fig. 7.3)
+TEMERGE<-8.5 # degrees C, temperature at which animal will move to a basking site
+ctmax<-43.  # degrees C, critical thermal maximum (animal will die if ctkill = 1 and this threshold is exceeded)
+ctmin<-1 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
 ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
-ctkill<-1 #if 1, animal dies when it hits critical thermal limits
-TPREF<-30.0 # ** preferred body temperature (animal will attempt to regulate as close to this value as possible) Spellerberg, I. F. 1972. Thermal Ecology of Allopatric Lizards (Sphenomorphus) in Southeast Australia. II. Physiological Aspects of Thermoregulation. Oecologia 9:385-398.
+ctkill<-0 #if 1, animal dies when it hits critical thermal limits
+TPREF<-37. # preferred body temperature (animal will attempt to regulate as close to this value as possible) # Licht 1966 thermal gradient
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
-skinwet<-0.1#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
+skinwet<-0.1 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
 extref<-20. # %, oxygen extraction efficiency (need to check, but based on 35 deg C for a number of reptiles, from Perry, S.F., 1992. Gas exchange strategies in reptiles and the origin of the avian lung. In: Wood, S.C., Weber, R.E., Hargens, A.R., Millard, R.W. (Eds.), Physiological Adaptations in Vertebrates: Respiration, Circulation, andMetabo -  lism. Marcel Dekker, Inc., New York, pp. 149-167.)
 PFEWAT<-73. # %, fecal water (from Shine's thesis, mixed diet 75% clover, 25% mealworms)
 PTUREA<-0. # %, water in excreted nitrogenous waste
 FoodWater<-82#82 # 82%, water content of food (from Shine's thesis, clover)
-minwater<-10 # %, minimum tolerated dehydration (% of wet mass) - prohibits foraging if greater than this
+minwater<-15 # %, minimum tolerated dehydration (% of wet mass) - prohibits foraging if greater than this
 raindrink<-0. # daily rainfall (mm) required for animal to rehydrate from drinking (zero means standing water always available)
 gutfill<-75. # % gut fill at which satiation occurs - if greater than 100%, animal always tries to forage
 
@@ -108,7 +108,7 @@ dayact<-1 # diurnal activity allowed (1) or not (0)?
 nocturn<-0 # nocturnal activity allowed (1) or not (0)?
 crepus<-0 # crepuscular activity allowed (1) or not (0)?
 burrow<-1 # shelter in burrow allowed (1) or not (0)?
-shdburrow<-0 #
+shdburrow<-1 #
 mindepth<-2 # minimum depth (soil node) to which animal can retreat if burrowing
 maxdepth<-10 # maximum depth (soil node) to which animal can retreat if burrowing
 CkGrShad<-1 # shade seeking allowed (1) or not (0)?
@@ -120,7 +120,6 @@ breedactthresh<-1 # threshold numbers of hours active after start of breeding se
 flyer<-0 # does the animal fly?
 flyspeed<-5 # flying speed, m/s
 flymetab<-0.1035 # flight metabolic excess, w/g
-
 
 # containter simulation settings
 container<-0 # run the container model? (aquatic start of life cycle, e.g. frog or mosquito)
@@ -136,13 +135,13 @@ wetmod<-0 # run the wetland model?
 soilmoisture<-0 # run the soil moisture model? (models near-surface soil moisture rather than a pond as a function of field capacity and wilting point)
 
 # which energy budget model to use? 
-DEB<-0 # run the DEB model (1) or just heat balance, using allometric respiration below (0)
+DEB<-1 # run the DEB model (1) or just heat balance, using allometric respiration below (0)
 
 # parameters for allometric model of respiration, for use in heat budget when DEB model is not
 # run so that metabolic heat generation and respiratory water loss can be calculated.
 # Metabolic rate, MR (ml O2/h, STP) at a given body mass (g) and body temperature, Tb (deg C)
 # MR=MR1*M^MR2*10^(MR3*Tb) based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
-amass<-40 # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
+amass<-10. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
 MR_1<-0.013
 MR_2<-0.8
 MR_3<-0.038
@@ -152,27 +151,27 @@ MR_3<-0.038
 fract<-1
 f<-1.
 MsM<-186.03*6. # J/cm3 produces a stomach volume of 5.3 cm3/100 g, as measured for Disosaurus dorsalis, adjusted for Egernia cunninghami
-z<-1.235*fract
-delta<- 0.2977
+z<-2.447*fract
+delta<- 0.2397
 kappa_X<-0.85#0.85
-v_dotref<-0.05868/24.
-kappa<-0.9415 
-p_Mref<-47.26/24.
-E_G<-7536
+v_dotref<-0.03043/24.
+kappa<-0.4795 
+p_Mref<-9.067/24.
+E_G<-7865
 k_R<-0.95
-k_J<-0.00628/24.
-E_Hb<-280.6*fract^3
+k_J<-0.001153/24.
+E_Hb<-1.36e+04*fract^3
 E_Hj<-E_Hb*fract^3
-E_Hp<-567*fract^3
-h_aref<-4.502e-07/(24.^2) #3.61e-11/(24.^2) 
+E_Hp<-3.867e+04*fract^3
+h_aref<-4.548e-10/(24.^2) #3.61e-11/(24.^2) 
 s_G<-0.01
 
-E_Egg<-6425*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
+E_Egg<-3.139e+04*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
 svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
 K<-0.01 # half-saturation constant
-X<-10 # food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
+X<-1000 # food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
 
 # for insect model
 metab_mode<-0 # 0 = off, 1 = holometabolous with Dyar's rule scaling, 2 = holometabolous linear scaling, 3 = hemimetabolous with Dyar's rule scaling, 4 = hemimetabolous linear scaling
@@ -184,11 +183,11 @@ gam<-1.6
 
 # these next five parameters control the thermal response, effectively generating a thermal response curve
 T_REF<-20 # degrees C, reference temperature - correction factor is 1 for this temperature
-TA<-7130
-TAL<-5.305e+04
-TAH<-9.076e+04
-TL<-288.
-TH<-315.
+TA<-9000
+TAL<-5.e+04
+TAH<-9.e+04
+TL<-273+5.
+TH<-273+40.
 
 # life-stage specific parameters
 arrhenius<-matrix(data = 0, nrow = 8, ncol = 5)
@@ -251,9 +250,9 @@ nP<-c(1,1.8,0.5,.15) # composition of product/faeces (atoms per carbon atoms for
 N_waste<-c(1,4/5,3/5,4/5) # chemical formula for nitrogenous waste product, CHON, e.g. Urea c(0,3,0,1), Uric acid c(5/5,4,3,4)
 
 # breeding life history
-clutchsize<-2. # clutch size
+clutchsize<-1. # clutch size
 eggmass<-3.787 # initial dry mass of an egg (g)
-viviparous<-1 # 1=yes, 0=no
+viviparous<-0 # 1=yes, 0=no
 batch<-1 # invoke Pequerie et al.'s batch laying model?
 
 # the following four parameters apply if batch = 1, i.e. animal mobilizes
@@ -292,22 +291,24 @@ v_init<-3e-9
 E_init<-E_Egg/v_init
 E_H_init<-0
 stage<-0
-v_init<-(3.82^3)*fract^3 #hatchling
+v_init<-(1.168^3)*fract^3 #hatchling
 E_init<-E_m
 E_H_init<-E_Hb+5
 stage<-1
-v_init<-(7.063^3)*fract^3*0.85
-E_init<-E_m
-E_H_init<-E_Hp+1
-stage<-3
+# v_init<-(7.063^3)*fract^3*0.85
+# E_init<-E_m
+# E_H_init<-E_Hp+1
+# stage<-3
 
 # mortality rates
 ma<-1e-4  # hourly active mortality rate (probability of mortality per hour)
 mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
+
 wilting<-1
+ystrt<-0
 #set up call to NicheMapR function
-niche<-list(wilting=wilting,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+niche<-list(soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -357,74 +358,44 @@ colnames(grass)<-c("dates","growth","tsdm")
 rainfall<-as.data.frame(cbind(dates2,rainfall))
 colnames(rainfall)<-c("dates","rainfall")
 
-
+if(DEB==1){
+ with(debout,plot(WETMASS~dates,type='l'))
+  with(debout,points(WETMASS_STD~dates,type='l',col='blue'))
+}
 ############### plot results ######################
 library(lattice)
 
 
-plotenviron<-subset(environ,YEAR==1)
-forage<-subset(plotenviron,ACT==2)
-bask<-subset(plotenviron,ACT==1)
-night<-subset(metout,ZEN==90)
-with(night,plot(TIME/60~JULDAY,pch=15,cex=2,ylab='hour of day',ylim=c(0,23),xlab='day of year'))
-with(forage,points((TIME-1)~JULDAY,pch=15,cex=2,col='grey'))
-with(plotenviron, plot(TC~dates,ylim=c(-15,40),type = "l"))
 
-with(plotenviron, plot(TC~dates,ylim=c(0,40),type = "l",col='grey'))
-abline(TMAXPR,0,lty=2,col='red',lwd=2)
-abline(TMINPR,0,lty=2,col='blue',lwd=2)
-abline(ctmin,0,lty=2,col='cyan',lwd=2)
-abline(TPREF,0,lty=2,col='orange',lwd=2)
-
-with(plotenviron, points(ACT*5~dates,type = "l",col="orange"))
-with(plotenviron, points(SHADE/10~dates,type = "l",col="green"))
-with(plotenviron, points(DEP/10~dates,type = "l",col="brown"))
+with(environ, plot(TC~dates,ylim=c(-15,70),type = "l"))
+with(environ, points(ACT*5~dates,type = "l",col="orange"))
+with(environ, points(SHADE/10~dates,type = "l",col="green"))
+with(environ, points(DEP/10~dates,type = "l",col="brown"))
 #with(metout, points(TAREF~dates,type = "l",col="blue"))
-abline(TMAXPR,0,lty=2,col='red',lwd=2)
-abline(TMINPR,0,lty=2,col='blue',lwd=2)
-abline(ctmin,0,lty=2,col='cyan',lwd=2)
-abline(TPREF,0,lty=2,col='orange',lwd=2)
-
-brks<-c(seq(19.25,38.75,1.5))
-julTC<-subset(plotenviron,format(environ$dates,'%m')=="07")
-hist(julTC$TC,breaks=brks,freq=FALSE,ylim=c(0,.25),xaxt = "n")
-axis(side = 1, at = brks+.75)
-octTC<-subset(plotenviron,format(environ$dates,'%m')=="10")
-hist(octTC$TC,breaks=brks,freq=FALSE,ylim=c(0,.20),xaxt = "n")
-axis(side = 1, at = brks+.75)
-janTC<-subset(plotenviron,format(environ$dates,'%m')=="01")
-hist(janTC$TC,breaks=brks,freq=FALSE,ylim=c(0,.25),xaxt = "n")
-axis(side = 1, at = brks+.75)
-
-hourly<-aggregate(plotenviron,by=list(plotenviron$TIME), FUN='mean')
-hourlySD<-aggregate(plotenviron,by=list(plotenviron$TIME), FUN='sd')
-hourly$TIME<-hourly$TIME*100
-plot(hourly$TC~hourly$TIME,ylim=c(24,36),xlim=c(600,2400),ylab="body temperature (C)",xlab="",xaxt = "n")
-at <- seq(from = 600, to = 2400, by = 200)
-axis(side = 1, at = at)
-# hack: we draw arrows but with very special "arrowheads"
-arrows(hourly$TIME, hourly$TC-hourlySD$TC, hourly$TIME, hourly$TC+hourlySD$TC, length=0.05, angle=90, code=3)
+abline(TMAXPR,0,lty=2,col='red')
+abline(TMINPR,0,lty=2,col='blue')
+abline(TBASK,0,lty=2,col='light blue')
+abline(TPREF,0,lty=2,col='orange')
 
 T_REF<-20 # degrees C, reference temperature - correction factor is 1 for this temperature
 TA<-9000
 TAL<-50000
 TAH<-90000
-TL<-273
+TL<-273+14
 TH<-273+40
 TC<-environ$TC
-summer<-subset(environ, format(dates, "%m")<= "03" | format(dates, "%m")>= "8") # remove leap years
+summer<-subset(environ, format(dates, "%m")< "03" | format(dates, "%m")> "08") # remove leap years
 TCsumm<-summer$TC
 TC<-as.numeric(exp(TA*(1/(273+T_REF)-1/(273+TC)))/(1+exp(TAL*(1/(273+TC)-1/TL))+exp(TAH*(1/TH-1/(273+TC)))))
-#plot(TC~dates)
+plot(TC~dates)
 mean(TC)
 
-Tb<-29.34 # put your guess in here and then run the next line to see what TC that implies
+Tb<-28.7# put your guess in here and then run the next line to see what TC that implies
 exp(TA*(1/(273+T_REF)-1/(273+Tb)))/(1+exp(TAL*(1/(273+Tb)-1/TL))+exp(TAH*(1/TH-1/(273+Tb))))
 
 TC<-as.numeric(exp(TA*(1/(273+T_REF)-1/(273+TCsumm)))/(1+exp(TAL*(1/(273+TCsumm)-1/TL))+exp(TAH*(1/TH-1/(273+TCsumm)))))
-#plot(TC~summer$dates)
+plot(TC~summer$dates)
 mean(TC)
 
-Tb<-25.2 # put your guess in here and then run the next line to see what TC that implies
+Tb<-25.3 # put your guess in here and then run the next line to see what TC that implies
 exp(TA*(1/(273+T_REF)-1/(273+Tb)))/(1+exp(TAL*(1/(273+Tb)-1/TL))+exp(TAH*(1/TH-1/(273+Tb))))
-
