@@ -759,51 +759,51 @@ stagefreq<-rep(0,nrow(DATA1)*length(stagefreqnames))
 dim(stagefreq)<-c(nrow(DATA1),length(stagefreqnames))
 
 
-# for(g in 1:100){
-#   if(g==1){
-#     hatchings<-gethatch(ovirows)
-#     hatchdates<-hatchings$hatchdates 
-#     generations<-getgen(hatchdates)
-#     reprodates<-generations$reprodates
-#     reprodates1<-reprodates
-#     gens<-generations$gens
-#   }else{
-#     if(length(reprodates)>0){
-#       hatchings<-gethatch(cbind(0,reprodates))
-#       hatchdates<-hatchings$hatchdates
-#       generations<-getgen(hatchdates)
-#       reprodates<-generations$reprodates
-#       gens<-generations$gens
-#     }else{
-#       break
-#     }
-#   }
-#   if(length(reprodates)>0){
-#   if(g==1){
-#     allgens<-gens
-#   }else{
-#     if(sum(reprodates1)!=sum(reprodates)){
-#     allgens<-rbind(allgens,gens)
-#     reprodates1<-reprodates
-#     }else{
-#       break
-#     }
-#   }
-#   cat('gen ',g,'\n')
-#   #plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-#   #points(grass~environ$dates,type='l',col='green')
-#   #points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
-#   }else{
-#     break
-#   }
-# }
-#       
-# plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-# points(grass~environ$dates,type='l',col='green')
-# points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
-# 
-# success<-as.data.frame(subset(allgens,mass>55))
-# success$dates
+for(g in 1:100){
+  if(g==1){
+    hatchings<-gethatch(ovirows, stagefreq)
+    hatchdates<-hatchings$hatchdates 
+    generations<-getgen(hatchdates, hatchings$stagefreq)
+    reprodates<-generations$reprodates
+    reprodates1<-reprodates
+    gens<-generations$gens
+  }else{
+    if(length(reprodates)>0){
+      hatchings<-gethatch(cbind(0,reprodates),stagefreq)
+      hatchdates<-hatchings$hatchdates
+      generations<-getgen(hatchdates, hatchings$stagefreq)
+      reprodates<-generations$reprodates
+      gens<-generations$gens
+    }else{
+      break
+    }
+  }
+  if(length(reprodates)>0){
+  if(g==1){
+    allgens<-gens
+  }else{
+    if(sum(reprodates1)!=sum(reprodates)){
+    allgens<-rbind(allgens,gens)
+    reprodates1<-reprodates
+    }else{
+      break
+    }
+  }
+  cat('gen ',g,'\n')
+  #plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+  #points(grass~environ$dates,type='l',col='green')
+  #points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
+  }else{
+    break
+  }
+}
+      
+plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+points(grass2~environ$dates,type='l',col='green')
+points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
+
+success<-as.data.frame(subset(allgens,mass>55))
+success$dates
 
 # plot individual gens by running each generation manually
 hatchings<-gethatch(ovirows, stagefreq)
@@ -845,8 +845,13 @@ points(gens4$mass/55~gens4$dates,type='p',col='red',cex=0.1)
 
 
 colors<-rainbow(6)
-stagefreqDF<-as.data.frame(stagefreq)
-names(stagefreqDF)<-stagefreqnames
+stagefreqDF<-as.data.frame(generations$stagefreq)
+
+stagefreqDF<-cbind(dates,longlat[1],longlat[2],stagefreqDF)
+names(stagefreqDF)<-c('date','long','lat',stagefreqnames)
+
+stagefreqDF_agg<-aggregate(stagefreqDF[,2:14],by=list(format(dates,'%Y-%m-%d')),max)
+
 eggs<-rowSums(generations$stagefreq[,Eggdevcol:Diapausecol]) # summ all nymphs to get total nymphs
 nymphs <- rowSums(generations$stagefreq[,N1col:N5col]) # summ all egg stages to get all eggs
 nymphs1 <- generations$stagefreq[,N1col] # summ all egg stages to get all eggs
@@ -856,14 +861,14 @@ nymphs4 <- generations$stagefreq[,N4col] # summ all egg stages to get all eggs
 nymphs5 <- generations$stagefreq[,N5col] # summ all egg stages to get all eggs
 adults <- generations$stagefreq[,Adultcol] # summ all egg stages to get all eggs
 diapause <- generations$stagefreq[,Diapausecol] # summ all egg stages to get all eggs
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs1)))),ylab='count',xlab='')
+plot(grass2~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs1)))),ylab='count',xlab='')
 lines( DATA1$DATE, nymphs1, 'l', col = colors[1])
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs2)))),ylab='count',xlab='')
+plot(grass2~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs2)))),ylab='count',xlab='')
 lines(DATA1$DATE, nymphs2  , 'l', col = colors[1])
 lines( DATA1$DATE, nymphs3, 'l', col = colors[3])
 lines(DATA1$DATE, nymphs4  , 'l', col = colors[4])
 lines( DATA1$DATE, nymphs5, 'l', col = colors[5])
-plot(grass/10~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(adults)))),ylab='count',xlab='')
+plot(grass2~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(adults)))),ylab='count',xlab='')
 lines( DATA1$DATE, adults, 'l', col = colors[6])
 lines(DATA1$DATE, diapause  , 'l', col = colors[3])
 lines(DATA1$DATE, eggs  , 'l', col = colors[3])
