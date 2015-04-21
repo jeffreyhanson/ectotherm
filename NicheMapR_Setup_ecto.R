@@ -35,6 +35,8 @@ NicheMapR_ecto <- function(niche) {
   shadmet<-read.csv(file=paste(microin,'shadmet.csv',sep=""),sep=",")[,-1]
   soil<-read.csv(file=paste(microin,'soil.csv',sep=""),sep=",")[,-1]
   shadsoil<-read.csv(file=paste(microin,'shadsoil.csv',sep=""),sep=",")[,-1]
+  soilpot<-read.csv(file=paste(microin,'soilpot.csv',sep=""),sep=",")[,-1]
+  soilmoist<-read.csv(file=paste(microin,'soilmoist.csv',sep=""),sep=",")[,-1]
   #   metout<-as.matrix(metout[,-1])
   #   shadmet<-as.matrix(shadmet[,-1])
   #   shadsoil<-as.matrix(shadsoil[,-1])
@@ -169,9 +171,22 @@ NicheMapR_ecto <- function(niche) {
 
   lat<-ectoin[4]
   if(soilmoisture==1){
-  grassgrowths<-as.data.frame(metout)
+  grassgrowths<-as.data.frame(soilpot)
+  soilmoist2<-as.data.frame(soilmoist)
+  soilmoist2<-subset(soilmoist2,TIME==720)
   grassgrowths<-subset(grassgrowths,TIME==720)
-  grassgrowths<-grassgrowths[,9]
+  grassgrowths<-grassgrowths$PT5cm
+  soilmoist2<-soilmoist2$WC5cm
+  grassgrowths<-as.data.frame(cbind(grassgrowths,soilmoist2))
+  colnames(grassgrowths)<-c('pot','moist')
+  grassgrowths$pot[grassgrowths$pot>-1500]<-FoodWater
+  grassgrowths$moist<-grassgrowths$moist*100
+  potmult<-grassgrowths$pot
+  potmult[potmult!=82]<-0
+  potmult[potmult!=0]<-1  
+  wilting<-subset(grassgrowths,pot==FoodWater)
+  wilting<-min(wilting$moist)
+  grassgrowths<-grassgrowths$moist
   grassgrowths[grassgrowths>wilting]<-FoodWater
   minmoist<-min(grassgrowths[grassgrowths<FoodWater])
   grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater

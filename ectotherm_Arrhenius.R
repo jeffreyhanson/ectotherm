@@ -9,6 +9,7 @@ file.copy('/git/micro_global/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_global/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_global/DEP.csv','DEP.csv',overwrite=TRUE)
 file.copy('/git/micro_global/MAXSHADES.csv','MAXSHADES.csv',overwrite=TRUE)
+
 microin<-"" # directory where the microclimate model outputs are (empty if in present directory)
 
 # simulation settings
@@ -165,3 +166,25 @@ night<-subset(metout,ZEN==90)
 with(night,plot(TIME/60~JULDAY,pch=15,cex=2))
 with(forage,points((TIME-1)~JULDAY,pch=15,cex=2,col='grey'))
 with(bask,points((TIME-1)~JULDAY,pch=15,cex=2,col='blue'))
+
+# code to get the 'constant temperature equivalent' (CTE)
+
+# Arrenius response parameter
+T_REF<-20 # degrees C, reference temperature - correction factor is 1 for this temperature
+TA<-10191
+TAL<-50000
+TAH<-90000
+TL<-273+10
+TH<-273+37
+
+plot(environ$TC,type='l') # plot of body temperatures across all hours
+TempCorr<-as.numeric(exp(TA*(1/(273+T_REF)-1/(273+environ$TC)))/(1+exp(TAL*(1/(273+environ$TC)-1/TL))+exp(TAH*(1/TH-1/(273+environ$TC))))) # convert Tb each hour to temperature correction factor
+plot(TempCorr,type='l') # plot of temperature correction across all hours
+TempCorr_mean<-mean(TempCorr) # get mean temperature correction factor
+TempCorr_mean # report value to console
+getTb<-function(Tb){ # function finding the difference between a temperature correction factor for a specified Tb compared to the mean calculated one (aim to make this zero)
+      x<-exp(TA*(1/(273+T_REF)-1/(273+Tb)))/(1+exp(TAL*(1/(273+Tb)-1/TL))+exp(TAH*(1/TH-1/(273+Tb))))-TempCorr_mean
+   }
+CTE<-uniroot(f=getTb,c(TL-273,TH-273),check.conv=TRUE)$root # search for a Tb (CTE) that gives the same temperature correction factor as the mean of the simulated temperature corrections
+mean(environ$TC) # report mean Tb to screen
+CTE # report constant temperature equivalent to screen
