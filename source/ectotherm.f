@@ -1,8 +1,9 @@
       subroutine ectotherm(ectoinput1,metout1,shadmet1,soil11,
-     &shadsoil1,dep1,rainfall1,debmod1,deblast1,grassgrowth1,grasstsdm1,
-     &wetlandTemps1,wetlandDepths1,arrhenius1,thermal_stages1,
-     &behav_stages1,water_stages1,maxshades1,environ1,enbal1,masbal1,
-     &debout1,yearout,yearsout1)
+     &shadsoil1,soilmoist1,shadmoist1,soilpot1,shadpot1,humid1
+     &,shadhumid1,dep1,rainfall1,debmod1,deblast1,grassgrowth1
+     &,grasstsdm1,wetlandTemps1,wetlandDepths1,arrhenius1
+     &,thermal_stages1,behav_stages1,water_stages1,maxshades1,environ1
+     &,enbal1,masbal1,debout1,yearout,yearsout1)
           
 C    COPYRIGHT WARREN P. PORTER  15 April, 2003
 c    Modified by Michael R. Kearney 2011 to interface with R environment, 
@@ -30,8 +31,8 @@ C      MKS System of Units (J, M, KG, S, C, K, Pa)
              
       DOUBLE PRECISION Y,T,TOUT,RTOL,ATOL,RWORK     
       
-      double precision metout1,
-     &shadmet1,soil11,shadsoil1,dep1,environ1,enbal1,
+      double precision metout1,soilmoist1,shadmoist1,soilpot1,shadpot1,
+     &shadmet1,soil11,shadsoil1,dep1,environ1,enbal1,humid1,shadhumid1,
      &rainfall1,ntry1,ectoinput1,yearout,masbal1,
      &grassgrowth1,grasstsdm1,wetlandTemps1,wetlandDepths1,
      &thermal_stages1,behav_stages1,water_stages1,maxshades1,arrhenius1
@@ -50,7 +51,7 @@ C      MKS System of Units (J, M, KG, S, C, K, Pa)
       Real DAYMET,DAYEVP,DAYEIN,DaJabs,DAYWIN,DAYNRG,DAWTR
      &,DAYWTR                   
       Real degday,DMET,DNRG,DOY,DTIME,DWIN,DWTR,Damt,Davp
-      Real Egghrs
+      Real Egghrs,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
       Real EMISAN,EMISSB,EMISSK,Enb,Enberr
       REAL ENLOST,Enary1,Enary2,Enary3,Enary4
       REAL Enary5,Enary6,Enary7,Enary8,ERRTES,EXTREF          
@@ -111,7 +112,8 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real depmax
       REAL V,ED,WETMASS,WETSTORAGE,WETGONAD,contref,contwet
      &    ,svl
-      REAL ATSOIL,ATSHSOI,p_B_past,cumbatch,wetfood,cumrepro,ms
+      REAL ATSOIL,ATSHSOI,ATMOIST,ATSHADMOIST,ATPOT,ATSHADPOT,ATHUMID
+     &,ATSHADHUMID,p_B_past,cumbatch,wetfood,cumrepro,ms
       REAL fecundity,clutches,monrepro,svlrepro,monmature,minED
       real annualact,annfood,food
       REAL act1,act2,act3,act4,act5,
@@ -138,11 +140,11 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &EH_baby_init,longev,surviv_init
 
       real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
-      real massleft,volumeleft,e_egg,eggmass
+      real massleft,volumeleft,e_egg
       REAL v_init,E_init,E_H,drunk
       REAL kappa_X,kappa_X_P,mu_X,mu_P,enberr2,pond_depth
 
-      REAL debout,debfirst1,svl_met,E_H_start,orig_clutchsize
+      REAL debout,debfirst1,E_H_start,orig_clutchsize
       REAL ms_init,cumrepro_init,q_init,hs_init,E_H_init,potfreemass,
      &cumbatch_init,p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,s_G,orig_MsM
      &,k_Jref,lambda,daylengthstart,daylengthfinish,breedrainthresh
@@ -156,7 +158,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26,surv,gam
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,gutfull,surviv
       real flytime,flyspeed,rhref,wingtemp,E_Hmoult1,E_Hmet,E_Hecl
-      real p_Am1,p_AmIm,disc,shdgrass
+      real p_Am1,p_AmIm,disc,shdgrass,clutcha,clutchb
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
      &    E_Hpup,breedtempthresh,deathstage,prevstage,maxshades
       real ectoinput,debfirst,rainfall2,grassgrowth,grasstsdm,flymetab
@@ -178,6 +180,8 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real yDLay,yDEgg,yDHatch,yDStg1,yDStg2,yDStg3,yDStg4,yDStg5
      &,yDStg7,yDStg8,yMStg1,yMStg2,yMStg3,yMStg4,yMStg5,yMStg6,yMStg7,
      &yMStg8,ysurv,yovipsurv,yfit,mi,ma,mh,yearfract,meanf,yDStg6
+     
+      real p_Am_acc,v_acc,p_Xm_acc
 
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),
      &FAECES(24),NWASTE(24),surviv(24),grassgrowth(7300)
@@ -280,13 +284,18 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
      &    hs(24),ms(24),cumbatch(24),q(24)
       DIMENSION repro(24),food(50),Acthr(52)
       DIMENSION hour2(25),ectoinput1(127)
-      DIMENSION ATSOIL(25,10),ATSHSOI(25,10)
+      DIMENSION ATSOIL(25,10),ATSHSOI(25,10),ATMOIST(25,10),
+     & ATSHADMOIST(25,10),ATPOT(25,10),ATSHADPOT(25,10),ATHUMID(25,10)
+     &,ATSHADHUMID(25,10)
       DIMENSION fec(100),lx(100),mx(100)
 
       DIMENSION environ1(24*7300,20),enbal1(24*7300,14),dep1(10)
       DIMENSION METOUT1(24*7300,18),SHADMET1(24*7300,18),
      &masbal1(24*7300,21),pond_env(20,365,25,2),debmod1(93)
-      DIMENSION SOIL11(24*7300,12),SHADSOIL1(24*7300,12)
+      DIMENSION SOIL11(24*7300,12),SHADSOIL1(24*7300,12),
+     & SOILMOIST1(24*7300,12),SHADMOIST1(24*7300,12),
+     &SOILPOT1(24*7300,12),SHADPOT1(24*7300,12),
+     &HUMID1(24*7300,12),SHADHUMID1(24*7300,12)
       DIMENSION debout(24,9),debout1(24*7300,20)
      &,deblast1(13),v_baby1(24),e_baby1(24),ntry1(24),
      &rainfall1(7300),yearout(80),debfirst1(12),dayjul(24*7300),
@@ -294,7 +303,9 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
      &,wetlandDepths1(24*7300),yearsout1(20,45)
       DIMENSION customallom(8),etaO(4,3),JM_JO(4,4),shp(3),EH_baby1(24)
       dimension rainfall2(7300),debfirst(13),ectoinput(127)    
-
+      DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
+     & ,HSHSOI(25) 
+     
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND 
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
       COMMON/FUN3/AL,TA,VEL,PTCOND,SUBTK,DEPSUB,TSUBST 
@@ -342,7 +353,8 @@ c    Other stuff
       Common/Behav4/Fosorial 
       COMMON/DEPTHS/DEPSEL,Tcores     
       COMMON/WOPT/XPROT,XFAT,ENLOST,WTRLOS 
-      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
+      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,
+     & HSHSOI
       common/fileio/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,I66
       common/lablts/labloc,labshd,metsun,metshd
       COMMON/ANPARMS/Rinsul,R1,Area,VOL,Fatcond
@@ -405,7 +417,6 @@ C     NEED NON, # OF SOIL NODES,
       common/debmass/etaO,JM_JO
       COMMON/REPYEAR/IYEAR,NYEAR
       COMMON/COUNTDAY/COUNTDAY,daycount
-      COMMON/ASOIL/ATSOIL,ATSHSOI
       COMMON/TRANSGUT/TRANS_START
       COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
      &,minED,annfood,food,longev,completion,complete,fec1,fec2,
@@ -424,8 +435,8 @@ C     NEED NON, # OF SOIL NODES,
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
-     &,prevdaylength,lat,svl_met,frogbreed,frogstage,metamorph
-     &,breedactthres    
+     &,prevdaylength,lat,frogbreed,frogstage,metamorph
+     &,breedactthres,clutcha,clutchb    
       COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
      &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
@@ -437,7 +448,7 @@ C     NEED NON, # OF SOIL NODES,
       common/julday/julday,monthly
       common/vivip/viviparous,pregnant
       common/refshade/refshd
-      common/debbaby/v_baby,e_baby,EH_baby,eggmass
+      common/debbaby/v_baby,e_baby,EH_baby
       COMMON/ARRHEN/T_A,TAL,TAH,TL,TH,T_ref
       COMMON/pond/inwater,aquatic,twater,pond_depth,feeding,pond_env
       COMMON/fly/flytime,flight,flyer,flytest,flyspeed,flymetab
@@ -450,8 +461,8 @@ C     NEED NON, # OF SOIL NODES,
       common/death/causedeath,deathstage
       common/stage_r/stage_rec,f1count,counter,meanf
       common/metdep/depress,aestivate,aest
-      common/soilmoist/fieldcap,wilting,soilmoisture
-
+      common/soilmoistur/fieldcap,wilting,soilmoisture
+      common/accel/p_Am_acc,v_acc,p_Xm_acc
       writecsv=0
 
       write(*,*) writecsv
@@ -900,11 +911,35 @@ c    zeroing annual outputs of fecundity and activity
      &       real(soil11(micros2+i2-1,j),4)
          ATSHSOI(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
      &       real(shadsoil1(micros2+i2-1,j),4)
+         ATPOT(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(soilpot1(micros2+i2-1,j),4)
+         ATSHADPOT(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadpot1(micros2+i2-1,j),4)
+         ATMOIST(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(soilmoist1(micros2+i2-1,j),4)
+         ATSHADMOIST(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadmoist1(micros2+i2-1,j),4)
+         ATHUMID(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(humid1(micros2+i2-1,j),4)
+         ATSHADHUMID(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadhumid1(micros2+i2-1,j),4)     
          else
          ATSOIL(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
      &       real(soil11(micros2+i2-2,j),4)
          ATSHSOI(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
      &       real(shadsoil1(micros2+i2-2,j),4)
+         ATPOT(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(soilpot1(micros2+i2-2,j),4)
+         ATSHADPOT(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadpot1(micros2+i2-2,j),4)
+         ATMOIST(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(soilmoist1(micros2+i2-2,j),4)
+         ATSHADMOIST(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadmoist1(micros2+i2-2,j),4)
+         ATHUMID(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(humid1(micros2+i2-2,j),4)
+         ATSHADHUMID(i-(countday-1)*25-(iyear-1)*365*25,j-2)=
+     &       real(shadhumid1(micros2+i2-2,j),4)
          endif
 1806    continue
 1805    continue
@@ -961,9 +996,25 @@ c    zeroing annual outputs of fecundity and activity
          if(i.lt.microf)then
          ATSOIL(i-(countday-1)*25,j-2)=real(soil11(micros2+i2-1,j),4)
       ATSHSOI(i-(countday-1)*25,j-2)=real(shadsoil1(micros2+i2-1,j),4)
+      ATMOIST(i-(countday-1)*25,j-2)=real(soilmoist1(micros2+i2-1,j),4)
+      ATSHADMOIST(i-(countday-1)*25,j-2)=real(shadmoist1(micros2+i2-1,j)
+     & ,4)
+      ATPOT(i-(countday-1)*25,j-2)=real(soilpot1(micros2+i2-1,j),4)
+      ATSHADPOT(i-(countday-1)*25,j-2)=real(shadpot1(micros2+i2-1,j),4)
+      ATHUMID(i-(countday-1)*25,j-2)=real(humid1(micros2+i2-1,j),4)
+      ATSHADHUMID(i-(countday-1)*25,j-2)=real(shadhumid1(micros2+i2-1,j)
+     & ,4)      
          else
          ATSOIL(i-(countday-1)*25,j-2)=real(soil11(micros2+i2-2,j),4)
       ATSHSOI(i-(countday-1)*25,j-2)=real(shadsoil1(micros2+i2-2,j),4)
+      ATMOIST(i-(countday-1)*25,j-2)=real(soilmoist1(micros2+i2-2,j),4)
+      ATSHADMOIST(i-(countday-1)*25,j-2)=real(shadmoist1(micros2+i2-2,j)
+     & ,4)
+      ATPOT(i-(countday-1)*25,j-2)=real(soilpot1(micros2+i2-2,j),4)
+      ATSHADPOT(i-(countday-1)*25,j-2)=real(shadpot1(micros2+i2-2,j),4)
+      ATHUMID(i-(countday-1)*25,j-2)=real(humid1(micros2+i2-2,j),4)
+      ATSHADHUMID(i-(countday-1)*25,j-2)=real(shadhumid1(micros2+i2-2,j)
+     & ,4)        
          endif
 1803    continue
 1802    continue
@@ -1306,9 +1357,21 @@ c    check if bucket model has run (or if WET0D was run) and, if so, switch off 
          if(i.lt.25)then
          ATSOIL(i,j-2)=real(soil11(i,j),4)
          ATSHSOI(i,j-2)=real(shadsoil1(i,j),4)
+         ATMOIST(i,j-2)=real(soilmoist1(i,j),4)
+         ATSHADMOIST(i,j-2)=real(shadmoist1(i,j),4)  
+         ATPOT(i,j-2)=real(soilpot1(i,j),4)
+         ATSHADPOT(i,j-2)=real(shadpot1(i,j),4) 
+         ATHUMID(i,j-2)=real(humid1(i,j),4)
+         ATSHADHUMID(i,j-2)=real(shadhumid1(i,j),4)          
          else
          ATSOIL(24,j-2)=real(soil11(24,j),4)
          ATSHSOI(24,j-2)=real(shadsoil1(24,j),4)
+         ATMOIST(i,j-2)=real(soilmoist1(24,j),4)
+         ATSHADMOIST(i,j-2)=real(shadmoist1(24,j),4)  
+         ATPOT(i,j-2)=real(soilpot1(24,j),4)
+         ATSHADPOT(i,j-2)=real(shadpot1(24,j),4) 
+         ATHUMID(i,j-2)=real(humid1(24,j),4)
+         ATSHADHUMID(i,j-2)=real(shadhumid1(24,j),4)  
          endif
 803     continue
 802    continue
@@ -1347,7 +1410,7 @@ c     primary DEB parameters
        E_Hb = real(debmod1(23),4)
        E_Hj = real(debmod1(24),4)
        E_Hp = real(debmod1(25),4)
-       eggmass = real(debmod1(26),4)
+       clutchb = real(debmod1(26),4)
        batch = int(debmod1(27))
        breedrainthresh = real(debmod1(28),4)
        photostart = int(debmod1(29))
@@ -1357,7 +1420,7 @@ c     primary DEB parameters
        photodirs=int(debmod1(33))
        photodirf=int(debmod1(34))
 
-       svl_met=real(debmod1(35),4)
+       clutcha=real(debmod1(35),4)
        frogbreed=int(debmod1(36))
        frogstage=int(debmod1(37))
        etaO(1,1)=real(debmod1(38),4)
@@ -2102,6 +2165,12 @@ c    note!!!!!!!!!! this should be specific to the last stage but had to put sta
       do 56 J=1,NON
        TSOIL(J)=ATSOIL(IHOUR,J)
        TSHSOI(J)=ATSHSOI(IHOUR,J)
+       MSOIL(J)=ATMOIST(IHOUR,J)
+       MSHSOI(J)=ATSHADMOIST(IHOUR,J)
+       PSOIL(J)=ATPOT(IHOUR,J)
+       PSHSOI(J)=ATSHADPOT(IHOUR,J)
+       HSOIL(J)=ATHUMID(IHOUR,J)
+       HSHSOI(J)=ATSHADHUMID(IHOUR,J)
 56    continue
 
       EggSoil(ihour)=TSOIL(SoilNode)
@@ -2183,7 +2252,7 @@ c       Tannual.ge.Tsoil(non)
         ZEN = 90. * PI / 180.   
         TAIREF = Ta   
         VEL = 0.01             
-        RELHUM = 99. 
+        RELHUM = HSOIL(nodnum)*100 
         TSKY = Ta
         TSUBST = Ta  
         TOBJ = TSUBST
@@ -2197,7 +2266,7 @@ c      not going so deep, since nodnum = 10 is only 60 cm max
         ZEN = 90. * PI / 180.   
         TAIREF = Ta   
         VEL = 0.01             
-        RELHUM = 99. 
+        RELHUM = HSOIL(nodnum)*100 
         TSKY = Ta
         TSUBST = Ta  
         TOBJ = TSUBST
@@ -2287,10 +2356,10 @@ c      get the soil node and temperature for this hour at that depth
          newdep=depth
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
          goto 253
@@ -2630,14 +2699,14 @@ c    endif
 c     too dehydrated for activity
         dehydrated=1
         If ((Burrow .eq. 'Y') .or. (Burrow .eq. 'y')) then
-         minnode=8
+         minnode=9
          shdburrow=0
          if(shdburrow.eq.1)then
           shade=maxshd
-          Call Seldep (TSHSOI,ZSOIL,DEPTH)
+          Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
          else
           shade=refshd
-          Call Seldep (TSOIL,ZSOIL,DEPTH) 
+          Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
          endif
          DEPSEL(IHOUR) = newdep * (-1.0)
          goto 253
@@ -2660,10 +2729,10 @@ c     gut close to full - stay home
          tc_old=tc
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
 c       check if too cold in retreat so the animal needs to bask
@@ -2695,10 +2764,10 @@ c        not right rainfall, can't be active
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2714,13 +2783,13 @@ c          No burrow allowed
         else 
          IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
 C        Put animal in burrow, it's nighttime
-          Call Seldep (TSOIL,ZSOIL,DEPTH)
+          Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM)
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
          else
@@ -2743,10 +2812,10 @@ C      If crepuscular, check for direct sun; stay up if z(Ihour) = 90.0
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
              DEPSEL(IHOUR) = newdep * (-1.0)
             else
@@ -2764,10 +2833,10 @@ c        No crepuscular
           if((BURROW .eq. 'Y') .or. (BURROW .eq. 'y'))Then
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
            DEPSEL(IHOUR) = newdep * (-1.0)
           else
@@ -2787,10 +2856,10 @@ C      Sun above horizon and diurnal
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2824,10 +2893,10 @@ C      Nighttime: Activity OK
 C        Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
            DEPSEL(IHOUR) = newdep * (-1.0)
           else
@@ -2853,10 +2922,10 @@ C      Crepuscular environment OK
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2874,10 +2943,10 @@ C      Not crepuscular, go to burrow environment, if burrow OK
         IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
         else
@@ -2890,10 +2959,10 @@ C     Not crepuscular, go to burrow environment, if burrow OK
        IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
         DEPSEL(IHOUR) = newdep * (-1.0)
        else
@@ -2910,10 +2979,10 @@ C    End of choices for nocturnal animal
         IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
         else
@@ -3246,10 +3315,10 @@ c      skip the thermoregulatory checks
        ELSE
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
         DEPSEL(IHOUR) = newdep *(-1.0)
         Acthr(Ihour) = 0.0
@@ -3341,10 +3410,10 @@ c        no chance the environment is too harsh: bail
          else
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
           go to 252
@@ -3395,10 +3464,10 @@ c        no other options.  Quit
           endif
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,ZSOIL,DEPTH)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,ZSOIL,DEPTH) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
           go to 252
@@ -3689,11 +3758,11 @@ c    have TC, now call DEB model to get next hour's V, E, mass and repro (but do
         H2O_URINE=NWASTE(ihour)/PTUREA-NWASTE(ihour)
         URINEFLUX=NWASTE(ihour)/PTUREA
        endif
-       if(grassgrowth(daycount).lt.0)then
-        FoodWaterCur=0.
-       else
-        FoodWaterCur=FoodWater
-       endif
+c       if(grassgrowth(daycount).eq.0)then
+c        FoodWaterCur=0.
+c       else
+c        FoodWaterCur=FoodWater
+c       endif
        FoodWaterCur=grassgrowth(daycount)
        if(FoodWaterCur.eq.0)then
         H2O_FREE=0.

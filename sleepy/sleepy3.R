@@ -12,6 +12,8 @@ file.copy('/git/micro_australia/metout.csv','metout.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadmet.csv','shadmet.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/soil.csv','soil.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadsoil.csv','shadsoil.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/soilmoist.csv','shadmoist.csv',overwrite=TRUE)
+file.copy('/git/micro_australia/soilpot.csv','soilpot.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/DEP.csv','DEP.csv',overwrite=TRUE)
@@ -36,7 +38,7 @@ timeinterval<-365 # number of time intervals in a year
 ystart<-read.csv('ectoin.csv')[7,2]
 yfinish<-read.csv('ectoin.csv')[8,2]
 nyears<-ceiling(nrow(read.csv('rainfall.csv'))/365) # number of years the simulation runs for (work out from input data)
-write_input<-0 # write input into 'csv input' folder? (1 yes, 0 no)
+write_input<-1 # write input into 'csv input' folder? (1 yes, 0 no)
 longlat<-c(read.csv('ectoin.csv')[3,2],read.csv('ectoin.csv')[4,2])
 grasshade<-0 # use grass shade values from microclimate model as min shade values (1) or not (0)? (simulates effect of grass growth on shading, as a function of soil moisture)
 
@@ -89,7 +91,7 @@ TMINPR<-26. # degrees C, voluntary thermal minimum (lower body temperature for f
 TBASK<-26. # degrees C, minimum basking temperature (14. deg C, Fraser 1985 thesis, min of A in Fig. 7.3)
 TEMERGE<-8.5 # degrees C, temperature at which animal will move to a basking site
 ctmax<-43.  # degrees C, critical thermal maximum (animal will die if ctkill = 1 and this threshold is exceeded)
-ctmin<-3.1 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
+ctmin<-3.5 # degrees C, critical thermal minimum (used by program to determine depth selected when inactive and burrowing)
 ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
 ctkill<-0 #if 1, animal dies when it hits critical thermal limits
 TPREF<-33.5 # preferred body temperature (animal will attempt to regulate as close to this value as possible)
@@ -132,7 +134,7 @@ conthole<- 0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. in
 contonly<-1 # just run the container model and quit?
 contwet<-80 # percent wet value for container
 wetmod<-0 # run the wetland model?
-soilmoisture<-0 # run the soil moisture model? (models near-surface soil moisture rather than a pond as a function of field capacity and wilting point)
+soilmoisture<-1 # run the soil moisture model? (models near-surface soil moisture rather than a pond as a function of field capacity and wilting point)
 
 # which energy budget model to use? 
 DEB<-1 # run the DEB model (1) or just heat balance, using allometric respiration below (0)
@@ -141,7 +143,7 @@ DEB<-1 # run the DEB model (1) or just heat balance, using allometric respiratio
 # run so that metabolic heat generation and respiratory water loss can be calculated.
 # Metabolic rate, MR (ml O2/h, STP) at a given body mass (g) and body temperature, Tb (deg C)
 # MR=MR1*M^MR2*10^(MR3*Tb) based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
-amass<-20. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
+amass<-300. # g, mass of animal (used if the 'monthly' option is checked and DEB model is thus off)
 MR_1<-0.013
 MR_2<-0.8
 MR_3<-0.038
@@ -167,7 +169,6 @@ h_aref<-3.61e-13/(24.^2) #3.61e-11/(24.^2)
 s_G<-0.01
 
 E_Egg<-1.04e+06*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
-svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
 p_Am<-v_dotref*E_m
@@ -253,7 +254,7 @@ N_waste<-c(1,4/5,3/5,4/5) # chemical formula for nitrogenous waste product, CHON
 
 # breeding life history
 clutchsize<-2. # clutch size
-eggmass<-3.787 # initial dry mass of an egg (g)
+clutch_ab<-c(0,0) # paramters for relationship between length and clutch size: clutch size = a*SVL-b, make zero if fixed clutch size
 viviparous<-1 # 1=yes, 0=no
 batch<-1 # invoke Pequerie et al.'s batch laying model?
 
@@ -309,7 +310,7 @@ mh<-0.5   # survivorship of hatchling in first year
 
 ystrt<-0 # year to start the simulation (if zero, starts at first year, but if greater than 1, runs at year ystart+1 and then loops back to the rest after)
 #set up call to NicheMapR function
-niche<-list(wilting=wilting,ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
+niche<-list(clutch_ab=clutch_ab,wilting=wilting,ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
@@ -415,7 +416,9 @@ addTrans <- function(color,trans)
 }
 
 with(debout, {plot(WETMASS~dates,type = "l",ylab = "wet mass (g)/grass",ylim=c(0,1200))})
-points(grassgrowths~dates2,type='l',col='green')
+points(grassgrowths*100~dates2,type='l',col='green')
+points(rainfall$rainfall*10~dates2,type='h',col='blue')
+
 with(debout, {plot((WETMASS-WETMASS*(Body_cond/100))~dates,type = "l",xlab = "day of year",ylab = "wet mass (g)",col='blue')})
 
 with(debout, {points(WETMASS~dates,type = "l",ylab = "wet mass (g)/grass growth")})
@@ -694,8 +697,8 @@ for(i in 1:121){
     lm_Tb_R2<-summary(lm_Tb)$r.squared
     lm_Tb_rmsd<-sqrt(mean(((correl2$Tb_obs-correl2$Tb_pred)^2),na.rm=TRUE))
     #text(11,40,paste("r2=",round(lm_Tb_R2,2),"\n","rmsd=",round(lm_Tb_rmsd,2),sep=""))
-    #act.obs<-ifelse(correl2$steps>threshold.act,1,0)
-    #act.pred<-ifelse(correl2$act>0,1,0)
+    act.obs<-ifelse(correl2$steps>threshold.act,1,0)
+    act.pred<-ifelse(correl2$act>0,1,0)
     #confus<-confusion(act.pred,act.obs)
     confus<-confusion(act.obs,act.pred)
     
@@ -1471,6 +1474,6 @@ for(i in 1:121){
   }
 } #end loop through lizards
   k<-0
-  points(metout$TAREF~environ$dates,cex=0.2,pch=16,col='black',type='l')
-#points(environ$TC~environ$dates,cex=0.5,pch=16)
+  #points(metout$TAREF~environ$dates,cex=0.2,pch=16,col='black',type='l')
+points(environ$TC~environ$dates,cex=0.5,pch=16)
 }

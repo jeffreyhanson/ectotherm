@@ -22,6 +22,7 @@ c    copyright Warren P. Porter 2006 All rights reserved.
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
       real twater,pond_depth,pond_env,shdgrass
+      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
 
       Integer IHOUR,NON,NDAY,IDAY,wingmod,minnode,inwater,feeding
       integer aquatic
@@ -31,7 +32,9 @@ c    copyright Warren P. Porter 2006 All rights reserved.
          Dimension node(10),pond_env(20,365,25,2)
       DIMENSION QSOL(25),RH(25),TskyC(25),SOIL1(25),SOIL3(25),rhref(25)
       DIMENSION TIME(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
-
+      DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
+     & ,HSHSOI(25) 
+     
       COMMON/BUR/NON,minnode
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
@@ -43,7 +46,8 @@ c    copyright Warren P. Porter 2006 All rights reserved.
      &,sidex,WQSOL,wingmod,phimin,phimax,twing,F12,F32,F42,F52
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,f23,f24,f25,f26
       COMMON/WSOLAR/ASIL,Shade
-      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
+      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,
+     & HSHSOI
       COMMON/DEPTHS/DEPSEL,Tcores
       Common/soln/Enb
       Common/Treg/Tc
@@ -61,8 +65,8 @@ c    copyright Warren P. Porter 2006 All rights reserved.
       Qsolr = 0.0
       Qsolar = 0.0
       VEL = 0.01
-      if((newdep.gt.20).or.(pond_depth.gt.0.1))then
-      Relhum = 80.
+      if(pond_depth.gt.0.1)then
+      Relhum = 99.
       endif
 
       if(newdep.GE. 200.)then

@@ -686,8 +686,8 @@ getgen<-function(hatchdates, stagefreq1){
     start<-hatchdates[m]
     drymass<-exp(pars_grow[1]) # fitted initial mass of 1 mg (egg mass)
     for(i in (start+1):length(masses)){
-      if(i==start){
-        masses[i]<-exp(pars_grow[1])
+      if(i==start+1){
+        masses[start]<-exp(pars_grow[1])
       }
       ddrymass<-dmass(pars_grow,drymass, environ[i,6])
       masses[i]<-masses[i-1]+ddrymass/24.
@@ -769,9 +769,9 @@ for(g in 1:100){
     gens<-generations$gens
   }else{
     if(length(reprodates)>0){
-      hatchings<-gethatch(cbind(0,reprodates),stagefreq)
+      hatchings<-gethatch(cbind(0,reprodates),generations$stagefreq)
       hatchdates<-hatchings$hatchdates
-      generations<-getgen(hatchdates, hatchings$stagefreq)
+      generations<-getgen(hatchdates, generations$stagefreq)
       reprodates<-generations$reprodates
       gens<-generations$gens
     }else{
@@ -805,12 +805,48 @@ points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
 success<-as.data.frame(subset(allgens,mass>55))
 success$dates
 
+stagefreqDF<-as.data.frame(generations$stagefreq)
+
+stagefreqDF<-cbind(dates,longlat[1],longlat[2],stagefreqDF)
+names(stagefreqDF)<-c('date','long','lat',stagefreqnames)
+
+stagefreqDF_agg<-aggregate(stagefreqDF[,2:14],by=list(format(dates,'%Y-%m-%d')),max)
+colnames(stagefreqDF_agg)[1]<-'date'
+
+
+
+d
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # plot individual gens by running each generation manually
 hatchings<-gethatch(ovirows, stagefreq)
 hatchdates<-hatchings$hatchdates
 dev1<-as.data.frame(hatchings$devs)
 plot(grass2/10~environ$dates,type='l',col='green',ylim=c(0,1))
-points(dev1$dev1~dev1$dates,type='p',col='blue',cex=0.1)
+points(dev1$dev1~dev1$dates,type='l',col='blue',cex=0.1)
 generations<-getgen(hatchdates, hatchings$stagefreq)
 reprodates1<-generations$reprodates
 gens1<-generations$gens
@@ -845,22 +881,16 @@ points(gens4$mass/55~gens4$dates,type='p',col='red',cex=0.1)
 
 
 colors<-rainbow(6)
-stagefreqDF<-as.data.frame(generations$stagefreq)
 
-stagefreqDF<-cbind(dates,longlat[1],longlat[2],stagefreqDF)
-names(stagefreqDF)<-c('date','long','lat',stagefreqnames)
-
-stagefreqDF_agg<-aggregate(stagefreqDF[,2:14],by=list(format(dates,'%Y-%m-%d')),max)
-
-eggs<-rowSums(generations$stagefreq[,Eggdevcol:Diapausecol]) # summ all nymphs to get total nymphs
-nymphs <- rowSums(generations$stagefreq[,N1col:N5col]) # summ all egg stages to get all eggs
-nymphs1 <- generations$stagefreq[,N1col] # summ all egg stages to get all eggs
-nymphs2 <- generations$stagefreq[,N2col] # summ all egg stages to get all eggs
-nymphs3 <- generations$stagefreq[,N3col] # summ all egg stages to get all eggs
-nymphs4 <- generations$stagefreq[,N4col] # summ all egg stages to get all eggs
-nymphs5 <- generations$stagefreq[,N5col] # summ all egg stages to get all eggs
-adults <- generations$stagefreq[,Adultcol] # summ all egg stages to get all eggs
-diapause <- generations$stagefreq[,Diapausecol] # summ all egg stages to get all eggs
+eggs<-rowSums(generations$stagefreq[,Eggdevcol:Diapausecol]) # sum all eggs to get total eggs
+nymphs <- rowSums(generations$stagefreq[,N1col:N5col]) # sum all nymph stages to get all nymphs
+nymphs1 <- generations$stagefreq[,N1col] # sum all egg stages to get all eggs
+nymphs2 <- generations$stagefreq[,N2col] # sum all egg stages to get all eggs
+nymphs3 <- generations$stagefreq[,N3col] # sum all egg stages to get all eggs
+nymphs4 <- generations$stagefreq[,N4col] # sum all egg stages to get all eggs
+nymphs5 <- generations$stagefreq[,N5col] # sum all egg stages to get all eggs
+adults <- generations$stagefreq[,Adultcol] # sum all egg stages to get all eggs
+diapause <- generations$stagefreq[,Diapausecol] # sum all egg stages to get all eggs
 plot(grass2~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs1)))),ylab='count',xlab='')
 lines( DATA1$DATE, nymphs1, 'l', col = colors[1])
 plot(grass2~environ$dates,type='h',col='green',ylim=c(0,max(c((grass/10),max(nymphs2)))),ylab='count',xlab='')

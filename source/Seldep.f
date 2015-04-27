@@ -1,4 +1,4 @@
-       SUBROUTINE SELDEP (TSOIL,ZSOIL,DEPTH)
+       SUBROUTINE SELDEP (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM)
 C    COPYRIGHT WARREN P. PORTER  12 DEC, 1990   
 
 C    If an ectotherm has to be below ground,
@@ -18,15 +18,15 @@ c    parameters the animal experiences.
       Real QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF
       Real TSUB,VREF,Z,Tannul
       Real ANDENS,ASILP,EMISSB,EMISSK,FLUID,G
-      Real MICRO,TOBJ,TSKY,pond_env,shdgrass
+      Real MICRO,TOBJ,TSKY,pond_env,shdgrass,hsoil
       Real Intercept,TWING,twater,pond_depth,rhref,tbask,temerge
-      Real TMAXPR,TMINPR,ACTLVL,AMTFUD,XBAS,TPREF,ctmin,ctmax
+      Real TMAXPR,TMINPR,ACTLVL,AMTFUD,XBAS,TPREF,ctmin,ctmax,relhum
 
       Integer I,IDEP,Ihour,NON,goodsoil,inwater,aquatic,feeding,
      &    ctmincum,ctminthresh,ctkill,minnode
 
       DIMENSION TSOIL(10),ZSOIL(10),pond_env(20,365,25,2),shdgrass(25)
-      DIMENSION QSOL(25),RH(25),TskyC(25),TIME(25),rhref(25),
+      DIMENSION QSOL(25),RH(25),TskyC(25),TIME(25),rhref(25),hsoil(25),
      * SOIL1(25),SOIL3(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
 
 C    NEED NON, # OF SOIL NODES,
@@ -96,6 +96,7 @@ c      IF ((TSOIL(IDEP) .GT. CTMIN).and.(TSOIL(IDEP) .LT. tmaxpr))THEN
      & (ctmax-(ctmax-tmaxpr)/2)))THEN    
     
             Ta = TSOIL(IDEP)
+            relhum = hsoil(idep)*100
             newdep = ZSOIL(IDEP)
 c          goodsoil = 1
             GO TO 999
@@ -108,9 +109,11 @@ c          newdep = ZSOIL(IDEP-1)
 c          GO TO 999
       if(NON.eq.10)then
        Ta = Tannul
+       relhum = hsoil(NON)*100
        NEWDEP = 200.
       else
        Ta = TSOIL(NON)
+       relhum = hsoil(NON)*100
        NEWDEP = ZSOIL(NON)
       endif
       goto 999
@@ -171,11 +174,13 @@ c              Establishing temperature & depth at 60 cm (max curr. depth)
                 slope = (200. - newdep)/(Tdeep - Tannul)*(-1.)
                 Intercept = 200. - (slope*Tannul)
                 Ta = TDIGPR
+                relhum = hsoil(NON)*100
                 newdep = slope*TDIGPR + Intercept
                 goto 999
               else
 C              Frozen tundra here.  Nowhere to go.  Better have some antifreeze.
                 Ta = Tannul
+                relhum = hsoil(NON)*100
                 newdep = 200.
                 goto 999
               Endif
@@ -183,6 +188,7 @@ C              Frozen tundra here.  Nowhere to go.  Better have some antifreeze.
          ELSE
           IF (TSOIL(IDEP) .EQ. TDIGPR)THEN
             Ta = TSOIL(IDEP)
+            relhum = hsoil(idep)*100
             newdep = ZSOIL(IDEP)
             goodsoil = 1
             GO TO 999
@@ -195,6 +201,7 @@ C             LOOKING ABOVE, IF IDEP .GT. 1
 C              CONTINUE
                 IF (TSOIL(IDEP-1) .GT. TDIGPR)THEN
                   Ta = TDIGPR
+                  relhum = hsoil(idep)*100
                   goodsoil = 1
                   TNORM = (TSOIL(IDEP-1)-TDIGPR)/
      &             (TSOIL(IDEP-1)-TSOIL(IDEP))
@@ -208,6 +215,7 @@ C                  TSOIL LESS THAN TDIGPR, KEEP LOOKING, BUT SAVE
 C                  WARMEST SOIL TEMPERATURE
                     Ta = TSMAX
                     newdep = ZMAX
+                    relhum = hsoil(idep)*100
                     goodsoil = 1
                      IF (newdep .eq. 0.000) THEN
 C                    PUT at first node BELOW THE SURFACE
@@ -220,6 +228,7 @@ C              LOOKING BELOW
                 IF (IDEP .LT. NON) THEN
                   IF (TSOIL(IDEP+1) .GT. TDIGPR)THEN
                     Ta = TDIGPR
+                    relhum = hsoil(idep)*100
                     TNORM = (TSOIL(IDEP)-TDIGPR)/
      &              (TSOIL(IDEP)-TSOIL(IDEP+1))
                     newdep = ZSOIL(IDEP) +

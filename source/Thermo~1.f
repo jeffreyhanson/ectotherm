@@ -34,6 +34,7 @@ c    A number of structural problems corrected.
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
       real flytime,flyspeed,flymetab
       real gutfull,gutfill
+      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
 
       Integer Ihour,LIVE,Lometry,Micro,NM,wingcalc,ctminthresh,ctkill
       INTEGER Nodnum,NumFed,NumHrs,DEB1,wingmod,ctmincum
@@ -47,7 +48,9 @@ c    A number of structural problems corrected.
       Dimension Taloc(25),Time(25),TREF(25),TSUB(25),VREF(25),Z(25)
       DIMENSION TSHLOW(25),TSHSKI(25),TSOILS(25),TSHOIL(25)
       DIMENSION customallom(8),shp(3),rhref(25),shdgrass(25)
-      
+      DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
+     & ,HSHSOI(25) 
+     
       common/gut/gutfull,gutfill
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
@@ -63,7 +66,8 @@ c    A number of structural problems corrected.
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
      & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
-      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
+      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,
+     & HSHSOI
       COMMON/WSOLAR/ASIL,Shade
       COMMON/Behav1/Dayact,Burrow,Climb,CkGrShad,Crepus,Nocturn,nofood 
       COMMON/Behav2/NumFed,NumHrs,Lometry,nodnum,customallom,shp 

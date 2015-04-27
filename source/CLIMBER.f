@@ -15,6 +15,7 @@
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
+      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
 
       Integer Ihour,Lometry,Micro,Nodnum,NumFed
      &,NumHrs,wingmod,wingcalc
@@ -25,7 +26,9 @@
       Dimension QSOL(25),RH(25),TskyC(25),SOIL1(25),SOIL3(25)
       Dimension Taloc(25),Time(25),TREF(25),TSUB(25),VREF(25),Z(25)
       DIMENSION customallom(8),shp(3),rhref(25)
-
+      DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
+     & ,HSHSOI(25) 
+     
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
       COMMON/FUN3/AL,TA,VEL,PTCOND,SUBTK,DEPSUB,TSUBST
@@ -37,7 +40,8 @@
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
      & ,shdgrass
       COMMON/ENVAR2/TSUB,VREF,Z,Tannul
-      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
+      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,
+     & HSHSOI
       COMMON/WSOLAR/ASIL,Shade
       COMMON/Behav1/Dayact,Burrow,Climb,CkGrShad,Crepus,Nocturn,nofood   
       COMMON/Behav2/NumFed,NumHrs,Lometry,nodnum,customallom,shp 

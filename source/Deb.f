@@ -21,7 +21,7 @@ c    EXTERNAL GUT
       REAL T_Ref,E_Hp,E_Hb,halfsat,x_food
       REAL k_R,p_Am,p_A,p_Mv,p_M,p_C,p_R,p_J,p_D,p_G,p_B,vdot
       REAL f,p_Xm,p_X,food,annfood,stage_rec
-      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg,eggmass
+      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg
       REAL E_M,E_G,kappa,cumrepro,cumbatch
       REAL d_V,p_B_past,GH2OMET
       REAL q,h_a,ms,ms_pres,dmsdt,MsM,ms_past
@@ -35,7 +35,7 @@ c    EXTERNAL GUT
       REAL fec,tknest,clutchenergy
       REAL acthr,actxbas,thconw,cumrepro_temp
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask,temerge
-      real svl_met,ctmin,ctmax,eggsoil,surv
+      real ctmin,ctmax,eggsoil,surv
       REAL cumrepro_init,q_init,hs_init,
      &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,p_Xmref,
      &k_Jref,k_J,batchprep,s_G,potfreemass
@@ -65,7 +65,7 @@ c    EXTERNAL GUT
      &,act14,act15,act16,act17,act18,act19,act20,fieldcap,wilting
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &for12,for13,for14,for15,for16,for17,for18,for19,for20,Vb
-      real gutfill,contwet,shdgrass,grass
+      real gutfill,contwet,shdgrass,grass,clutcha,clutchb
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,soilmoisture,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,
@@ -138,14 +138,14 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch
      &,MsM,lambda,breedrainthresh,daylengthstart,daylengthfinish
      &,photostart,photofinish,lengthday,photodirs,photodirf
-     &,lengthdaydir,prevdaylength,lat,svl_met,frogbreed,frogstage
-     &,metamorph,breedactthres
+     &,lengthdaydir,prevdaylength,lat,frogbreed,frogstage
+     &,metamorph,breedactthres,clutcha,clutchb
       COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
      &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
       COMMON/TPREFR/TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask
      &,temerge
       common/vivip/viviparous,pregnant
-      common/debbaby/v_baby,e_baby,EH_baby,eggmass
+      common/debbaby/v_baby,e_baby,EH_baby
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
      &    ,contype,contwet
       Common/Rainfall/Rainfall
@@ -195,9 +195,9 @@ c    check if first day of simulation
       endif
 
 c     for water pythons
-c       clutchsize=FLOOR(0.1696*(SVL(hour)/10)-16.855)
-c     for snow skinks
-       clutchsize=FLOOR(0.1574*SVL(hour)-6.3066)
+      if(clutcha.gt.0)then
+       clutchsize=FLOOR(clutcha*(SVL(hour)/10)-clutchb)
+      endif
 c      clutch size below for sleepy lizards
 c      if(SVL(hour).lt.300)then
 c       clutchsize=1

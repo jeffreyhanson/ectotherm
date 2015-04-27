@@ -12,7 +12,7 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
       REAL T_Ref
       REAL k_R,p_Am,p_Mv,vdot
       REAL f,k_Mdot
-      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg,eggmass
+      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg
       REAL E_M,E_G,kappa
       REAL d_V
       REAL eggdryfrac,E_Hmoult1,E_Hmet,E_Hecl
@@ -20,14 +20,14 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
       REAL dLdt,v_temp,Sc,dUEdt,E_temp,U_H_pres,dUHdt,dE_Hdt,E_H_pres
 
       REAL Tc,daylengthstart,daylengthfinish,lengthday,lengthdaydir
-     &,prevdaylength,lat,svl_met,k_J,kappa_X,kappa_X_P,mu_X,mu_P
+     &,prevdaylength,lat,k_J,kappa_X,kappa_X_P,mu_X,mu_P
 
       real lambda,funct
       REAL v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,
      &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,halfsat,x_food,
      &v_baby_init,v_init_baby,k_Jref,s_G,surviv_init,p_Xmref,E_H_start
       REAL andens_deb,delta_deb,clutchsize,msm,E_Hb,E_Hp,E_Hj,E_H_init
-      real breedrainthresh,w_N,w_P,w_X,TWING
+      real breedrainthresh,w_N,w_P,w_X,TWING,clutcha,clutchb
       INTEGER countday,breeding,
      &viviparous,pregnant,daycount,batch,photostart,photofinish,
      &photodirs,photodirf,frogbreed,frogstage,metamorph
@@ -43,15 +43,15 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
-     &,prevdaylength,lat,svl_met,frogbreed,frogstage,metamorph
-     &,breedactthres
+     &,prevdaylength,lat,frogbreed,frogstage,metamorph
+     &,breedactthres,clutcha,clutchb
       COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
      &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
      &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
      &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
      &Vold_init,Vpup_init,Epup_init,E_Hpup_init,p_Xmref
-      common/debbaby/v_baby,e_baby,EH_baby,eggmass
+      common/debbaby/v_baby,e_baby,EH_baby
       common/vivip/viviparous,pregnant
       COMMON/BREEDER/breeding
       COMMON/ARRHEN/T_A,TAL,TAH,TL,TH,T_ref

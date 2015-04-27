@@ -35,16 +35,39 @@ NicheMapR_ecto <- function(niche) {
   shadmet<-read.csv(file=paste(microin,'shadmet.csv',sep=""),sep=",")[,-1]
   soil<-read.csv(file=paste(microin,'soil.csv',sep=""),sep=",")[,-1]
   shadsoil<-read.csv(file=paste(microin,'shadsoil.csv',sep=""),sep=",")[,-1]
+  if(soilmoisture==1){
   soilpot<-read.csv(file=paste(microin,'soilpot.csv',sep=""),sep=",")[,-1]
   soilmoist<-read.csv(file=paste(microin,'soilmoist.csv',sep=""),sep=",")[,-1]
-  #   metout<-as.matrix(metout[,-1])
-  #   shadmet<-as.matrix(shadmet[,-1])
-  #   shadsoil<-as.matrix(shadsoil[,-1])
-  #   soil<-as.matrix(soil[,-1])
+  shadpot<-read.csv(file=paste(microin,'shadpot.csv',sep=""),sep=",")[,-1]
+  shadmoist<-read.csv(file=paste(microin,'shadmoist.csv',sep=""),sep=",")[,-1]
+  humid<-read.csv(file=paste(microin,'humid.csv',sep=""),sep=",")[,-1]
+  shadhumid<-read.csv(file=paste(microin,'shadhumid.csv',sep=""),sep=",")[,-1]  
+  }else{
+  soilpot<-soil
+  soilmoist<-soil
+  shadpot<-soil
+  shadmoist<-soil
+  humid<-soil
+  shadhumid<-soil
+  soilpot[,3:12]<-0
+  soilmoist[,3:12]<-0.5
+  shadpot[,3:12]<-0
+  shadmoist[,3:12]<-0.5
+  humid[,3:12]<-0.99
+  shadhumid[,3:12]<-0.99
+  }
+  soilpotb<-soilpot
+  soilmoistb<-soilmoist
   metout<-as.matrix(metout)
   shadmet<-as.matrix(shadmet)
   shadsoil<-as.matrix(shadsoil)
   soil<-as.matrix(soil)
+  soilmoist<-as.matrix(soilmoist)
+  shadmoist<-as.matrix(shadmoist)  
+  soilpot<-as.matrix(soilpot)
+  shadpot<-as.matrix(shadpot) 
+  humid<-as.matrix(humid)
+  shadhumid<-as.matrix(shadhumid)     
   RAINFALL<-as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2]
   ectoin<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[,-1]
   DEP<-as.matrix(read.csv(file=paste(microin,'DEP.csv',sep=""),sep=","))[,2]
@@ -54,22 +77,49 @@ NicheMapR_ecto <- function(niche) {
   soil2=matrix(data = 0., nrow = 24*7300, ncol = 12)
   shadmet2=matrix(data = 0., nrow = 24*7300, ncol = 18)
   shadsoil2=matrix(data = 0., nrow = 24*7300, ncol = 12)
+  soilmoist2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
+  shadmoist2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
+  soilpot2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
+  shadpot2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
+  humid2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
+  shadhumid2=matrix(data = 0., nrow = 24*7300, ncol = 12)  
   wetlandTemps=matrix(data = 0., nrow = 24*7300, ncol = 1)
   wetlandDepths=matrix(data = 0., nrow = 24*7300, ncol = 1)
   metout2[1:nrow(metout),]<-metout
   shadmet2[1:nrow(metout),]<-shadmet
   soil2[1:nrow(metout),]<-soil
   shadsoil2[1:nrow(metout),]<-shadsoil
+  soilmoist2[1:nrow(metout),]<-soilmoist
+  shadmoist2[1:nrow(metout),]<-shadmoist
+  soilpot2[1:nrow(metout),]<-soilpot
+  shadpot2[1:nrow(metout),]<-shadpot
+  humid2[1:nrow(metout),]<-humid
+  shadhumid2[1:nrow(metout),]<-shadhumid  
   metout<-metout2
   shadmet<-shadmet2
   soil<-soil2
   shadsoil<-shadsoil2
+  soilmoist<-soilmoist2
+  shadmoist<-shadmoist2
+  soilpot<-soilpot2
+  shadpot<-shadpot2
+  humid<-humid2
+  shadhumid<-shadhumid2    
   metout.names<-c("JULDAY","TIME","TALOC","TAREF","RHLOC","RH","VLOC","VREF","SOILMOIST3","POOLDEP","TDEEP","ZEN","SOLR","TSKYC","DEW","FROST","SNOWFALL","SNOWDEP")
   colnames(metout)<-metout.names
   colnames(shadmet)<-metout.names
   soil.names<-c("JULDAY","TIME",paste("D",DEP,"cm", sep = ""))
   colnames(soil)<-soil.names
   colnames(shadsoil)<-soil.names
+  moist.names<-c("JULDAY","TIME",paste("WC",DEP,"cm", sep = ""))
+  colnames(soilmoist)<-moist.names
+  colnames(shadmoist)<-moist.names
+  pot.names<-c("JULDAY","TIME",paste("PT",DEP,"cm", sep = ""))
+  colnames(soilpot)<-pot.names
+  colnames(shadpot)<-pot.names  
+  hum.names<-c("JULDAY","TIME",paste("RH",DEP,"cm", sep = ""))
+  colnames(humid)<-hum.names
+  colnames(shadhumid)<-hum.names  
   } # end vlsci check
   # habitat
   ALT<-ectoin[1] # altitude (m)
@@ -171,15 +221,42 @@ NicheMapR_ecto <- function(niche) {
 
   lat<-ectoin[4]
   if(soilmoisture==1){
-  grassgrowths<-as.data.frame(soilpot)
-  soilmoist2<-as.data.frame(soilmoist)
-  soilmoist2<-subset(soilmoist2,TIME==720)
+ 
+
+  grassgrowths<-as.data.frame(soilpotb)
+  soilmoist2b<-as.data.frame(soilmoistb)
+  soilmoist2b<-subset(soilmoist2b,TIME==720)
   grassgrowths<-subset(grassgrowths,TIME==720)
-  grassgrowths<-grassgrowths$PT5cm
-  soilmoist2<-soilmoist2$WC5cm
-  grassgrowths<-as.data.frame(cbind(grassgrowths,soilmoist2))
+  grassgrowths<-grassgrowths$PT10cm
+    
+    grow<-grassgrowths
+    grow[grow>-1500]<-1
+    grow[grow<=-1500]<-0
+    counter<-0
+    grow2<-grow*0
+      for(j in 1:length(grow)){
+        if(j==1){
+            if(grow[j]==1){
+            counter<-counter+1
+            }
+          grow2[j]<-counter
+        }else{
+          if(grow[j-1]>0 & grow[j]==1){
+            counter<-counter+1
+          }else{
+            counter<-0
+          }
+          grow2[j]<-counter
+        }
+      }
+     grow3<-grow2
+     grow3[grow3<7]<-0
+     grow3[grow3>0]<-1
+    
+  soilmoist2b<-soilmoist2b$WC10cm
+  grassgrowths<-as.data.frame(cbind(grassgrowths,soilmoist2b))
   colnames(grassgrowths)<-c('pot','moist')
-  grassgrowths$pot[grassgrowths$pot>-1500]<-FoodWater
+  grassgrowths$pot[grassgrowths$pot>-200]<-FoodWater
   grassgrowths$moist<-grassgrowths$moist*100
   potmult<-grassgrowths$pot
   potmult[potmult!=82]<-0
@@ -189,8 +266,10 @@ NicheMapR_ecto <- function(niche) {
   grassgrowths<-grassgrowths$moist
   grassgrowths[grassgrowths>wilting]<-FoodWater
   minmoist<-min(grassgrowths[grassgrowths<FoodWater])
+  minmoist<-0
   grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater
-  grassgrowths<-grassgrowths/100
+  grassgrowths<-grassgrowths/100*grow3
+  #grassgrowths[grassgrowths<FoodWater/100]<-0
   grasstsdms<-grassgrowths
   #minmoist<-min(grassgrowths)
   #grassgrowths<-(as.numeric(grassgrowths)-minmoist)
@@ -222,7 +301,8 @@ NicheMapR_ecto <- function(niche) {
   }
   
   ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade)
-  debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,eggmass,batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,svl_met,frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
+  debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,clutch_ab[2],batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,clutch_ab[1],frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,p_Am1,p_AmIm,disc,gam,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
+
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
   
   origjulday<-metout[,1]
@@ -231,6 +311,12 @@ NicheMapR_ecto <- function(niche) {
     shadmet<-rbind(shadmet[((ystrt)*365*24+1):(20*365*24),],shadmet[1:((ystrt)*365*24),])
     soil<-rbind(soil[((ystrt)*365*24+1):(20*365*24),],soil[1:((ystrt)*365*24),])
     shadsoil<-rbind(shadsoil[((ystrt)*365*24+1):(20*365*24),],shadsoil[1:((ystrt)*365*24),])
+    soilmoist<-rbind(soilmoist[((ystrt)*365*24+1):(20*365*24),],soilmoist[1:((ystrt)*365*24),])
+    shadmoist<-rbind(shadmoist[((ystrt)*365*24+1):(20*365*24),],shadmoist[1:((ystrt)*365*24),])
+    soilpot<-rbind(soilpot[((ystrt)*365*24+1):(20*365*24),],soilpot[1:((ystrt)*365*24),])
+    shadpot<-rbind(shadpot[((ystrt)*365*24+1):(20*365*24),],shadpot[1:((ystrt)*365*24),])
+    humid<-rbind(humid[((ystrt)*365*24+1):(20*365*24),],humid[1:((ystrt)*365*24),])
+    shadhumid<-rbind(shadhumid[((ystrt)*365*24+1):(20*365*24),],shadhumid[1:((ystrt)*365*24),])    
     MAXSHADES<-c(MAXSHADES[((ystrt)*365+1):(20*365)],MAXSHADES[1:((ystrt)*365)])
     RAINFALL<-c(RAINFALL[((ystrt)*365+1):(20*365)],RAINFALL[1:((ystrt)*365)])
     grassgrowths<-c(grassgrowths[((ystrt)*365+1):(20*365)],grassgrowths[1:((ystrt)*365)])
@@ -239,6 +325,12 @@ NicheMapR_ecto <- function(niche) {
   shadmet[,1]<-origjulday
   soil[,1]<-origjulday
   shadsoil[,1]<-origjulday
+    soilmoist[,1]<-origjulday
+  shadmoist[,1]<-origjulday
+    soilpot[,1]<-origjulday
+  shadpot[,1]<-origjulday
+    humid[,1]<-origjulday
+  shadhumid[,1]<-origjulday
   
   if(write_input==1){
     cat('writing input csv files \n')
@@ -256,13 +348,21 @@ NicheMapR_ecto <- function(niche) {
     write.csv(behav_stages, file = "csv input/behav_stages.csv")
     write.csv(water_stages, file = "csv input/water_stages.csv")
     write.csv(MAXSHADES, file = "csv input/Maxshades.csv")
-    write.table(metout, file = "csv input/metout.csv",sep=",",row.names=FALSE)
-    write.table(shadmet, file = "csv input/shadmet.csv",sep=",",row.names=FALSE)
-    write.table(soil, file = "csv input/soil.csv",sep=",",row.names=FALSE)
-    write.table(shadsoil, file = "csv input/shadsoil.csv",sep=",",row.names=FALSE)
+    write.table(metout2[(seq(1,nyears*timeinterval*24)),], file = "csv input/metout.csv",sep=",",row.names=FALSE)
+    write.table(shadmet2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadmet.csv",sep=",",row.names=FALSE)
+    write.table(soil2[(seq(1,nyears*timeinterval*24)),], file = "csv input/soil.csv",sep=",",row.names=FALSE)
+    write.table(shadsoil2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadsoil.csv",sep=",",row.names=FALSE)
+    write.table(soilmoist2[(seq(1,nyears*timeinterval*24)),], file = "csv input/soilmoist.csv",sep=",",row.names=FALSE)
+    write.table(shadmoist2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadmoist.csv",sep=",",row.names=FALSE)
+    write.table(soilpot2[(seq(1,nyears*timeinterval*24)),], file = "csv input/soilpot.csv",sep=",",row.names=FALSE)
+    write.table(shadpot2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadpot.csv",sep=",",row.names=FALSE)
+    write.table(humid2[(seq(1,nyears*timeinterval*24)),], file = "csv input/humid.csv",sep=",",row.names=FALSE)
+    write.table(shadhumid2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadhumid.csv",sep=",",row.names=FALSE)
   }
   
-  ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
+  ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
+  #ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
+
   if(vlsci==1){
     setwd("/vlsci/VR0212/shared/NicheMapR_Working/ectotherm")
     source('NicheMapR_ecto.R')
@@ -288,9 +388,9 @@ NicheMapR_ecto <- function(niche) {
   yearsout<-ectout$yearsout[1:nyears,]
   
   if(DEB==0){
-    return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,RAINFALL=RAINFALL,enbal=enbal,environ=environ,masbal=masbal,yearout=yearout,yearsout=yearsout,grassgrowths=grassgrowths,grasstsdms=grasstsdms))   
+    return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,RAINFALL=RAINFALL,enbal=enbal,environ=environ,masbal=masbal,yearout=yearout,yearsout=yearsout,grassgrowths=grassgrowths,grasstsdms=grasstsdms))   
   }else{
-    return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,RAINFALL=RAINFALL,enbal=enbal,masbal=masbal,environ=environ,debout=debout,yearout=yearout,yearsout=yearsout,grassgrowths=grassgrowths,grasstsdms=grasstsdms))
+    return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,RAINFALL=RAINFALL,enbal=enbal,masbal=masbal,environ=environ,debout=debout,yearout=yearout,yearsout=yearsout,grassgrowths=grassgrowths,grasstsdms=grasstsdms))
   }
   
 }

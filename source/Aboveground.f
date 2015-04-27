@@ -22,11 +22,12 @@ C    Version 8/1/06
      &,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16
       real flytime,flyspeed,rhref,flymetab,conthole,pond_env
-      real zfact,kappa,E_G,k_R,delta_deb,E_H_start
+      real zfact,kappa,E_G,k_R,delta_deb,E_H_start,clutcha,clutchb
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,lengthday
-     &,prevdaylength,lat,svl_met,metamorph,lengthdaydir,contwet,shdgrass
-
+     &,prevdaylength,lat,metamorph,lengthdaydir,contwet,shdgrass
+      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
+      
       integer frogbreed,frogstage,photostart,photofinish,batch,
      &photodirs,photodirf,breedact,breedactthres
 
@@ -39,7 +40,8 @@ C    Version 8/1/06
       DIMENSION SOIL3(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)
       Dimension TSOIL(25),TSHSOI(25),Tshski(25),Tshlow(25),ZSOIL(10)
       Dimension RHREF(25),pond_env(20,365,25,2),SHDGRASS(25)
-
+      DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
+     & ,HSHSOI(25) 
 
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
       COMMON/FUN3/AL,TA,VEL,PTCOND,SUBTK,DEPSUB,TSUBST
@@ -54,7 +56,8 @@ C    Version 8/1/06
       COMMON/WSOLAR/ASIL,Shade
       COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/WDSUB2/MICRO,QSOLR,TOBJ,TSKY
-      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL
+      COMMON/SOIL/TSOIL,TSHSOI,ZSOIL,MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,
+     & HSHSOI
 c    Shade environmental variables for this hour
       common/shenv1/Tshski,Tshlow
       Common/Treg/Tc
@@ -66,7 +69,7 @@ c    Shade environmental variables for this hour
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
-     &,prevdaylength,lat,svl_met,frogbreed,frogstage,metamorph
+     &,prevdaylength,lat,frogbreed,frogstage,metamorph,clutcha,clutchb
      &,breedactthres    
       common/pondtest/pond
 

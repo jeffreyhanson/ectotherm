@@ -9,8 +9,8 @@ c      EXTERNAL JAC
 c    EXTERNAL GUT
 
 c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
-      DOUBLE PRECISION dVdt,dqdt,rdot,dhsds,Sc,dUedt,E_temp,dEdt,dE_Hdt
-     &    ,dUHdt,dsurvdt,hs
+      DOUBLE PRECISION dVdt,dqdt,rdot,dhsds,dEdt,dE_Hdt
+     &    ,dsurvdt,hs
 
       REAL SVL,v_baby,e_baby,EH_baby,v_baby1,e_baby1,EH_baby1,funct    
       REAL E_pres,ED,V,V_pres,gutfull,orig_clutchsize,Vb,p_Am_scaled
@@ -23,7 +23,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       REAL T_Ref,E_Hp,E_Hb,halfsat,x_food,E_H_start
       REAL k_R,p_Am,p_A,p_Mv,p_M,p_C,p_R,p_J,p_D,p_G,p_B,vdot
       REAL f,p_Xm,X,p_X,food,annfood
-      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg
+      REAL w_E,mu_E,mu_V,w_V,M_V,E_egg,eggmass
       REAL E_M,E_G,kappa,cumrepro,cumbatch
       REAL d_V,p_B_past,GH2OMET
       REAL q,h_a,ms,ms_pres,dmsdt,MsM,ms_past
@@ -37,7 +37,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       REAL fec,tknest,clutchenergy
       REAL acthr,actxbas,thconw
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask,temerge
-      real ctmin,ctmax,eggsoil,surv
+      real svl_met,ctmin,ctmax,eggsoil,surv
       REAL cumrepro_init,q_init,hs_init,
      &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,p_xmref,
      &k_Jref,k_J,s_G
@@ -55,7 +55,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,longev,surviv
-      real rhref,E_Hmoult1,E_Hmet,E_He,breedtempthresh,gam,repro
+      real rhref,E_Hmoult1,E_Hmet,E_Hecl,breedtempthresh,gam,repro
       real p_Am1,p_AmIm,disc
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
      &E_Hpup,E_Hthresh,pond_env,tbs,oldclutch,stage
@@ -64,11 +64,8 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
      &    ,grasstsdm,raindrink,wetlandTemps,wetlandDepths,conthole
       real gutfill
       real tbmean,meanf
-      real s_1,s_2,s_3,s_4,s_5,s_j,y_EV_l,f_W,f_4,Wi_0,k_E,kT_E,h_w
 
-      real newclutch,fieldcap,wilting,l_b
-      real p_Am_acc,v_acc,p_Xm_acc,batchprep,dldt,v_temp,L_instar,
-     & S_instar,U_H_pres
+      real newclutch,fieldcap,wilting
 
       real fec1,fec2,fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,
      &fec11,fec12,fec13,fec14,fec15,fec16,fec17,fec18,fec19,fec20,act1
@@ -76,7 +73,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
      &,act14,act15,act16,act17,act18,act19,act20,stage_rec
       real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
      &    for12,for13,for14,for15,for16,for17,for18,for19,for20
-      real cri_o,cri_m,cri,contwet,shdgrass,clutcha,clutchb
+      real cri_o,cri_m,cri,contwet,shdgrass
 
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,startday,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,reset,
@@ -106,7 +103,6 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
 
       DIMENSION QSOL(25),RH(25),TskyC(25),soil1(25),rhref(25)
       DIMENSION SOIL3(25),Taloc(25),TREF(25),TIME(25),shdgrass(25)
-      DIMENSION L_instar(5),S_instar(5)
 
       Data PI/3.14159/
 
@@ -151,14 +147,14 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
      &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
-     &,prevdaylength,lat,frogbreed,frogstage,metamorph
-     &,breedactthres,clutcha,clutchb
+     &,prevdaylength,lat,svl_met,frogbreed,frogstage,metamorph
+     &,breedactthres
       COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm,
-     & disc,gam,E_Hmoult1,E_Hmet,E_He,Vb
+     & disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
       COMMON/TPREFR/TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask
      &,temerge
       common/vivip/viviparous,pregnant
-      common/debbaby/v_baby,e_baby,EH_baby
+      common/debbaby/v_baby,e_baby,EH_baby,eggmass
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,wetmod,contonly,conthole
      &    ,contype,contwet
       Common/Rainfall/Rainfall
@@ -176,53 +172,11 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       common/death/causedeath,deathstage
       common/stage_r/stage_rec,f1count,counter,meanf
       common/soilmoist/fieldcap,wilting,soilmoisture
-      common/accel/p_Am_acc,v_acc,p_Xm_acc
 
-c  s_1    = par(17);% -, stress at instar 1: L_1^2/ L_b^2
-c  s_2    = par(18);% -, stress at instar 2: L_2^2/ L_1^2
-c  s_3    = par(19);% -, stress at instar 3: L_3^2/ L_2^2
-c  s_4    = par(20);% -, stress at instar 4: L_4^2/ L_3^2
-c  s_5    = par(21);% -, stress at instar 5: L_5^2/ L_4^2
-c  s_j    = par(22);% -, reprod buffer/structure at pupation as fraction of max
-c  y_EV_l = par(23);% mol/mol, yield of imago reserve on larval structure
-c  y_S_V  = par(24);% mol/mol, yield of silk on larval structure
-c  E_He   = par(25);% J, E_H^p, maturity at emergence
-c  h_W    = par(26);% 1/d, Weibull aging rate
-c  k_E_l  = par(27);% 1/d, spec decay rate of larval structure in pupa
-c  f_W    = par(24);% -, scaled functional response for instar 1-3 of t-W data
-c  f_4    = par(25);% -, scaled functional response of instar  4 
-c  Wi_0   = par(26);% g, weight of imago at start starvation
-      
-      s_1 = 2.660       
-      s_2 = 2.310
-      s_3 = 1.916
-      s_j = 0.999
-      y_EV_l = 0.95
-      E_He = 2.126e-2
-      h_W = 2.033e-2
-      f_W = 6.219
-      f_4 = 0.2755
-      Wi_0 = 3.04e-3
-      l_b=0.01175
-      
-c      zfact = 6.717
-c      delta_deb= 0.04103
-c      vdotref = 0.006452/24.
-c      kappa = 0.6033
-c      p_Mref = 21.64/24.
-c      k_Jref = 0.02/24.
-c      E_G = 5231
-c      E_Hb = 5.443e-3
-      
-      S_instar(1)=s_1
-      S_instar(2)=s_2
-      S_instar(3)=s_3
-      
-      L_instar(1)=S_instar(1)**0.5*L_b
-      do 88 i=2,(stages-4)
-       L_instar(i)=S_instar(i-1)**0.5*L_instar(i-1)
-88    continue      
-  
+c     James' new parameter names
+      cri_o=E_Hb
+      cri_m=E_Hj
+      cri=cri_o*cri_m**5
 
        svl(hour)=0.
        wetgonad(hour)=0.
@@ -242,6 +196,12 @@ c      E_Hb = 5.443e-3
        hs(hour)=0.
        surviv(hour)=1.
        ms(hour)=0.
+
+      if(stage.eq.0)then
+       meanf=1.
+       counter=0
+       f1count=0
+      endif
               
       prevdead=dead
       if((hour.eq.1).and.(daycount.eq.1))then
@@ -285,7 +245,7 @@ c    check if start of a new day
        E_pres = E_init
        ms_pres = ms_init
        minED = E_pres
-       E_H_pres = E_H_init
+       E_H_pres = E_init
        q_pres = q_init
        hs_pres = hs_init
        surviv_pres = surviv_init
@@ -297,7 +257,7 @@ c    check if start of a new day
        V_pres = V(hour-1)
        E_pres = Ed(hour-1)
        ms_pres = ms(hour-1)
-       E_H_pres = E_H(hour-1)
+       E_H_pres = Ed(hour-1)
        q_pres = q(hour-1)
        hs_pres = real(hs(hour-1),4)
        surviv_pres = surviv(hour-1)
@@ -307,14 +267,19 @@ c    check if start of a new day
        E_Hpup_pres = E_Hpup(hour-1)
       endif
 
+      v_pres=v_pres*1.00
+
 c    set body temperature
       Tb = Tc
-c      Tb = 30.
+c      Tb = 36.
 
       if((frogbreed.eq.1).or.(frogbreed.eq.2))then
        contdep=pond_env(iyear,countday,hour,2)
        Tb=pond_env(iyear,countday,hour,1)
       endif
+
+c    Tb=28
+c    contdep=100
 
 c    if running a frog or aquatic insect, check if terrestrial breeder and set Tb to soil temp
       if(stage.eq.0)then
@@ -325,9 +290,9 @@ c    if running a frog or aquatic insect, check if terrestrial breeder and set T
 
 c    Arrhenius temperature correction factor 5 parameters
 
-      Tcorr = EXP(T_A*(1/(273+T_ref)-1/(273+Tb)))/(1+EXP(TAL
+            Tcorr = EXP(T_A*(1/(273+T_ref)-1/(273+Tb)))/(1+EXP(TAL
      &*(1/(273+Tb)-1/TL))+EXP(TAH*(1/TH-1/(273+Tb))))
-      Tcorr=2.0661
+
 
 c    Arrhenius temperature correction factor 1 parameter
 c            Tcorr = EXP(T_A*(1/(273+T_ref)-1/(273+Tb)))
@@ -364,52 +329,24 @@ c    temperature corrections and compound parameters
       p_Mv = p_Mref*Tcorr
       k_Mdot = p_Mv/E_G
       k_J = k_Jref*Tcorr
-      p_Am = p_Mv*zfact/kappa
+      p_AmImT=p_AmIm*Tcorr
+      p_Am1T=p_Am1*Tcorr
+      p_Am = p_Am1T
 
-      if(stage.lt.(stages-2))then
-          v_pres=vold_pres
-      endif
-      if(stage.ge.(stages-2))then
-          E_H_pres=Epup_pres
-      endif
-      
-c     acceleration check      
-      if((stage.gt.0).and.(stage.lt.stages-2))then
-       vdot = vdotref*Tcorr*V_pres**(1./3.)/L_b
-       p_Am = p_Mv*zfact/kappa*Tcorr*V_pres**(1./3.)/L_b
-       p_Xm=p_Xmref*Tcorr*V_pres**(1./3.)/L_b
-       v_acc=vdot/Tcorr
-       p_Am_acc=p_Am/Tcorr
-       p_Xm_acc=p_Xm/Tcorr
-      else
-       if(stage.ge.stages-2)then
-       vdot=v_acc*Tcorr
-       p_Am=p_Am_acc*Tcorr
-       p_Xm=p_Xm_acc*Tcorr
-       else
-       vdot = vdotref*Tcorr
-       p_Am=p_Mv*zfact/kappa*Tcorr
-       p_Xm=p_Xmref*Tcorr
-       endif
-      endif
-c    p_Xm = p_Am/kappa_X
-      kT_E = vdot/L_b
-
-      E_M = p_Am/vdot
-      g = E_G/(kappa*E_M)
-      
       if(stage.eq.0)then
 c     egg
-       E_Hthresh = E_Hb
+       E_Hthresh = E_Hb*meanf
       endif
       if(stage.eq.stages-2)then
        if(metab_mode.eq.2)then
 c     pupa
 c      p_Am = 0.00001/24
-        E_Hthresh = E_He
+       E_Hthresh = E_Hecl*meanf
+       else
+         stage=stage+1
        endif
       endif
-c      if(stage.ge.stages-1)then
+      if(stage.ge.stages-1)then
 c      imago
 c        if(breeding.eq.1)then
 c       p_Am = 0.00001/24
@@ -426,14 +363,13 @@ c     &       (cumbatch(hour-1).gt.0))then
 c        dead=1
 c       endif
 c      endif
-c       E_Hthresh = E_He*meanf
-c      endif
-      if((stage.gt.0).and.(stage.lt.stages-3))then
-c     larva
-       E_Hthresh=L_instar(int(stage))
+       E_Hthresh = E_Hecl*meanf
       endif
-      if(stage.eq.(stages-3))then
-       E_Hthresh=s_J*((1-kappa)*E_m*g*(kT_E+k_Mdot)/(kT_E-g*k_Mdot))
+      if((stage.gt.0).and.(stage.lt.stages-2))then
+c     larva
+c        E_Hthresh = E_Hmoult1*exp(disc)**(stage-1)*meanf
+c       E_Hthresh = E_Hmoult1*exp(disc)**(stage-1)*meanf
+       E_Hthresh = meanf*(E_Hb/1000)*(E_Hmoult1/1000)**(stage)*1000
       endif
 
       if(frogbreed.eq.1)then
@@ -446,6 +382,9 @@ c     larva
        endif
       endif
 
+      vdot = vdotref*Tcorr
+c    p_Xm = p_Am/kappa_X
+      p_Xm=p_Xmref*Tcorr
 c    h_a = h_aref*Tcorr
       L_T = 0.
       L_pres = V_pres**(1./3.)
@@ -783,6 +722,7 @@ c    kill tadpoles if pond dries
 
 c    ********end devreset*************
 
+
 c    now checking to see if starting with embryo, and if so setting the appropriate reserve density
       if(hour.eq.1)then
        if(daycount.eq.1)then
@@ -802,76 +742,6 @@ c    checking to see if animal died recently and needs to start again as an embr
         endif
        endif
       endif
-
-      E_scaled=E_pres/E_m
-      h_a = h_aref*Tcorr
-      L_T = 0.
-      L_pres = V_pres**(1./3.)
-      L_max = V_max**(1./3.)
-      scaled_l = L_pres/L_max
-C
-      if(E_H_pres.le.E_Hb)then
-c     use embryo equation for length, from Kooijman 2009 eq. 2
-       if(waiting.eq.1)then
-        dLdt = 0
-        V_temp=(V_pres**(1./3.)+dLdt)**3
-        dVdt = 0
-        rdot=0
-       else
-        dLdt=(vdot*E_scaled-k_Mdot*g*V_pres**(1./3.))/(3*(E_scaled+g))
-        V_temp=(V_pres**(1./3.)+dLdt)**3
-        dVold_dt = V_temp-V_pres
-        rdot=vdot*(e_scaled/L_pres-(1+L_T/L_pres)/L_max)/
-     &    (e_scaled+g)
-       endif
-         Sc = L_pres**2*(g*e_scaled)/(g+E_scaled)*
-     &       (1+((k_Mdot*L_pres)/vdot))
-         dUEdt = -1*Sc 
-         E_temp=((E_pres*V_pres/p_Am)+dUEdt)*p_Am/(v_pres+dvdt)
-         dEdt=E_temp-E_pres
-         vold(hour)=vold_pres+dVold_dt
-      endif
-      
-      if((stage.gt.0).and.(stage.lt.(stages-2)))then
-c     larva
-       p_C=(E_pres*V_pres)*((E_G*vdot/L_b+p_Mv)/
-     &    (kappa*E_pres+E_G))
-       p_G=kappa*p_C-p_Mv*V_pres
-       dVold_dt=p_G/E_G
-       vold(hour)=vold_pres+dVold_dt
-       if(hour.eq.1)then
-        if(ms_init.gt.0.0000001*MsM*V_pres)then
-c        Equation 2.10 DEB3
-          dEdt = (p_Am*f-E_pres*vdot)/L_pres
-        else
-          dEdt = (p_Am*0-E_pres*vdot)/L_pres
-        endif
-       else
-        if(ms(hour-1).gt.0.0000001*MsM*V_pres)then
-         dEdt = (p_Am*f-E_pres*vdot)/L_pres
-        else
-         dEdt = (p_Am*0-E_pres*vdot)/L_pres
-        endif
-       endif
-      endif
-      
-      if(stage.eq.(stages-2))then
-c     pupa          
-       p_C=(E_pres*V_pres)*((E_G*vdot/V_pres**(1./3.)+p_Mv)/
-     &    (kappa*E_pres+E_G))
-       p_G=kappa*p_C-p_Mv*V_pres
-       dVpup_dt=p_G/E_G
-       dVold_dt=-1.*Vold(hour)*vdot
-       Vpup(hour)=dVpup_dt+Vpup_pres
-       dEdt=Vold(hour)*vdot*y_EV_L*mu_E*M_V-p_C
-      endif
-
-
-c      if(aest.eq.1)then
-c      dVdt=0
-c      rdot=0
-c      endif
-
       
 c    clutchsize=ANINT(0.023*(V_pres**(0.3333333333333)/delta_deb*10)
 c     &    +0.35)
@@ -880,50 +750,98 @@ c     &    +0.35)
       endif
       clutchenergy = E_egg*clutchsize
 
-     
-C     E_M = p_Am/vdot
-C     V_max=(kappa*p_Am_scaled/p_Mv)**(3.)
-Cc      V_max=(kappa*p_Am_scaled/p_Mv)**(3.)
-Cc    increase p_Xmref by proportion that p_Am has been scaled up (reverting to reference temp) then temp correct
-Cc      p_Xm = p_Xmref*(p_Am_scaled/Tcorr)/p_Am1*Tcorr
-C     g = E_G/(kappa*E_M)
-Cc      g = E_G/(1*E_M)
+      if(stage.ne.stages-2)then
+       p_C=(E_pres*V_pres)*(E_G*vdot/V_pres**(1./3.)+p_Mv)/
+     &    ((E_pres*V_pres)/V_pres+E_G)
+      else
+       p_C=(E_pres*Vpup_pres)*(E_G*vdot/Vpup_pres**(1./3.)+p_Mv)/
+     &    ((E_pres*Vpup_pres)/Vpup_pres+E_G)
+      endif
 
-Cc    calculate rate of change of Vold (i.e. egg to larval structure and its degredation)
-C     if(stage.ne.stages-2)then
-C      dVold_dt=(kappa*p_C-V_pres*p_Mv)/E_G
-C     else
-C      if(V_pres.le.0)then
-C       dVold_dt=0
-C      else
-Cc        dVold_dt=-1.*vdot*V_pres**(2./3.)
-C       dVold_dt=-1.*V_pres*vdot/L_b
-C      endif
-C     endif
-C
-Cc    calculate rate of change of Vpup (i.e. new structure formed during metamorphosis)
-C     if(stage.eq.stages-2)then
-Cc    metamorphosis has started, grow the new structure during pupal phase
-C      if(v_pres.le.0)then
-C       dVpup_dt=0
-C      else
-Cc     dVpup_dt=kappa_G*Vpup_pres*((E_pres*V_pres*vdot)/(Vpup_pres**
-Cc     &(4./3.))-(p_Mv/kappa))/((E_pres*V_pres)/Vpup_pres+(E_G/kappa))
-C       dVpup_dt=(kappa*p_C-Vpup_pres*p_Mv)/E_G
-C      endif
-C     else
-C      dVpup_dt=0
-C     endif
-C
-C     if(stage.ne.stages-2)then
-C       dedt=p_A-p_C
-C     else
-Cc       dedt=-1.*kappa_G*kappa_G*E_G*dVold_dt-p_C
-C       dedt= vold(hour)*vdot/l_b-p_C
-C     endif
+      if(stage.eq.0)then
+       p_A=0
+      else
+       if(hour.eq.1)then
+        if(ms_init.gt.0.0)then
+         p_A=f*p_Am*Vb**(2./3.)*(V_pres/Vb)**gam
+         f1count=f1count+1
+         meanf=(f1count*1.)/(counter*1.)
+         counter=counter+1
+        else
+         p_A=0
+         counter=counter+1
+        endif
+       else
+        if(ms(hour-1).gt.0.0)then
+         p_A=f*p_Am*Vb**(2./3.)*(V_pres/Vb)**gam
+         f1count=f1count+1
+         meanf=(f1count*1.)/(counter*1.)
+         counter=counter+1
+        else
+         p_A=0
+         counter=counter+1
+        endif
+       endif
+      endif
+      
+      if(stage.eq.0)then
+       p_Am_scaled=p_Am
+      else
+       p_Am_scaled=(f*p_Am*Vb**(2./3.)*(V_pres/Vb)**gam)
+     &      /V_pres**(2./3.)
+      endif
+
+      E_M = p_Am/vdot
+c    V_max=(kappa*p_Am_scaled/p_Mv)**(3.)
+      V_max=(1*p_Am_scaled/p_Mv)**(3.)
+c    increase p_Xmref by proportion that p_Am has been scaled up (reverting to reference temp) then temp correct
+      p_Xm = p_Xmref*(p_Am_scaled/Tcorr)/p_Am1*Tcorr
+c    g = E_G/(kappa*E_M)
+      g = E_G/(1*E_M)
+      E_scaled=E_pres/E_m
+      h_a = h_aref*Tcorr
+      L_T = 0.
+      L_pres = V_pres**(1./3.)
+      L_max = V_max**(1./3.)
+      scaled_l = L_pres/L_max
+
+c    calculate rate of change of Vold (i.e. egg to larval structure and its degredation)
+      if(stage.ne.stages-2)then
+       dVold_dt=(p_C-V_pres*p_Mv)/E_G
+      else
+       if(V_pres.le.0)then
+        dVold_dt=0
+       else
+        dVold_dt=-1.*vdot*V_pres**(2./3.)
+       endif
+      endif
+
+c    calculate rate of change of Vpup (i.e. new structure formed during metamorphosis)
+      if(stage.eq.stages-2)then
+c    metamorphosis has started, grow the new structure during pupal phase
+       if(v_pres.le.0)then
+        dVpup_dt=0
+       else
+c     dVpup_dt=kappa_G*Vpup_pres*((E_pres*V_pres*vdot)/(Vpup_pres**
+c     &(4./3.))-(p_Mv/kappa))/((E_pres*V_pres)/Vpup_pres+(E_G/kappa))
+        dVpup_dt=(p_C-Vpup_pres*p_Mv)/E_G
+       endif
+      else
+       dVpup_dt=0
+      endif
+
+      if(stage.ne.stages-2)then
+       if(stage.eq.stages-1)then
+        dedt=-1*kappa*Tcorr-V_pres*p_Mv
+       else
+        dedt=p_A-p_C
+       endif
+      else
+       dedt=-1.*kappa_G*kappa_G*E_G*dVold_dt-p_C
+      endif
 
 c    old maturity is now reserve density too
-c      dE_Hdt=dedt
+      dE_Hdt=dedt
 
 c    diapause before pond fill
       if(frogbreed.eq.1)then
@@ -955,71 +873,20 @@ c    equation 2.20 DEB3
 
 c    this power isn't used in the insect model - kappa is now reproduction power
       p_J = 0.
-   
+
       if((stage.lt.stages-1).or.(pregnant.eq.1))then
        p_B = 0.
       else
-        if(batch.eq.1)then
-         batchprep=(k_R/lambda)*((1-kappa)*(E_m*(vdot*V_pres**(2./3.)+
-     &      k_Mdot*V_pres)/(1+(1/g)))-p_J)
-         if(breeding.eq.0)then
-          p_B =0.
-         else 
-          if(hour.eq.1)then
-c        if the repro buffer is lower than what p_B would be(see below), p_B is p_R
-           if(cumrepro_init.lt.batchprep)then        
-            p_B = p_R
-           else
-c          otherwise it is a faster rate, as specified in Pecquerie et. al JSR 2009 Anchovy paper, 
-c         with lambda (the fraction of the year the animals breed if food/temperature not limiting) = 0.583 or 7 months of the year
-            p_B = batchprep
-           endif
-         else
-c       if the repro bufffer is lower than what p_B would be(see below), p_B is p_R
-          if(cumrepro(hour-1).lt.batchprep)then        
-           p_B = p_R
-          else
-c         otherwise it is a faster rate, as specified in Pecquerie et. al JSR 2009 Anchovy paper, 
-c        with lambda (the fraction of the year the animals breed if food/temperature not limiting) = 0.583 or 7 months of the year
-           p_B = batchprep
-          endif
-         endif
-        endif
-       else
-        p_B=p_R
+       p_B = kappa
 c     end check for whether batch mode is operating
-       endif
-c    end check for immature or mature
       endif
 
-c      p_R = p_B
+      p_R = p_B
 
-c    maturity
-      if(E_H_pres.lt.E_Hb)then
-c       use embryo equation for scaled maturity, U_H, from Kooijman 2009 eq. 3
-       if(waiting.eq.1)then
-        U_H_pres=E_H_pres/p_Am    
-        dUHdt=0
-        dE_Hdt=dUHdt*p_Am
-       else
-        U_H_pres=E_H_pres/p_Am    
-        dUHdt=(1-kappa)*Sc-k_J*U_H_pres
-        dE_Hdt=dUHdt*p_Am
-       endif
+      if(stage.ge.stages-1)then
+       p_D = p_M+(1-k_R)*p_R
       else
-       if(stage.eq.(stages-2))then
-        dE_Hdt = (1-kappa)*p_C-p_J
-       else
-        dE_Hdt=0
-       endif
-      endif
-
-      p_R = (1.-kappa)*p_C-p_J
-
-      if((stage.gt.1).and.(stage.ne.(stages-2)))then
-       p_D = p_M+p_J+(1-k_R)*p_R
-      else
-       p_D = p_M+p_J+p_R
+       p_D = p_M+p_R
       endif
 
       p_G = p_C-p_M-p_J-p_R
@@ -1160,7 +1027,7 @@ c      longev=5
 
 c     accumulate energy/matter in reproduction buffer
 c    if it is the beginning of the day
-      if((stage.gt.0).and.(stage.ne.(stages-2)))then
+      if(stage.ge.stages-1)then
        if(hour.eq.1)then
 c      if the buffer ran out in the previous hour
         if(cumrepro_init.lt.0)then
@@ -1200,13 +1067,13 @@ c        stage=3
 c    endif
       
 c    calculate Vold for this hour, ensuring it doesn't go negative
-c      Vold(hour)=Vold_pres+dVold_dt
+      Vold(hour)=Vold_pres+dVold_dt
       if(Vold(hour).lt.0)then
        Vold(hour)=0
       endif
 
 c    calculate Vpup for this hour, ensuring it doesn't go negative
-c      Vpup(hour)=Vpup_pres+dVpup_dt
+      Vpup(hour)=Vpup_pres+dVpup_dt
       if(Vpup(hour).lt.0)then
        Vpup(hour)=0
       endif
@@ -1214,19 +1081,16 @@ c      Vpup(hour)=Vpup_pres+dVpup_dt
 c    sum structures    
       V(hour)=Vpup(hour)+Vold(hour)
 
+      if(stage.eq.stages-2)then
        if(v(hour).le.0)then
         ED(hour)=0
        else
-      ED(hour) = E_pres+real(dEdt,4)
+        ED(hour)=(E_pres*V(hour)+real(dEdt,4))/V(hour)
        endif
-
-
-      if(hour.eq.1)then
-        E_H(hour) = real(E_H_init,4) + real(dE_Hdt,4)
-       else
-        E_H(hour) = E_H(hour-1)+real(dE_Hdt,4)
+      else
+       ED(hour) = (E_pres*V_pres+real(dEdt,4))/V(hour)
       endif
-
+      E_H(hour) = Ed(hour)
 c    make sure ED doesn't go below zero
       if(ED(hour).lt.0)then
        ED(hour)=0
@@ -1239,52 +1103,35 @@ c    find min value of ED for the simulation
 c    svl in mm
       svl(hour) = V(hour)**
      &    (0.3333333333333)/delta_deb*10
-     
+
 c    transition between stages for insect
-      if(metab_mode.eq.1)then
+      if(stage.lt.stages-2)then
+c     before pupal stage
        if(stage.eq.0)then
         if(E_H(hour).le.E_Hb)then
-c        start the larval stage
-         stage=stage+1
+c       start the larval stage
+        stage=stage+1
          Vb=Vold(hour)
-        endif      
+        endif
        else
-        if(V_pres**(1./3.).gt.E_HThresh)then
+        if(E_H(hour).gt.E_Hthresh)then
          stage=stage+1
-        endif 
+        endif
+       endif
+      else
+       if(stage.eq.stages-2)then
+        if(metab_mode.eq.2)then
+        if((E_H(hour)*V(hour)/Vpup(hour)).lt.E_Hecl)then
+c        eclosion
+         stage=stage+1
+        endif
+        else
+c       hemimetabolous - so skip this stage        
+        stage=stage+1
+        endif
        endif
       endif
       
-      if(metab_mode.eq.2)then
-       if(stage.eq.0)then   
-        if(E_H(hour).ge.E_Hb)then
-c       start the larval stage
-         stage=stage+1
-         Vb=Vold(hour)
-        endif
-       else 
-        if(stage.lt.stages-3)then
-         if(V_pres**(1./3.).gt.E_Hthresh)then
-          stage=stage+1
-         endif 
-        else
-         if(stage.eq.stages-3)then
-          if(cumrepro(hour).gt.E_Hthresh)then
-           stage=stage+1
-           E_H(hour)=0.
-          endif
-         else
-          if(stage.eq.(stages-2))then
-           if((E_H(hour)).gt.E_He)then
-c          eclosion
-            stage=stage+1
-           endif
-          endif
-         endif
-        endif
-       endif
-      endif
-             
       if(cumbatch(hour).gt.0)then
        if(monmature.eq.0)then
         monmature=(day+365*(iyear-1))/30.5
@@ -1406,7 +1253,7 @@ c    change below to active or not active rather than depth-based, in case of fo
 c      cumbatch(hour) = cumbatch(hour)-clutchenergy
 c      specific for heteronympha
         if(metab_mode.eq.2)then
-c        stage=stage+1
+        stage=stage+1
         endif
         repro(hour)=1
         if(iyear.eq.1)then
@@ -1583,12 +1430,7 @@ c       if(Depsel(hour).ge. 0)then
        else
          dMsdt = p_Xm*v_pres**(2./3.)*0*(X_food/(halfsat+X_food))-
      &       p_Xm*v_pres**(2./3.)*f*(Ms_pres/(MsM*v_pres))
-      endif
-      dMsdt = p_Xm*v_pres**(2./3.)*funct*(X_food/(halfsat+X_food))-
-     &       p_Xm*v_pres**(2./3.)*f*(Ms_pres/(MsM*v_pres))
-      endif
-      if(stage.eq.0)then
-          dMsdt=0
+       endif
       endif
       if(v_pres.eq.0)then
       dMsdt=0
@@ -1656,6 +1498,9 @@ c    mass balance
 c    mlO2/h, temperature corrected (including SDA)
 
       if(DEB1.eq.1)then
+       if(cumrepro(hour).ne.cumrepro(hour))then
+        cumrepro(hour)=0.
+       endif
        if(ED(hour).ne.ED(hour))then
         ED(hour)=0.
         v(hour)=0
@@ -1713,7 +1558,7 @@ c      a thermoregulating mother with full reserves
         p_M = p_Mv*V_max
         p_C = (E_m*(vdot/L_max+k_Mdot*(1+L_T/L_max))*
      &    (1*g)/(1+g))*v_max
-        p_J = k_J*E_He
+        p_J = k_J*E_Hecl
         p_R = -1*kappa
         p_D = p_M+p_J+(1-k_R)*p_R
         p_A = V_max**(2./3.)*p_Am*f
@@ -1838,3 +1683,6 @@ c    endif
 
       RETURN   
       END  
+
+
+
