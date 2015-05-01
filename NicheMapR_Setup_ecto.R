@@ -56,8 +56,7 @@ NicheMapR_ecto <- function(niche) {
   humid[,3:12]<-0.99
   shadhumid[,3:12]<-0.99
   }
-  soilpotb<-soilpot
-  soilmoistb<-soilmoist
+
   metout<-as.matrix(metout)
   shadmet<-as.matrix(shadmet)
   shadsoil<-as.matrix(shadsoil)
@@ -120,6 +119,8 @@ NicheMapR_ecto <- function(niche) {
   hum.names<-c("JULDAY","TIME",paste("RH",DEP,"cm", sep = ""))
   colnames(humid)<-hum.names
   colnames(shadhumid)<-hum.names  
+      soilpotb<-soilpot
+  soilmoistb<-soilmoist
   } # end vlsci check
   # habitat
   ALT<-ectoin[1] # altitude (m)
@@ -221,13 +222,17 @@ NicheMapR_ecto <- function(niche) {
 
   lat<-ectoin[4]
   if(soilmoisture==1){
- 
-
+  humid[,3:9]<-metout[,5]/100
+  shadhumid[,3:9]<-shadmet[,5]/100
+  humid[,10:12]<-0.8
+  shadhumid[,10:12]<-0.8
+    
+    
   grassgrowths<-as.data.frame(soilpotb)
   soilmoist2b<-as.data.frame(soilmoistb)
   soilmoist2b<-subset(soilmoist2b,TIME==720)
   grassgrowths<-subset(grassgrowths,TIME==720)
-  grassgrowths<-grassgrowths$PT10cm
+  grassgrowths<-grassgrowths$PT5cm
     
     grow<-grassgrowths
     grow[grow>-1500]<-1
@@ -253,7 +258,7 @@ NicheMapR_ecto <- function(niche) {
      grow3[grow3<7]<-0
      grow3[grow3>0]<-1
     
-  soilmoist2b<-soilmoist2b$WC10cm
+  soilmoist2b<-soilmoist2b$WC5cm
   grassgrowths<-as.data.frame(cbind(grassgrowths,soilmoist2b))
   colnames(grassgrowths)<-c('pot','moist')
   grassgrowths$pot[grassgrowths$pot>-200]<-FoodWater
@@ -269,6 +274,7 @@ NicheMapR_ecto <- function(niche) {
   minmoist<-0
   grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater
   grassgrowths<-grassgrowths/100*grow3
+  grassgrowths<-c(grassgrowths,rep(0,nrow(metout)/24-length(grassgrowths)))
   #grassgrowths[grassgrowths<FoodWater/100]<-0
   grasstsdms<-grassgrowths
   #minmoist<-min(grassgrowths)

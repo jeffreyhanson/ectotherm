@@ -77,8 +77,8 @@ c    MAXSHD = (VEGHYT/D)*50.
       if(shade.lt.maxshd)then
 c      increase shade, and do a solution in the new environment
 c    original value for Functional Ecology MS
-c      shade = shade + 3.
-        shade = shade + 35.
+      shade = shade + 3.
+c        shade = shade + 40.
         if(shade.gt. maxshd)then
           shade = maxshd
         ENDIF

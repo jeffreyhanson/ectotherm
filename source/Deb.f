@@ -199,9 +199,9 @@ c     for water pythons
        clutchsize=FLOOR(clutcha*(SVL(hour)/10)-clutchb)
       endif
 c      clutch size below for sleepy lizards
-c      if(SVL(hour).lt.300)then
+      if(SVL(hour).lt.300)then
 c       clutchsize=1
-c      endif
+      endif
       
       if((daycount.lt.startday).or.((countday.lt.startday).and.
      &    (v_init.le.3e-9)).or.(deadead.eq.1))then
