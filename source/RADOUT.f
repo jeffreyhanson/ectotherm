@@ -5,7 +5,7 @@
        REAL AL,ALT,AMASS,ATOT,BP,DEPSUB,EMISAN,FATOSB,FATOSK,Flshcond,
      * PTCOND,QIR2SK,QIR2SB,QCOND,QCONV,Qresp,Qsevap,QIRIN,QIROUT,
      * QMETAB,QSOLAR,R,RELHUM,SIG,SUBTK,
-     * TA,TC,Tskin,TR,TSUBST,VEL,WEVAP,X,XK,H2O_BalPast
+     * TA,Tskin,TR,TSUBST,VEL,WEVAP,X,XK,H2O_BalPast
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,twing,F12,F32,F42,F52
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16
@@ -37,8 +37,6 @@
       QIR2SB = ATOT * FATOSB * EMISAN * SIG * XK * * 4 
       QIROUT = QIR2SK + QIR2SB 
       endif
-
-10    FORMAT(1X,7E10.2)
 
       RETURN   
       end

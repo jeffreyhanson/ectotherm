@@ -62,9 +62,9 @@ C    COPYRIGHT 2006 WARREN P. PORTER  ALL RIGHTS RESERVED.
       If ((Burrow .eq. 'Y') .or. (Burrow .eq. 'y')) then
         if(shdburrow.eq.1)then
          shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
         DEPSEL(IHOUR) = NEWDEP *(-1.0)
 c      Ta determined in Seldep, new Tcore suggested in Undrgrd 

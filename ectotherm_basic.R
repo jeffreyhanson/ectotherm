@@ -52,9 +52,9 @@ TPREF<-31.4 # preferred body temperature (animal will attempt to regulate as clo
 skinwet<-0.229 # %, percentage of total surface area acting like a free water surface for evaporation 
 
 # behavioural traits
-dayact<-0 # diurnal activity allowed (1) or not (0)?
-nocturn<-1 # nocturnal activity allowed (1) or not (0)?
-crepus<-1 # crepuscular activity allowed (1) or not (0)?
+dayact<-1 # diurnal activity allowed (1) or not (0)?
+nocturn<-0 # nocturnal activity allowed (1) or not (0)?
+crepus<-0 # crepuscular activity allowed (1) or not (0)?
 burrow<-1 # shelter in burrow allowed (1) or not (0)?
 shdburrow<-0 # choose if the animal's retreat is in the shade (1) or in the open (0)
 mindepth<-2 # minimum depth (soil node) to which animal can retreat if burrowing
@@ -117,7 +117,7 @@ with(environ, plot(TC~dates,ylim=c(-20,70),type = "l"))
 with(environ, points(ACT*5~dates,type = "l",col="orange"))
 with(environ, points(SHADE/10~dates,type = "l",col="green"))
 with(environ, points(DEP/10~dates,type = "l",col="brown"))
-with(metout, points(TAREF~dates,type = "l",col="light blue"))
+#with(metout, points(TAREF~dates,type = "l",col="light blue"))
 abline(TMAXPR,0,lty=2,col='red')
 abline(TMINPR,0,lty=2,col='blue')
 

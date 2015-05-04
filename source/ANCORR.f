@@ -1,10 +1,10 @@
-      SUBROUTINE ANCORR (GR,RE,ANU) 
+      SUBROUTINE ANCORR (RE,ANU) 
 C    Forced convection subroutine from empirical data
 c    Warren Porter version 31 July 2006  copyright 2006 All rights reserved.
 
 
       IMPLICIT None 
-      REAL ANU,GR,PR,RE,SH,SC
+      REAL ANU,PR,RE,SH,SC
       real customallom,shp
       INTEGER IMODEL,Nodnum,NumFed,NumHrs,Lometry  
       DIMENSION customallom(8),shp(3)

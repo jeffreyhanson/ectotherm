@@ -8,8 +8,8 @@
       Real DEPSUB,DELTAR,EMISAN,EMISSB,EMISSK,Enb,EXTREF
       Real Fatcond,FATOSB,FATOSK,Flshcond,FLTYPE,FLUID,FUNskin
       Real G,GEVAP,GN,gwatph,O2MAX,O2MIN
-      Real PI,PTCOND,QCOND,QCONV,Qgenet,QIN,QIRIN,QIROUT
-      Real QMETAB,QOUT,QRESP,Qsevap,QSOLAR,QSOLR,QSWEAT
+      Real PI,PTCOND,QCOND,QCONV,Qgenet,QIRIN,QIROUT
+      Real QMETAB,QRESP,Qsevap,QSOLAR,QSOLR,QSWEAT
       Real R,R1,RELHUM,Rflesh,Rinsul,RQ,Rskin
       Real S1,shade,SIG,SPHEAT,SUBTK,TA,TC,Tlung
       Real Tdigpr,Tmaxpr,Tminpr,Tskin,TOBJ,TR,TSKY,tbask,temerge

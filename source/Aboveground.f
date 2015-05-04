@@ -9,14 +9,14 @@ C    Version 8/1/06
       External Fun
 
       Real AMASS,Asil,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
-      Real AL,delta,TA,VEL,Pi,PTCOND,SUBTK,DEPSUB,TSUBST
+      Real AL,TA,VEL,Pi,PTCOND,SUBTK,DEPSUB,TSUBST
       Real Fun,WC,ZEN,PCTDIF,ABSSB,ABSAN,ASILN,FATOBJ,NM
       Real QSOL,RH,TskyC,Shade,SOIL1,SOIL3,TIME,Taloc,TREF
-      Real Tsoil,TSUB,VREF,Z,Tannul,Tairef,Tc,Tshsoi
+      Real Tsoil,TSUB,VREF,Z,Tannul,Tc,Tshsoi
       Real ANDENS,ASILP,EMISSB,EMISSK,FLUID,G
-      Real MICRO,QSOLR,TOBJ,testx,testy,TSKY
-      Real veghyt,x,x1,x2,zbrent,Zsoil,CONTH,CONTW,CONTVOL,CONTDEP
-      Real Tshsky,Tshloc,Tshski,Tshlow,twater,pond_depth
+      Real MICRO,QSOLR,TOBJ,TSKY
+      Real Zsoil,CONTH,CONTW,CONTVOL,CONTDEP
+      Real Tshski,Tshlow,twater,pond_depth
       Real Tskin,R,WEVAP,TR,ALT,BP,H2O_BalPast
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
@@ -34,7 +34,6 @@ C    Version 8/1/06
 
       Integer Ihour,wingmod,wingcalc,inwater,aquatic,feeding
       integer flight,flyer,flytest,wetmod,contonly,contype,pond
-      LOGICAL SUCCES
 
       DIMENSION TIME(25),QSOL(25),RH(25),TskyC(25),SOIL1(25)
       DIMENSION SOIL3(25),Taloc(25),TREF(25),TSUB(25),VREF(25),Z(25)

@@ -3,7 +3,7 @@ NicheMapR_ecto <- function(niche) {
 enberr<-0.0002 # tolerance for energy balance solution
 #timeinterval<-1 # number of time intervals computed in a year (min of 12, i.e. monthly, max of 365, make the same as was set for the microclimate run)
 nyears<-read.csv('ectoin.csv')[8,2]-read.csv('ectoin.csv')[7,2]+1 # number of years the simulation runs for 
-write_input<-0 # write input into 'csv input' folder? (1 yes, 0 no)
+write_input<-1# write input into 'csv input' folder? (1 yes, 0 no)
 longlat<-c(read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[3,2],read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[4,2]) # get longitude and latitude from microclimate output
 nyears<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[8,2]-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[7,2]+1 # number of years the simulation runs for 
 # 'custallom' below operates if lometry=5, and consists of 4 pairs of values representing 

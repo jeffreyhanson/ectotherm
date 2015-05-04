@@ -57,11 +57,11 @@ c    the numerical integrator for transients
       If(TRANCT .eq. NDAYY)THEN
       hour = real(T/60.,4)
       transient(IT)=real(Y(1),4)
-c      If(Y(1) .gt. 50.)THEN
-c              CORE = 50.
-c          Else
-c              CORE = real(Y(1),4)
-c      Endif
+       If(Y(1) .gt. 50.)THEN
+               CORE = 50.
+           Else
+               CORE = real(Y(1),4)
+       Endif
       IF(LIVE .eq. 1)THEN
           QMETAB = 0.0056*10.**(0.038*(core)-1.771)*GMASS**.82
           QMETAB = QMETAB*XBAS

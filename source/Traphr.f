@@ -44,7 +44,7 @@ C     ON A DAILY (D) AND TOTAL TIME SELECTED (T) BASIS
       Common/Trav/Dist
       Common/Intnum/Intnum
 C     We must save the values of these variables between calls.
-      SAVE OLDMET,OLDEVP,OLDWIN,OLDAIR,OLDCO2
+      SAVE OLDMET,OLDEVP,OLDWIN,OLDAIR,OLDCO2,OLDDIS
 
       If((Transt.eq.'Y').or.(Transt.eq.'y'))then
       JP=JP+1

@@ -1,4 +1,4 @@
-       SUBROUTINE SELDEP (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM)
+       SUBROUTINE SELDEP (TSOIL,HSOIL,ZSOIL,RELHUM)
 C    COPYRIGHT WARREN P. PORTER  12 DEC, 1990   
 
 C    If an ectotherm has to be below ground,
@@ -11,7 +11,7 @@ c    parameters the animal experiences.
 
       Implicit None
 
-      Real ALT,BP,DEPTH,QSOLR,R,slope,newdep
+      Real ALT,BP,QSOLR,R,slope,newdep
       Real AL,TA,VEL,PTCOND,SUBTK,DEPSUB,TSUBST
       Real TC,Tdeep,TDIGPR,TNORM,TR,TSKIN,TSMAX,TSMIN,TSOIL
       Real WEVAP,ZMAX,ZMIN,ZSOIL,H2O_BalPast

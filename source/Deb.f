@@ -200,7 +200,7 @@ c     for water pythons
       endif
 c      clutch size below for sleepy lizards
       if(SVL(hour).lt.300)then
-c       clutchsize=1
+       clutchsize=1
       endif
       
       if((daycount.lt.startday).or.((countday.lt.startday).and.

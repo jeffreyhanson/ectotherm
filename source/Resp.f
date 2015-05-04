@@ -86,6 +86,9 @@ C      OTIS, 1964
       RPCTO2 = 0.2095
       RPCTN2 = 0.7902
       RPCTCO2 = 0.0003
+      PctO2 = RPCTO2
+      PctN2 = RPCTN2
+      PctCO2 = RPCTCO2
 C    Allowing user to modify gas values for burrow, etc. conditions
       If (PctO2 .ne. O2gas/100.)then
         PctO2 = O2gas/100.

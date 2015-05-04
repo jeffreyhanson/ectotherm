@@ -241,7 +241,7 @@ C    Forced CONVECTION FOR ANIMAL
    15    CONTINUE 
       IF((LOMETRY.EQ.3).OR.(LOMETRY.EQ.4).OR.(LOMETRY.EQ.5))THEN 
 C      CALCULATE FORCED CONVECTION FOR LIZARDS, FROGS OR TURTLES
-        CALL ANCORR (GR,RE,ANU) 
+        CALL ANCORR (RE,ANU) 
       ENDIF  
       
    20 CONTINUE
@@ -315,7 +315,6 @@ C       FORCED CONVECTION IN SPHERE
 
 C    FORCED CONVECTION FOR ANIMAL  
    35 CONTINUE  
-c      CALL ANCORR (GR,RE,ITYPE,ANU,SH)  
       if(wingmod.gt.0)then
        if(wingcalc.eq.1)then
 c      ANU=0.102*RE**0.675*PR**(1./3.)
@@ -363,6 +362,4 @@ C  **************************************************************************
       Qforced = HC * convar * (Tskin - TA) 
       Qconv = Qfree + Qforced 
 
-115   format (1x,1I3,7e10.3/4X,7E10.3,/4X,7E10.3)
-50    RETURN  
       END     

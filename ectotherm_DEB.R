@@ -187,7 +187,7 @@ daylengthstart<- 12.5 # threshold daylength for initiating breeding
 daylengthfinish<- 12.5 # threshold daylength for terminating breeding
 photodirs <- 1 # is the start daylength trigger during a decrease (0) or increase (1) in day length?
 photodirf <- 0 # is the finish daylength trigger during a decrease (0) or increase (1) in day length?
-startday<-3*30 # day of year at which DEB model starts
+startday<-1 # day of year at which DEB model starts
 breedtempthresh<-200 # body temperature threshold below which breeding will occur
 breedtempcum<-24*7 # cumulative time below temperature threshold for breeding that will trigger breeding
 

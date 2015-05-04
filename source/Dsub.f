@@ -52,7 +52,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       Real S2,SHADE,SIG,SOIL1,SOIL3,SPHEAT,SUBTK
       Real TA,Taloc,Tannul,TC,Tcpast,TI,TIME,Tlung,Tskin,TOBJ
       Real TPAST,TR,TREF,TSKY,TskyC,TSUB,TSUBST,Tym
-      Real VAR,VEL,VOL,VREF,WC,WCMIN,WEVAP,XBAS,XCALC,Z,ZEN
+      Real VAR,VEL,VOL,VREF,WC,WCMIN,WEVAP,XBAS,Z,ZEN
       Real Rinsul,R1,Area,Fatcond,AirVol,CO2MOL
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,tbask,temerge,R2
       Real tcinit,pi,MLO2,GH2OMET,H2O_BalPast,TWING,massleft,volumeleft
@@ -73,7 +73,7 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,rhref
 
       real HC,Trad,HD,WB,DP,E,ESAT,VD,RW,TVIR,TVINC,TOTLEN,AV,AT,  
-     * DENAIR,CP,WTRPOT,HTOVPR,CONTDEPTH,shdgrass
+     * DENAIR,CP,WTRPOT,HTOVPR,CONTDEPTH,shdgrass,tprint,printt
       real PCTEYE,WEYES,WRESP,WCUT,AEFF,CUTFA,AEYES,SkinW,convar
      &,SkinT,VDAIR,VDSURF,TAVE,RHUM,x1,x2,x,testx,zbrent,enberr,reftol
       real CONTH,CONTW,CONTVOL,CONTDEP,conthole,fieldcap,wilting,contwet
@@ -154,8 +154,9 @@ C    NOTE: VARIABLE ACTIVITY DEPENDING ON HOUR OF THE DAY NOT YET IN DSUB.FOR
       COMMON/CONTDEPTH/CONTDEPTH
       COMMON/CONT/CONTH,CONTW,CONTVOL,CONTDEP,WETMOD,contonly,conthole
      &,contype,contwet
-      common/soilmoist/fieldcap,wilting,soilmoisture
+      common/soilmoistur/fieldcap,wilting,soilmoisture
       common/pondtest/pond
+      Common/Usrop2/Enberr,printT,tprint      
 
       DATA TI/0.,60.,120.,180.,240.,300.,360.,420.,480.,540.,600.,660.,
      &720.,780.,840.,900.,960.,1020.,1080.,1140.,1200.,1260.,1320.,
@@ -167,6 +168,11 @@ C    GRAMS OF MASS
       PI = 3.141592
       volumeleft=vol
       massleft=amass
+      ASQ=0.
+      BSQ=0.
+      CSQ=0.
+      TPAST = real(T,4)
+
 
 C     TIME DEPENDENT TEMPERATURE OR HEAT GEN./UNIT VOLUME
         If((TRANIN .eq. 'n') .or. (TRANIN .eq. 'N'))then
