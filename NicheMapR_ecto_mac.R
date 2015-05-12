@@ -3,43 +3,46 @@ ectotherm <- function(ecto) {
   if (!is.loaded('ectotherm')) {
     dyn.load('ectotherm.so')
   }
+  dim<-as.numeric(ecto$ectoinput[69])*as.numeric(ecto$ectoinput[104]) # number of days to run
   a <- .Fortran("ectotherm", 
-                as.double(ecto$ectoinput), 
-                as.double(ecto$metout), 
-                as.double(ecto$shadmet), 
-                as.double(ecto$soil), 
-                as.double(ecto$shadsoil), 
-                as.double(ecto$soilmoist), 
-                as.double(ecto$shadmoist), 
-                as.double(ecto$soilpot), 
-                as.double(ecto$shadpot), 
-                as.double(ecto$humid), 
-                as.double(ecto$shadhumid),     
-                as.double(ecto$DEP), 
-                as.double(ecto$RAINFALL),              
-                as.double(ecto$debmod), 
-                as.double(ecto$deblast), 
-                as.double(ecto$grassgrowths),
-                as.double(ecto$grasstsdms),
-                as.double(ecto$wetlandTemps),
-                as.double(ecto$wetlandDepths), 
-                as.double(ecto$arrhenius),
-                as.double(ecto$thermal_stages),
-                as.double(ecto$behav_stages), 
-                as.double(ecto$water_stages),
-                as.double(ecto$MAXSHADES),
-                environ=matrix(data = 0., nrow = 24*7300, ncol = 20), 
-                enbal=matrix(data = 0., nrow = 24*7300, ncol = 14), 
-                masbal=matrix(data = 0., nrow = 24*7300, ncol = 21),              
-                debout=matrix(data = 0., nrow = 24*7300, ncol = 20), 
-                yearout=matrix(data = 0., nrow = 1, ncol = 80),
-                yearsout=matrix(data = 0., nrow = 20, ncol = 45))
+    as.integer(dim),
+    as.double(ecto$ectoinput), 
+    as.double(ecto$metout), 
+    as.double(ecto$shadmet), 
+    as.double(ecto$soil), 
+    as.double(ecto$shadsoil),
+    as.double(ecto$soilmoist), 
+    as.double(ecto$shadmoist), 
+    as.double(ecto$soilpot), 
+    as.double(ecto$shadpot), 
+    as.double(ecto$humid), 
+    as.double(ecto$shadhumid),    
+    as.double(ecto$DEP), 
+    as.double(ecto$RAINFALL),              
+    as.double(ecto$debmod), 
+    as.double(ecto$deblast), 
+    as.double(ecto$grassgrowths),
+    as.double(ecto$grasstsdms),
+    as.double(ecto$wetlandTemps),
+    as.double(ecto$wetlandDepths), 
+    as.double(ecto$arrhenius),
+    as.double(ecto$thermal_stages),
+    as.double(ecto$behav_stages), 
+    as.double(ecto$water_stages),
+    as.double(ecto$MAXSHADES),
+    as.double(ecto$S_instar),
+    environ=matrix(data = 0., nrow = dim*24, ncol = 20), 
+    enbal=matrix(data = 0., nrow = dim*24, ncol = 14),
+    masbal=matrix(data = 0., nrow = dim*24, ncol = 21),              
+    debout=matrix(data = 0., nrow = dim*24, ncol = 20), 
+    yearout=matrix(data = 0., nrow = 1, ncol = 80),
+    yearsout=matrix(data = 0., nrow = 20, ncol = 45))
   dyn.unload('ectotherm.so')
-    
-  environ <- matrix(data = 0., nrow = 24*7300, ncol = 20)
-  enbal <- matrix(data = 0., nrow = 24*7300, ncol = 14)
-  masbal <- matrix(data = 0., nrow = 24*7300, ncol = 21)
-  debout <- matrix(data = 0., nrow = 24*7300, ncol = 20)
+  
+  environ <- matrix(data = 0., nrow = 24*dim*24, ncol = 20)
+  enbal <- matrix(data = 0., ncol = 24*dim*24, nrow = 14)
+  masbal <- matrix(data = 0., nrow = 24*dim*24, ncol = 21)
+  debout <- matrix(data = 0., nrow = 24*dim*24, ncol = 20)
   yearout <- matrix(data = 0., nrow = 1, ncol = 80)
   yearsout <- matrix(data = 0., nrow = 20, ncol = 45)
   

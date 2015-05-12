@@ -65,11 +65,11 @@ c    Shade environmental variables for this hour
      &    ,contype,contwet
       COMMON/fly/flytime,flight,flyer,flytest,flyspeed,flymetab
       COMMON/DEBPAR2/zfact,kappa,E_G,k_R,delta_deb,E_H_start,breedact
-     &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
-     &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
-     &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
-     &,prevdaylength,lat,frogbreed,frogstage,metamorph,clutcha,clutchb
-     &,breedactthres    
+     &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch
+     &,MsM,lambda,breedrainthresh,daylengthstart,daylengthfinish
+     &,photostart,photofinish,lengthday,photodirs,photodirf
+     &,lengthdaydir,prevdaylength,lat,frogbreed,frogstage
+     &,metamorph,breedactthres,clutcha,clutchb 
       common/pondtest/pond
 
       Data Pi/3.141592/

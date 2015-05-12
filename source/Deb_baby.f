@@ -14,8 +14,8 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
       REAL f,k_Mdot
       REAL w_E,mu_E,mu_V,w_V,M_V,E_egg
       REAL E_M,E_G,kappa
-      REAL d_V
-      REAL eggdryfrac,E_Hmoult1,E_Hmet,E_Hecl
+      REAL d_V,S_instar
+      REAL eggdryfrac,L_b
       REAL g,E_scaled,V_max,L_T,L_pres,L_max,scaled_l
       REAL dLdt,v_temp,Sc,dUEdt,E_temp,U_H_pres,dUHdt,dE_Hdt,E_H_pres
 
@@ -32,9 +32,9 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &viviparous,pregnant,daycount,batch,photostart,photofinish,
      &photodirs,photodirf,frogbreed,frogstage,metamorph
       integer metab_mode,stages,breedact,breedactthres
-      real p_Am1,p_AmIm,disc
-      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,gam,Vb
-
+      real y_EV_l
+      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,s_j
+      dimension S_instar(4)
       Common/Treg/Tc,TWING
 
       COMMON/DEBPAR1/clutchsize,andens_deb,d_V,eggdryfrac,w_E,mu_E,
@@ -45,8 +45,7 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb
-      COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
-     &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
      &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
      &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,

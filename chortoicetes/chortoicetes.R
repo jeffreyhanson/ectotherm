@@ -18,7 +18,6 @@ file.copy('/git/micro_australia/soilmoist.csv','soilmoist.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadpot.csv','shadpot.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadhumid.csv','shadhumid.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/shadpot.csv','shadpot.csv',overwrite=TRUE)
-
 file.copy('/git/micro_australia/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_australia/DEP.csv','DEP.csv',overwrite=TRUE)
@@ -174,19 +173,17 @@ h_aref<-3.61e-13/(24.^2) #3.61e-11/(24.^2)
 s_G<-0.01
 
 E_Egg<-1.04e+06*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
-svl_met<-11 # mm, snout vent length at metamorphosis
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
 K<-1 # half-saturation constant
 X<-10 # food density J/cm2, approximation based on 200 Tetragonia berries per 1m2 (Dubasd and Bull 1990) assuming energy content of Lilly Pilly (http://www.sgapqld.org.au/bush_food_safety.pdf)
 
 # for insect model
-metab_mode<-0 # 0 = off, 1 = holometabolous with Dyar's rule scaling, 2 = holometabolous linear scaling, 3 = hemimetabolous with Dyar's rule scaling, 4 = hemimetabolous linear scaling
-stages<-8 # number of stages (max = 8) = number of instars plus 1 for egg + 1 for pupa + 1 for imago
-p_Am1<-0.9296852/24*100
-p_AmIm<-2.068836/24*100
-disc<-0.0307
-gam<-1.6
+metab_mode<-2 # 0 = off, 1 = hemimetabolus model (to do), 2 = holometabolous model
+stages<-7 # number of stages (max = 8) = number of instars plus 1 for egg + 1 for pupa + 1 for imago
+y_EV_l<-0.95 # mol/mol, yield of imago reserve on larval structure
+S_instar<-c(2.660,2.310,1.916,0) # -, stress at instar n: L_n^2/ L_n-1^2
+s_j<-0.999 # -, reprod buffer/structure at pupation as fraction of max
 
 # these next five parameters control the thermal response, effectively generating a thermal response curve
 T_REF<-20 # degrees C, reference temperature - correction factor is 1 for this temperature
@@ -258,8 +255,8 @@ N_waste<-c(1,4/5,3/5,4/5) # chemical formula for nitrogenous waste product, CHON
 
 # breeding life history
 clutchsize<-2. # clutch size
-eggmass<-3.787 # initial dry mass of an egg (g)
-viviparous<-1 # 1=yes, 0=no
+clutch_ab<-c(0,0) # paramters for relationship between length and clutch size: clutch size = a*SVL-b, make zero if fixed clutch size
+viviparous<-0 # 1=yes, 0=no
 batch<-1 # invoke Pequerie et al.'s batch laying model?
 
 # the following four parameters apply if batch = 1, i.e. animal mobilizes
@@ -315,21 +312,20 @@ wilting<-1 # redundant
 ystrt<-0
 
 #set up call to NicheMapR function
-niche<-list(wilting=wilting,ystrt=ystrt,soilmoisture=soilmoisture,write_input=write_input,minshade=minshade,maxshade=maxshade,REFL=REFL,nyears=nyears,enberr=enberr,FLTYPE=FLTYPE,SUBTK=SUBTK,soilnode=soilnode,rinsul=rinsul,lometry=lometry,Flshcond=Flshcond,Spheat=Spheat,Andens=Andens,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,DELTAR=DELTAR,skinwet=skinwet,extref=extref,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,fosorial=fosorial,rainact=rainact,actrainthresh=actrainthresh,container=container,conth=conth,contw=contw,rainmult=rainmult,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,svl_met=svl_met,frogbreed=frogbreed,frogstage=frogstage,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,eggmass=eggmass,batch=batch,breedrainthresh=breedrainthresh,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,customallom=customallom,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,EMISAN=EMISAN,FATOSK=FATOSK,FATOSB=FATOSB,f=f,minwater=minwater,s_G=s_G,K=K,X=X,flyer=flyer,flyspeed=flyspeed,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,metab_mode=metab_mode,stages=stages,p_Am1=p_Am1,p_AmIm=p_AmIm,arrhenius=arrhenius,disc=disc,gam=gam,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,flymetab=flymetab,live=live,continit=continit,wetmod=wetmod,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,aestivate=aestivate,depress=depress,contype=contype,rainmult=rainmult,conthole=conthole,contonly=contonly,contwet=contwet,microin=microin,mac=mac,grasshade=grasshade)
 source('NicheMapR_Setup_ecto.R')
 nicheout<-NicheMapR_ecto(niche)
 
 # retrieve output
-metout<-as.data.frame(nicheout$metout)[1:(nyears*365*24),]
-shadmet<-as.data.frame(nicheout$shadmet)[1:(nyears*365*24),]
-soil<-as.data.frame(nicheout$soil)[1:(nyears*365*24),]
-shadsoil<-as.data.frame(nicheout$shadsoil)[1:(nyears*365*24),]
-rainfall<-as.data.frame(nicheout$RAINFALL)
+metout<-as.data.frame(nicheout$metout)
+shadmet<-as.data.frame(nicheout$shadmet)
+soil<-as.data.frame(nicheout$soil)
+shadsoil<-as.data.frame(nicheout$shadsoil)
+rainfall<-as.data.frame(as.numeric(nicheout$RAINFALL))
 grassgrowths<-as.data.frame(nicheout$grassgrowths)
 grasstsdms<-as.data.frame(nicheout$grasstsdms)
-environ<-as.data.frame(nicheout$environ[1:(365*24*nyears),])
-enbal<-as.data.frame(nicheout$enbal[1:(365*24*nyears),])
-masbal<-as.data.frame(nicheout$masbal[1:(365*24*nyears),])
+environ<-as.data.frame(nicheout$environ)
+enbal<-as.data.frame(nicheout$enbal)
+masbal<-as.data.frame(nicheout$masbal)
 
 yearout<-as.data.frame(nicheout$yearout)
 if(nyears>1){
@@ -347,7 +343,7 @@ tzone<-paste("Etc/GMT-",10,sep="") # doing it this way ignores daylight savings!
 dates<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="hours")
 dates<-subset(dates, format(dates, "%m/%d")!= "02/29") # remove leap years
 if(DEB==1){
-  debout<-as.data.frame(nicheout$debout[1:(365*24*nyears),])
+  debout<-as.data.frame(nicheout$debout)
   debout<-cbind(dates,debout)
 }
 environ<-cbind(dates,environ)
@@ -374,15 +370,16 @@ library(lattice)
 # grass presence vector
 soilpot<-read.csv(file=paste(microin,'soilpot.csv',sep=""),sep=",")
 soilmoist<-read.csv(file=paste(microin,'soilmoist.csv',sep=""),sep=",")
-grass<-soilpot$PT5cm
-grassthresh<--1500
+grass<-soilpot$PT90cm
+grass[is.na(grass)] <- 0
+grassthresh<--500
 grass[grass<=grassthresh]<-0
 grass2<-grass
 grass2[grass2>grassthresh & grass2<0]<-1
+plot(grass2~metout$dates,type='l',col='dark green')
 
 with(soilmoist, {plot(WC3cm~dates,type='l',col='light blue')})
 with(environ, {xyplot(TC+ACT*5+SHADE/10+DEP/10~dates,ylim=c(-15,50),type = "l")})
-plot(grass2~metout$dates,type='l',col='dark green')
 
 recover<-7 # time locust needs to build up resources to lay first batch
 ovidates<-as.data.frame(cbind(grass2[1:(length(grass2)-1)],grass2[2:length(grass2)]))
@@ -400,12 +397,12 @@ ovirows<-rbind(c(0,recover),ovirows) # add first day of sim as an oviposition da
 
 ############### chortoicetes egg model #############
 
-DATA1<-cbind(soil[,1:7],metout[,13:14],environ[,17],soilmoist[,4]*100)
-colnames(DATA1)<-c('DATE','JULDAY','TIME','D0cm','D2_5cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST')
+DATA1<-cbind(soil[,1:8],metout[,13:14],environ[,17],soilmoist[,5:7]*100)
+colnames(DATA1)<-c('DATE','JULDAY','TIME','D0cm','D1cm','D3cm','D5cm','D10cm','ZEN','SOLR','PHOTO','MOIST3cm','MOIST5cm','MOIST10cm')
 
 # if photo period (DATA%PHOTO) < 13 and decreasing during egg lay, then make diapause egg 
 # (lay at 2.5cm and stop development at 45% under ideal conditions)
-egglay <- function(photoperiod,previous_photoperiod, SHALtemp, DEEPtemp, SHALmoist){
+egglay <- function(photoperiod,previous_photoperiod, SHALtemp, DEEPtemp, SHALmoist, DEEPmoist){
   if(photoperiod<photo_thresh && photoperiod<=previous_photoperiod){
     #set diapause potential
     out.diapause_pot <-TRUE
@@ -415,7 +412,7 @@ egglay <- function(photoperiod,previous_photoperiod, SHALtemp, DEEPtemp, SHALmoi
   }else{
     out.diapause_pot <- FALSE
     out.temp <- DEEPtemp
-    out.moist<- SHALmoist
+    out.moist<- DEEPmoist
     out.diapause_egg <-FALSE
   }
   out.diapause_hours <- 0
@@ -466,7 +463,7 @@ gethatch<-function(ovirows, stagefreq1){
     DATA$PHOTOPREV[25:nrow(DATA)]<-DATA$PHOTO[1:(nrow(DATA)-24)] 
     
     #egg <- egglay(DATA$PHOTO[2],DATA$PHOTOPREV[1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
-    egg <- egglay(DATA$PHOTO[ovirows[m,2]],DATA$PHOTOPREV[ovirows[m,2]-1], DATA$D5cm, DATA$D10cm, DATA$MOIST)
+    egg <- egglay(DATA$PHOTO[ovirows[m,2]],DATA$PHOTOPREV[ovirows[m,2]-1], DATA$D5cm, DATA$D10cm, DATA$MOIST5cm, DATA$MOIST10cm)
     # make counter for total number of consecutive egg hatches
     egg_gen <- 1
     # make empty vector for development 
@@ -570,12 +567,12 @@ gethatch<-function(ovirows, stagefreq1){
       
     } # end check if within recovery time
     
-    dev1<-as.data.frame(dev)
-    dev1<-as.data.frame(cbind(metout$dates,dev1, DATA$D10cm, DATA$MOIST))
-    colnames(dev1)<-c('dates','dev1','temp', 'moist')
+    #dev1<-as.data.frame(dev)
+    #dev1<-as.data.frame(cbind(metout$dates,dev1, DATA$D10cm, DATA$MOIST))
+    #colnames(dev1)<-c('dates','dev1','temp', 'moist')
     # update temp to account for diapause egg depths
-    dev1$temp[d_e]<-DATA$D5cm[d_e]
-    dev1$moist[d_e]<-DATA$MOIST[d_e]
+    #dev1$temp[d_e]<-DATA$D5cm[d_e]
+    #dev1$moist[d_e]<-DATA$MOIST[d_e]
     if(ovirows[m,1]!=1){
       p<-p+1
     }
@@ -593,14 +590,14 @@ gethatch<-function(ovirows, stagefreq1){
     #     }
     #       points(dev1$dev1~dev1$dates,type='l',col='blue')
     #   }
-     if(n==1){
-      devs<-subset(dev1,dev>0)
-     }else{
-      devs<-rbind(devs,dev1)
-     }
+     #if(n==1){
+      #devs<-subset(dev1,dev>0)
+     #}else{
+    #  devs<-rbind(devs,dev1)
+     #}
     
   } # end loop through ovip dates
-  return(list(hatchdates=hatchdates,devs=devs, stagefreq=stagefreq1))
+  return(list(hatchdates=hatchdates, stagefreq=stagefreq1))
 }
 
 
@@ -798,9 +795,9 @@ for(g in 1:100){
   }
 }
       
-plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
-points(grass2~environ$dates,type='l',col='green')
-points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
+#plot(environ$TC~environ$dates,type='l',col='orange',ylim=c(0,60))
+#points(grass2~environ$dates,type='l',col='green')
+#points(allgens$mass~allgens$dates,type='p',col='blue',cex=0.1)
 
 success<-as.data.frame(subset(allgens,mass>55))
 success$dates
@@ -813,10 +810,116 @@ names(stagefreqDF)<-c('date','long','lat',stagefreqnames)
 stagefreqDF_agg<-aggregate(stagefreqDF[,2:14],by=list(format(dates,'%Y-%m-%d')),max)
 colnames(stagefreqDF_agg)[1]<-'date'
 
+stagefreqDF_agg$nymphs<-rowSums(stagefreqDF_agg[,8:12])
+plot(stagefreqDF_agg$nymphs~as.POSIXct(stagefreqDF_agg$date),type='l')
+plot(stagefreqDF_agg$Adult~as.POSIXct(stagefreqDF_agg$date),type='l')
 
 
-d
 
+require(foreign) # read/write dbf
+library(ggplot2) # Plotting maps.
+library(maps)    # Map data.
+library(oz)      # Map data for Australia.
+library(scales)  # Functions: alpha() comma()
+library(ggmap)   # Google maps.
+library(zoom)
+library(rgeos)   # for gContains(...)
+
+
+# read australia map data
+path<-"C:/NicheMapR_Working/projects/Chortoicetes/survey_james/ALPC data and R scripts/"
+ds <- read.csv(file.path(path, "ozdata.csv"))
+# ds  <- subset(ds, border == "coast") # dont keep state lines
+mapdata<-ds[,c(2,3,6)] # long, lat, state
+mapdata$ausmap <- rep(TRUE,nrow(mapdata)) # ausmap
+mapdata$NDENS <- rep(-1,nrow(mapdata)) # nymph density
+mapdata$ADENS <- rep(NA,nrow(mapdata)) # adult density
+mapdata$DATE_ <- rep(NA,nrow(mapdata)) # sampling date
+mapdata<-subset(mapdata, state != "TAS")
+
+# Load locust survey data
+surveylist <- c("survey90-92.dbf", "survey93-95.dbf","surveys96-98.dbf", 
+                "survey98-01.dbf", "survey02-05.dbf" , "survey05-09.dbf") 
+datalist <- list()
+datalength <- 0
+for(i in 1:length(surveylist)){
+  dat <- read.dbf(file.path(path,surveylist[i]))
+  if(surveylist[i]!="survey05-09.dbf"){
+  datalist[length(datalist)+1]<-list(cbind(dat$X_COORD, dat$Y_COORD, 
+                                      rep(NA,nrow(dat)),rep(FALSE,nrow(dat)),
+                                      dat$NDENS, dat$ADENS,dat$DATE_ ))
+  
+  
+  }else{ # 2005-2009 follows a different format
+    datalist[length(datalist)+1]<-list(cbind(dat$POINT_X, dat$POINT_Y, 
+                                             rep(NA,nrow(dat)),rep(FALSE,nrow(dat)),
+                                             dat$NDENS, dat$ADENS,dat$DATE_ ))
+  }
+  datalength<-datalength + nrow(dat) # sum of all data rows
+}
+
+
+# stitch together data
+locustdata<-rep(NA,datalength*ncol(mapdata))
+dim(locustdata)<-c(datalength,ncol(mapdata))
+start<-1
+for(i in 1:length(datalist)){
+  end<-start+nrow(datalist[[i]])
+  locustdata[start:(end-1),]<-datalist[[i]]
+  start <- end
+}
+locustdata<-as.data.frame(locustdata)
+names(locustdata)<-names(mapdata)
+locustdata$DATE_<-as.Date(locustdata$DATE_, ,origin="1970-01-01")
+
+# get rid of anomolous data long/lat = 1 = -54
+locustdata<-subset(locustdata, lat!=-54)
+locustdata<-subset(locustdata, long!=1)
+
+
+# round long lat measurements to nearest 0.5 degrees 
+locustdata1 <- as.data.frame(locustdata)
+locustdata1$lat <- round(locustdata$lat*2,0)/2 # round to nearest 0.5
+locustdata1$long <- round(locustdata$long*2,0)/2
+surveyfreq<-as.data.frame(table(locustdata1$long,locustdata1$lat))
+names(surveyfreq)<-c('long','lat', 'freq')
+surveyfreq$lat<-as.numeric(as.character(surveyfreq$lat))
+surveyfreq$long<-as.numeric(as.character(surveyfreq$long))
+surveyfreq$freq<-as.numeric(as.character(surveyfreq$freq))
+
+
+
+# plot survey distribution 
+# p <- ggplot() + coord_fixed()
+# basemap <- p + geom_polygon(data=mapdata, aes(x=long,y=lat,group=state, fill = 'red'), colour = "white")
+# p <- basemap + geom_point(data=surveyfreq[which(surveyfreq$freq>0),],
+#                           aes(x=long,
+#                               y=lat,
+#                               size = freq))
+# p
+
+# order long/lats by survey freq
+attach(surveyfreq)
+sforder <-surveyfreq[order(-freq),]
+detach(surveyfreq)
+
+# print top surveyed coordinates
+head(sforder)
+
+# get subset for most sampled longlat 
+attach(locustdata1)
+locustsub<-locustdata1[which((long == sforder[2,1])&(lat==sforder[2,2])),]
+detach(locustdata1)
+plot(locustsub$NDENS*20~as.POSIXct(locustsub$DATE_), type='h',col='red')
+
+
+plot(stagefreqDF_agg$nymphs~as.POSIXct(stagefreqDF_agg$date),type='l')
+points(locustsub$NDENS*20~as.POSIXct(locustsub$DATE_), type='h',col='red')
+
+plot(stagefreqDF_agg$Adult~as.POSIXct(stagefreqDF_agg$date),type='l')
+points(locustsub$ADENS*5~as.POSIXct(locustsub$DATE_), type='h',col='red')
+
+plot(locustsub$ADENS*10~as.POSIXct(locustsub$DATE_), type='h',col='red')
 
 
 

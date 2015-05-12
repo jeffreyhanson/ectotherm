@@ -1,14 +1,14 @@
       SUBROUTINE BREED(julday,photostart,photofinish,lengthday
      &,daylengthstart,daylengthfinish,photodirs,photodirf,prevdaylength,
-     &lat,firstday,breedact,breedactthres,tbs,hour,countday,
+     &lat,firstday,breedact,breedactthres,tbs,hour,
      &breedtempthresh,breedtempcum,daycount)
        
       INTEGER breeding,julday,photostart,photofinish,photodirs,photodirf
-     &,firstday,breedact,breedactthres,hour,countday,starttime,endtime,
+     &,firstday,breedact,breedactthres,hour,starttime,endtime,
      &breedtempcum,daycount
 
       REAL daylengthstart,daylengthfinish,breedtempthresh,
-     &lengthday,lengthdaydir,prevdaylength,lat,tbs,tbmean
+     &lengthday,prevdaylength,lat,tbs,tbmean
       
       dimension tbs(24*7300)
       
@@ -23,7 +23,7 @@ c    breedtempthresh=20
 c    breedtempcum=7*24
 
       if(photostart.eq.0)then
-      breeding=1
+       breeding=1
       endif
 
       if((photostart.gt.0).and.(photostart.lt.5))then
@@ -125,22 +125,61 @@ c    end check for seasonal breeding
       if(photostart.eq.5)then
 c     using specified daylength thresholds for breeding
        if((lengthday.ge.daylengthstart).and.(prevdaylength.lt.
-     &      daylengthstart))then
+     &      lengthday))then
 c      we have reached the critical daylength for breeding initiation and day length is increasing
           if(photodirs.eq.1)then
            breeding=1
+       if((lengthday.ge.daylengthfinish).and.(prevdaylength.lt.
+     &      lengthday))then
+c      we have reached the critical daylength for breeding initiation and day length is increasing
+          if(photodirf.eq.1)then
+           breeding=0
           endif
+       endif
+       if((lengthday.le.daylengthfinish).and.(prevdaylength.gt.
+     &      lengthday))then
+c      we have reached the critical daylength for breeding cessation and day length is decreasing
+          if(photodirf.eq.0)then
+           breeding=0
+          endif
+       endif
+           goto 1101
+          else
+           breeding=0
+          endif
+       else
+        breeding=0
        endif
 
        if((lengthday.le.daylengthstart).and.(prevdaylength.gt.
-     &      daylengthstart))then
+     &      lengthday))then
 c      we have reached the critical daylength for breeding initiation and day length is decreasing
           if(photodirs.eq.0)then
            breeding=1
+       if((lengthday.ge.daylengthfinish).and.(prevdaylength.lt.
+     &      lengthday))then
+c      we have reached the critical daylength for breeding initiation and day length is increasing
+          if(photodirf.eq.1)then
+           breeding=0
           endif
        endif
+       if((lengthday.le.daylengthfinish).and.(prevdaylength.gt.
+     &      lengthday))then
+c      we have reached the critical daylength for breeding cessation and day length is decreasing
+          if(photodirf.eq.0)then
+           breeding=0
+          endif
+       endif
+           goto 1101
+          else
+           breeding=0
+          endif
+       else
+        breeding=0
+       endif
+
        if((lengthday.ge.daylengthfinish).and.(prevdaylength.lt.
-     &      daylengthfinish))then
+     &      lengthday))then
 c      we have reached the critical daylength for breeding initiation and day length is increasing
           if(photodirf.eq.1)then
            breeding=0
@@ -148,16 +187,26 @@ c      we have reached the critical daylength for breeding initiation and day le
        endif
 
        if((lengthday.le.daylengthfinish).and.(prevdaylength.gt.
-     &      daylengthfinish))then
-c      we have reached the critical daylength for breeding initiation and day length is decreasing
+     &      lengthday))then
+c      we have reached the critical daylength for breeding cessation and day length is decreasing
           if(photodirf.eq.0)then
            breeding=0
           endif
        endif
       endif
 
+1101  continue
+
+      
       if(breedact.lt.breedactthres)then
          breeding=0
+      endif
+
+      if(prevdead.eq.1)then
+       if(breeding.eq.0)then
+        dead=1
+        goto 987
+       endif
       endif
 
       tbmean=0
@@ -167,12 +216,12 @@ c      we have reached the critical daylength for breeding initiation and day le
        do 10 i=starttime,endtime
         tbmean=tbmean+tbs(i)
 10     continue
-      
        tbmean=tbmean/breedtempcum
        if(tbmean.gt.breedtempthresh)then
         breeding=0
        endif
       endif
+
       
-      RETURN
+987      RETURN
       end

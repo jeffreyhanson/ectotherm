@@ -13,7 +13,11 @@ file.copy('/git/micro_global/shadmet.csv','shadmet.csv',overwrite=TRUE)
 file.copy('/git/micro_global/soil.csv','soil.csv',overwrite=TRUE)
 file.copy('/git/micro_global/shadsoil.csv','shadsoil.csv',overwrite=TRUE)
 file.copy('/git/micro_global/soilmoist.csv','soilmoist.csv',overwrite=TRUE)
+file.copy('/git/micro_global/shadmoist.csv','shadmoist.csv',overwrite=TRUE)
 file.copy('/git/micro_global/soilpot.csv','soilpot.csv',overwrite=TRUE)
+file.copy('/git/micro_global/shadpot.csv','shadpot.csv',overwrite=TRUE)
+file.copy('/git/micro_global/humid.csv','humid.csv',overwrite=TRUE)
+file.copy('/git/micro_global/shadhumid.csv','shadhumid.csv',overwrite=TRUE)
 file.copy('/git/micro_global/rainfall.csv','rainfall.csv',overwrite=TRUE)
 file.copy('/git/micro_global/ectoin.csv','ectoin.csv',overwrite=TRUE)
 file.copy('/git/micro_global/DEP.csv','DEP.csv',overwrite=TRUE)
@@ -213,23 +217,22 @@ mi<-0  # hourly inactive mortality rate (probability of mortality per hour)
 mh<-0.5   # survivorship of hatchling in first year
 
 #set up call to NicheMapR function
-niche<-list(clutch_ab=clutch_ab,minshade=minshade,maxshade=maxshade,soilnode=soilnode,lometry=lometry,ABSMAX=ABSMAX,ABSMIN=ABSMIN,ptcond=ptcond,ctmax=ctmax,ctmin=ctmin,TMAXPR=TMAXPR,TMINPR=TMINPR,TPREF=TPREF,skinwet=skinwet,dayact=dayact,nocturn=nocturn,crepus=crepus,burrow=burrow,CkGrShad=CkGrShad,climb=climb,andens_deb=andens_deb,d_V=d_V,d_E=d_E,eggdryfrac=eggdryfrac,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,kappa_X_P=kappa_X_P,mu_X=mu_X,mu_E=mu_E,mu_V=mu_V,mu_P=mu_P,nX=nX,nE=nE,nV=nV,nP=nP,N_waste=N_waste,T_REF=T_REF,TA=TA,TAL=TAL,TAH=TAH,TL=TL,TH=TH,z=z,kappa=kappa,kappa_X=kappa_X,p_Mref=p_Mref,v_dotref=v_dotref,E_G=E_G,k_R=k_R,MsM=MsM,delta=delta,h_aref=h_aref,viviparous=viviparous,k_J=k_J,E_Hb=E_Hb,E_Hj=E_Hj,E_Hp=E_Hp,clutchsize=clutchsize,v_init=v_init,E_init=E_init,E_H_init=E_H_init,batch=batch,daylengthstart=daylengthstart,daylenghtfinish=daylengthfinish,photodirs=photodirs,photodirf=photodirf,photostart=photostart,photofinish=photofinish,amass=amass,E_Egg=E_Egg,PTUREA=PTUREA,PFEWAT=PFEWAT,FoodWater=FoodWater,DEB=DEB,MR_1=MR_1,MR_2=MR_2,MR_3=MR_3,f=f,minwater=minwater,s_G=s_G,K=K,X=X,maxdepth=maxdepth,mindepth=mindepth,ctminthresh=ctminthresh,ctkill=ctkill,arrhenius=arrhenius,startday=startday,raindrink=raindrink,reset=reset,gutfill=gutfill,TBASK=TBASK,TEMERGE=TEMERGE,p_Xm=p_Xm,live=live,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,stage=stage,ma=ma,mi=mi,mh=mh,microin=microin,mac=mac)
 source('NicheMapR_Setup_ecto_basicDEB.R')
 nicheout<-NicheMapR_ecto(niche)
 
 # retrieve output
 nyears<-nicheout$nyears
 timeinterval<-nicheout$timeinterval
-metout<-as.data.frame(nicheout$metout)[1:(nyears*365*24),]
-shadmet<-as.data.frame(nicheout$shadmet)[1:(nyears*365*24),]
-soil<-as.data.frame(nicheout$soil)[1:(nyears*365*24),]
-shadsoil<-as.data.frame(nicheout$shadsoil)[1:(nyears*365*24),]
+metout<-as.data.frame(nicheout$metout)
+shadmet<-as.data.frame(nicheout$shadmet)
+soil<-as.data.frame(nicheout$soil)
+shadsoil<-as.data.frame(nicheout$shadsoil)
 rainfall<-as.data.frame(nicheout$RAINFALL)
 grassgrowths<-as.data.frame(nicheout$grassgrowths)
 grasstsdms<-as.data.frame(nicheout$grasstsdms)
-environ<-as.data.frame(nicheout$environ[1:(365*24*nyears),])
-enbal<-as.data.frame(nicheout$enbal[1:(365*24*nyears),])
-masbal<-as.data.frame(nicheout$masbal[1:(365*24*nyears),])
+environ<-as.data.frame(nicheout$environ)
+enbal<-as.data.frame(nicheout$enbal)
+masbal<-as.data.frame(nicheout$masbal)
 
 yearout<-as.data.frame(nicheout$yearout)
 if(nyears>1){
@@ -244,7 +247,7 @@ ystart<-2014
 dates<-seq(ISOdate(ystart,1,1,tz=tzone)-3600*12, ISOdate((ystart+nyears),1,1,tz=tzone)-3600*13, by="hours")
 dates<-subset(dates, format(dates, "%m/%d")!= "02/29") # remove leap years
 if(DEB==1){
-  debout<-as.data.frame(nicheout$debout[1:(365*24*nyears),])
+  debout<-as.data.frame(nicheout$debout)
   debout<-cbind(dates,debout)
 }
 environ<-cbind(dates,environ)

@@ -3,7 +3,9 @@ ectotherm <- function(ecto) {
   if (!is.loaded('ectotherm')) {
     dyn.load('ectotherm.dll')
   }
+  dim<-as.numeric(ecto$ectoinput[69])*as.numeric(ecto$ectoinput[104]) # number of days to run
   a <- .Fortran("ectotherm", 
+    as.integer(dim),
     as.double(ecto$ectoinput), 
     as.double(ecto$metout), 
     as.double(ecto$shadmet), 
@@ -28,18 +30,19 @@ ectotherm <- function(ecto) {
     as.double(ecto$behav_stages), 
     as.double(ecto$water_stages),
     as.double(ecto$MAXSHADES),
-    environ=matrix(data = 0., nrow = 24*7300, ncol = 20), 
-    enbal=matrix(data = 0., nrow = 24*7300, ncol = 14), 
-    masbal=matrix(data = 0., nrow = 24*7300, ncol = 21),              
-    debout=matrix(data = 0., nrow = 24*7300, ncol = 20), 
+    as.double(ecto$S_instar),
+    environ=matrix(data = 0., nrow = dim*24, ncol = 20), 
+    enbal=matrix(data = 0., nrow = dim*24, ncol = 14),
+    masbal=matrix(data = 0., nrow = dim*24, ncol = 21),              
+    debout=matrix(data = 0., nrow = dim*24, ncol = 20), 
     yearout=matrix(data = 0., nrow = 1, ncol = 80),
     yearsout=matrix(data = 0., nrow = 20, ncol = 45))
   dyn.unload("ectotherm.dll")
   
-  environ <- matrix(data = 0., nrow = 24*7300, ncol = 20)
-  enbal <- matrix(data = 0., nrow = 24*7300, ncol = 14)
-  masbal <- matrix(data = 0., nrow = 24*7300, ncol = 21)
-  debout <- matrix(data = 0., nrow = 24*7300, ncol = 20)
+  environ <- matrix(data = 0., nrow = 24*dim*24, ncol = 20)
+  enbal <- matrix(data = 0., ncol = 24*dim*24, nrow = 14)
+  masbal <- matrix(data = 0., nrow = 24*dim*24, ncol = 21)
+  debout <- matrix(data = 0., nrow = 24*dim*24, ncol = 20)
   yearout <- matrix(data = 0., nrow = 1, ncol = 80)
   yearsout <- matrix(data = 0., nrow = 20, ncol = 45)
   

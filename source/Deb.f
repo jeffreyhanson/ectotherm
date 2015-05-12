@@ -32,10 +32,10 @@ c    EXTERNAL GUT
       REAL Tc,depsel,tcores,orig_clutchsize
       REAL QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,clutchsize
       REAL fecundity,clutches,monrepro,svlrepro,monmature,minED
-      REAL fec,tknest,clutchenergy
+      REAL tknest,clutchenergy
       REAL acthr,actxbas,thconw,cumrepro_temp
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask,temerge
-      real ctmin,ctmax,eggsoil,surv
+      real ctmin,ctmax,eggsoil
       REAL cumrepro_init,q_init,hs_init,
      &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,p_Xmref,
      &k_Jref,k_J,batchprep,s_G,potfreemass
@@ -53,20 +53,17 @@ c    EXTERNAL GUT
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,longev,h_w
-      real rhref,E_Hmoult1,E_Hmet,E_Hecl,newclutch,depress,surviv
-      real p_Am1,p_AmIm,disc
+      real rhref,E_Hecl,newclutch,depress,surviv
+      real y_EV_l
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
-     &    E_Hpup,E_H_start,breedtempthresh,gam,repro,tbmean
+     &    E_Hpup,E_H_start,breedtempthresh,s_j,repro
       real rainfall2,debfirst,ectoinput,grassgrowth,grasstsdm,raindrink
       real wetlandTemps,wetlandDepths,conthole,pond_env,tbs,stage
-      real fec1,fec2,fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,
-     &fec11,fec12,fec13,fec14,fec15,fec16,fec17,fec18,fec19,fec20,act1
-     &,act2,act3,act4,act5,act6,act7,act8,act9,act10,act11,act12,act13
-     &,act14,act15,act16,act17,act18,act19,act20,fieldcap,wilting
-      real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
-     &for12,for13,for14,for15,for16,for17,for18,for19,for20,Vb
-      real gutfill,contwet,shdgrass,grass,clutcha,clutchb
-
+      real fieldcap,wilting
+      real S_instar,L_b
+      real gutfill,contwet,shdgrass,clutcha,clutchb
+      REAL, dimension(100) :: FEC,SURV
+      
       INTEGER day,hour,iyear,nyear,countday,i,pregnant,soilmoisture,
      &viviparous,daycount,batch,photostart,photofinish,metamorph,
      &photodirs,photodirf,breeding,dead,frogbreed,frogstage,census
@@ -75,18 +72,18 @@ c    EXTERNAL GUT
       integer DEB1,inwater,aquatic,feeding,ctmincum,ctminthresh,ctkill
       integer metab_mode,stages,deadead,startday,reset,wetmod,contonly
       integer contype,firstday,completion,complete,waiting,breedact
-      integer breedactthres,breedtempcum,starttime,endtime,aestivate
+      integer breedactthres,breedtempcum,aestivate
 
       character*1 transt,dlenth
 
       DIMENSION V(24),ED(24),wetmass(24),E_H(24),eggsoil(24)
      &,wetstorage(24),wetfood(24),svl(24),Vold(24),Vpup(24),Epup(24),
-     &E_Hpup(24),stage_rec(25)
-      DIMENSION wetgonad(24),repro(24),surv(100)
+     &E_Hpup(24),stage_rec(25),S_instar(4)
+      DIMENSION wetgonad(24),repro(24)
      &    ,cumrepro(24),q(24),hs(24),ms(24),EH_baby1(24)
      &   ,cumbatch(24),food(50),v_baby1(24),e_baby1(24),surviv(24)
       DIMENSION depsel(25),tcores(25),acthr(25),actxbas(25)
-      DIMENSION etaO(4,3),JM_JO(4,4),fec(100)
+      DIMENSION etaO(4,3),JM_JO(4,4)
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),FAECES
      &    (24),NWASTE(24),rhref(25),pond_env(20,365,25,2)
       dimension rainfall2(7300),debfirst(13),ectoinput(127),
@@ -116,14 +113,8 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/DEPTHS/DEPSEL,Tcores
       COMMON/ENVAR1/QSOL,RH,TskyC,SOIL1,SOIL3,TIME,Taloc,TREF,rhref
      & ,shdgrass
-      COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
-     &,minED,annfood,food,longev,completion,complete,fec1,fec2,
-     &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,
-     &fec15,fec16,fec17,fec18,fec19,fec20,act1,act2,act3,act4,act5,act6
-     &,act7,act8,act9,act10,act11,act12,act13,act14,act15,act16,act17,
-     &act18,act19,act20,fec,surv,for1,for2,for3,for4,for5,for6,for7
-     &,for8,for9,for10,for11,for12,for13,for14,for15,for16,for17,for18,
-     &for19,for20   
+      COMMON/DEBOUTT/fecundity,clutches,monrepro,svlrepro,monmature
+     &,minED,annfood,food,longev,completion,complete,fec,surv
       common/gut/gutfull,gutfill
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
      &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
@@ -135,13 +126,12 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/DEBPAR1/clutchsize,andens_deb,d_V,eggdryfrac,w_E,mu_E,
      &mu_V,w_V,e_egg,kappa_X,kappa_X_P,mu_X,mu_P,w_N,w_P,w_X,funct
       COMMON/DEBPAR2/zfact,kappa,E_G,k_R,delta_deb,E_H_start,breedact
-     &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch
-     &,MsM,lambda,breedrainthresh,daylengthstart,daylengthfinish
-     &,photostart,photofinish,lengthday,photodirs,photodirf
-     &,lengthdaydir,prevdaylength,lat,frogbreed,frogstage
-     &,metamorph,breedactthres,clutcha,clutchb
-      COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
-     &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
+     &,maxmass,e_init_baby,v_init_baby,E_H_init,E_Hb,E_Hp,E_Hj,batch,MsM
+     &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
+     &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
+     &,prevdaylength,lat,frogbreed,frogstage,metamorph
+     &,breedactthres,clutcha,clutchb
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
       COMMON/TPREFR/TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask
      &,temerge
       common/vivip/viviparous,pregnant
@@ -163,10 +153,30 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       common/death/causedeath,deathstage
       common/stage_r/stage_rec
       common/metdep/depress,aestivate,aest,dehydrated
-      common/soilmoist/fieldcap,wilting,soilmoisture
+      common/soilmoistur/fieldcap,wilting,soilmoisture
       
       dead=0
       waiting=0
+      
+      svl(hour)=0.
+       wetgonad(hour)=0.
+       wetstorage(hour)=0.
+       wetfood(hour)=0.
+       wetmass(hour)=0.
+       MLO2(hour) = 0.
+       O2FLUX = 0.
+       CO2FLUX = 0.
+       v(hour)=0.
+       e_H(hour)=0.
+       cumrepro(hour)=0.
+       cumbatch(hour)=0.
+       vpup(hour)=0.
+       vold(hour)=0.
+       ed(hour)=0.
+       hs(hour)=0.
+       surviv(hour)=1.
+       ms(hour)=0.
+       
       if(daycount.eq.1494)then
       continue
       endif
@@ -370,282 +380,17 @@ c    p_Xm = p_Am/kappa_X*1
 
 
 c    call subroutine that assesses photoperiod cues on breeding
-c    CALL BREED(julday,photostart,photofinish,lengthday
-c     &,daylengthstart,daylengthfinish,photodirs,photodirf,prevdaylength,
-c     &lat,firstday,breedact,breedactthres,tbs,hour,countday,
-c     &breedtempthresh,breedtempcum,daycount)
-
-
-      breedactthres=0
-c    breedtempthresh=20
-c    breedtempcum=7*24
-
-      if(photostart.eq.0)then
-      breeding=1
-      endif
-
-      if((photostart.gt.0).and.(photostart.lt.5))then
-       if(lat.lt.0)then
-c     southern hemisphere        
-        if(photostart.eq.1)then
-         if((julday.eq.357).or.(firstday.eq.1))then
-          breeding=1
-         endif
-        endif
-        if(photostart.eq.2)then
-         if(julday.eq.80)then
-         breeding=1
-         endif
-        endif
-        if(photostart.eq.3)then
-         if(julday.eq.173)then
-         breeding=1
-         endif
-        endif
-        if(photostart.eq.4)then
-         if(julday.eq.266)then
-         breeding=1
-         endif
-        endif
-       else
-c     northern hemisphere
-        if(photostart.eq.1)then
-         if(julday.eq.173)then
-         breeding=1
-         endif
-        endif
-        if(photostart.eq.2)then
-         if(julday.eq.266)then
-         breeding=1
-         endif
-        endif
-        if(photostart.eq.3)then
-         if(julday.eq.357)then
-         breeding=1
-         endif
-        endif
-        if(photostart.eq.4)then
-         if(julday.eq.80)then
-         breeding=1
-         endif
-        endif
-       endif
-
-       if(lat.lt.0)then
-c     southern hemisphere        
-        if(photofinish.eq.1)then
-         if(julday.eq.357)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.2)then
-         if(julday.eq.80)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.3)then
-         if(julday.eq.173)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.4)then
-         if(julday.eq.266)then
-         breeding=0
-         endif
-        endif
-       else
-c     northern hemisphere
-        if(photofinish.eq.1)then
-         if(julday.eq.173)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.2)then
-         if(julday.eq.266)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.3)then
-         if(julday.eq.80)then
-         breeding=0
-         endif
-        endif
-        if(photofinish.eq.4)then
-         if(julday.eq.357)then
-         breeding=0
-         endif
-        endif
-       endif
-
-c    end check for seasonal breeding
-      endif
-
-      if(photostart.eq.5)then
-c     using specified daylength thresholds for breeding
-       if((lengthday.ge.daylengthstart).and.(prevdaylength.lt.
-     &      daylengthstart))then
-c      we have reached the critical daylength for breeding initiation and day length is increasing
-          if(photodirs.eq.1)then
-           breeding=1
-          endif
-       endif
-
-       if((lengthday.le.daylengthstart).and.(prevdaylength.gt.
-     &      daylengthstart))then
-c      we have reached the critical daylength for breeding initiation and day length is decreasing
-          if(photodirs.eq.0)then
-           breeding=1
-          endif
-       endif
-       if((lengthday.ge.daylengthfinish).and.(prevdaylength.lt.
-     &      daylengthfinish))then
-c      we have reached the critical daylength for breeding initiation and day length is increasing
-          if(photodirf.eq.1)then
-           breeding=0
-          endif
-       endif
-
-       if((lengthday.le.daylengthfinish).and.(prevdaylength.gt.
-     &      daylengthfinish))then
-c      we have reached the critical daylength for breeding initiation and day length is decreasing
-          if(photodirf.eq.0)then
-           breeding=0
-          endif
-       endif
-      endif
-
-      if(breedact.lt.breedactthres)then
-         breeding=0
-      endif
-C     if(breeding.eq.1)then
-C         if(cumrepro
-
-c    if(countday.lt.213)then
-c    breeding=1
-c    else
-c    breeding=0
-c    endif
-c    lambda=0.3
-
-      tbmean=0
-      starttime=int((daycount-1)*24+hour-breedtempcum)
-      endtime=int((daycount-1)*24+hour)
-      if(starttime.gt.0)then
-       do 10 i=starttime,endtime
-        tbmean=tbmean+tbs(i)
-10     continue
-      
-       tbmean=tbmean/breedtempcum
-       if(tbmean.gt.breedtempthresh)then
-        breeding=0
-       endif
-      endif
-
+      CALL BREED(julday,photostart,photofinish,lengthday,
+     &daylengthstart,daylengthfinish,photodirs,photodirf,prevdaylength,
+     &lat,firstday,breedact,breedactthres,tbs,hour,
+     &breedtempthresh,breedtempcum,daycount)
 
 c    call subroutine (for frogs at this stage) that assesses if user wants cumulative resets of development after metamorphosis
-c    CALL DEVRESET(dead,E_H_pres,E_Hb,frogbreed,breeding,
-c     &    conth,contdep,stage,frogstage,reset,complete,waiting)
+      CALL DEVRESET(dead,E_H_pres,E_Hb,frogbreed,breeding,
+     &conth,contdep,stage,frogstage,reset,complete,waiting,
+     &hour,stages,completion)
 
-      waiting=0
 
-       if(reset.gt.0)then
-        if(stage.ge.reset)then
-         dead=1
-         complete=1
-        endif
-       endif
-
-      if(frogbreed.eq.1)then
-       if(breeding.eq.1)then
-         if(frogstage.eq.1)then 
-c        resetting at metamorphosis            
-         if(stage.eq.2)then
-         dead=1
-         endif
-         endif
-       endif
-      endif
-
-      if(frogbreed.eq.1)then
-       if(stage.le.1)then
-         if(contdep.le.0.1)then
-          dead=1
-         endif
-       endif
-      endif
-
-c    prevent egg development in soil if not the right season
-      if(frogbreed.eq.2)then
-       if(E_H_pres.le.E_Hb)then
-        if(breeding.eq.0)then
-         dead=1
-        endif
-       endif
-      endif
-
-c    kill eggs of terrestrial breeders if the pond fills up too soon
-      if(frogbreed.eq.2)then
-       if(stage.eq.0)then
-        if(E_H_pres.le.E_Hb*0.90)then
-        if(contdep.gt.50)then
-         dead=1
-        endif
-       endif
-       endif
-      endif
-
-c    kill tadpoles if pond dries
-      if(frogbreed.eq.2)then
-       if(stage.eq.1)then
-         if(contdep.le.0.1)then
-      waiting=1
-      E_H_pres=E_Hb
-      stage=0
-         endif
-       endif
-        if(frogstage.eq.1)then 
-         if(stage.eq.2)then
-          dead=1
-      waiting=0
-         endif
-        endif
-      endif
-
-      if(frogbreed.eq.2)then
-       if(stage.eq.1)then
-         if(contdep.le.0.1)then
-         dead=1
-      waiting=0
-         endif
-       endif
-      endif
-
-      if(frogbreed.eq.3)then
-       if(frogstage.eq.1)then
-        if(breeding.eq.1)then
-         if(stage.ge.1)then
-         dead=1
-      waiting=0
-         endif
-        else
-         dead=1
-      waiting=0
-        endif
-       endif
-      endif
-
-      if(frogbreed.eq.3)then
-       if(frogstage.eq.0)then
-         if(E_H_pres.le.E_Hb)then
-        if(breeding.eq.0)then
-         dead=1
-      waiting=0
-         endif
-        endif
-       endif
-      endif
-
-c    ********end devreset*************
 
 c    now checking to see if starting with embryo, and if so setting the appropriate reserve density
       if(hour.eq.1)then
@@ -1084,7 +829,7 @@ c    svl in mm
         stage=stage
        endif
        if(monmature.eq.0)then
-        monmature=(day+365*(iyear-1))/30.5
+        monmature=(countday+365*(iyear-1))/30.5
        endif
       endif
       
@@ -1136,70 +881,11 @@ c        then remove what is needed from the repro buffer and add it to the batc
          e_baby=e_init_baby
          EH_baby=0
          newclutch=clutchsize
-        if(iyear.eq.1)then
          fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.2)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.3)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.4)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.5)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.6)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.7)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.8)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.9)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.10)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.11)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.12)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.13)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.14)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.15)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.16)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.17)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.18)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.19)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.20)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
          fecundity=fecundity+clutchsize
          clutches=clutches+1
          if(fecundity.ge.clutchsize)then
-          monrepro=(day+365*(iyear-1))/30.5
+          monrepro=(countday+365*(iyear-1))/30.5
           svlrepro=svl(hour)
          endif
          pregnant=0
@@ -1228,70 +914,11 @@ c    change below to active or not active rather than depth-based, in case of fo
         endif
         cumbatch(hour) = cumbatch(hour)-clutchenergy
         repro(hour)=1
-        if(iyear.eq.1)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.2)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.3)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.4)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.5)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.6)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.7)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.8)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.9)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.10)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.11)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.12)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.13)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.14)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.15)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.16)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.17)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.18)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.19)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
-        if(iyear.eq.20)then
-         fec(iyear)=fec(iyear)+clutchsize
-        endif
+        fec(iyear)=fec(iyear)+clutchsize
         fecundity=fecundity+clutchsize
         clutches=clutches+1
         if(fecundity.ge.clutchsize)then
-         monrepro=(day+365*(iyear-1))/30.5
+         monrepro=(countday+365*(iyear-1))/30.5
          svlrepro=svl(hour)
         endif
        endif
@@ -1300,66 +927,7 @@ c    change below to active or not active rather than depth-based, in case of fo
 898   continue
 
       if((reset.gt.0).and.(reset.ne.8))then
-        if(iyear.eq.1)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.2)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.3)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.4)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.5)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.6)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.7)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.8)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.9)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.10)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.11)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.12)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.13)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.14)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.15)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.16)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.17)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.18)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.19)then
-         fec(iyear)=completion
-        endif
-        if(iyear.eq.20)then
-         fec(iyear)=completion
-        endif
+       fec(iyear)=completion
       endif
 
 c    if((stage.ne.0).and.(stage.ne.stages-2))then

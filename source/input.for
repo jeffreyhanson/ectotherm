@@ -4,15 +4,17 @@
              
       DOUBLE PRECISION T,hs
       
-      double precision metout2,grassgrowths2,
-     &shadmet2,soil22,shadsoil2,dep2,environ2,enbal2,
-     &rainfall2,ectoinput2,yearout2,masbal2,grasstsdm2
-     &,wetlandTemps2,wetlandDepths2,thermal_stages2,
-     &behav_stages2,water_stages2,yearsout2,maxshades2,arrhenius2,
-     &soilmoist2,shadmoist2,soilpot2,shadpot2,humid2,shadhumid2
-               
-      double precision debmod2,debout2,deblast2
+      double precision grassgrowths2,dep2,ectoinput2,yearout2,grasstsdm2
+     &,wetlandTemps2,wetlandDepths2,thermal_stages2,S_instar2,
+     &behav_stages2,water_stages2,yearsout2,maxshades2,arrhenius2
 
+               
+      double precision debmod2,deblast2
+      double precision, DIMENSION(:,:), ALLOCATABLE :: environ2,enbal2
+     & ,masbal2,debout2,metout2,shadmet2,soil22,shadsoil2,soilmoist2,
+     &shadmoist2,soilpot2,shadpot2,humid2,shadhumid2
+      double precision, DIMENSION(:), ALLOCATABLE :: rainfall2
+      
       REAL ABSAN,ABSMAX,ABSMIN,ABSSB,Acthr,ACTLVL
       REAL ACTXBAS,AEFF,AEYES,AHEIT
       Real AMET,AEVP,AEIN,AWIN,ANRG,AWTR,AFOD,AHRS,AAIR,ADIS            
@@ -79,11 +81,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       REAL p_B_past,cumbatch,wetfood,cumrepro,ms
       REAL fecundity,clutches,monrepro,svlrepro,monmature,minED
       real annualact,annfood,food
-      REAL act1,act2,act3,act4,act5,fec1,fec2,fec3,fec4,fec5,
-     &fec,tknest
-      REAL act11,act12,act13,act14,act15,act16,act17,act18,act19,act20
-      REAL fec11,fec12,fec13,fec14,fec15,fec16,fec17,fec18,fec19,fec20
-      REAL act6,act7,act8,act9,act10,fec6,fec7,fec8,fec9,fec10
+      REAL tknest
 
       REAL O2gas,CO2gas,N2gas
       REAL rainfall,lengthday
@@ -100,7 +98,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
       real e_egg
       REAL v_init,E_init,E_H
-      REAL kappa_X,kappa_X_P,mu_X,mu_P,conthole,Vb
+      REAL kappa_X,kappa_X_P,mu_X,mu_P,conthole,L_b
 
       REAL Thconw
       REAL ms_init,cumrepro_init,q_init,hs_init,E_H_init,
@@ -114,22 +112,20 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26,surviv
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,longev,gutfull
-      real rhref,E_Hmoult1,E_Hmet,E_Hecl,repro,raindrink,orig_clutchsize
-      real p_Am1,p_AmIm,disc,gam
+      real rhref,repro,raindrink,orig_clutchsize
+      real y_EV_l,s_j,S_instar
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
-     &E_Hpup,surviv_init,halfsat,x_food,tbask,temerge,surv,arrhenius
+     &E_Hpup,surviv_init,halfsat,x_food,tbask,temerge,arrhenius
       real thermal_stages,stage,behav_stages,water_stages,orig_MsM
-      real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
-     &    for12,for13,for14,for15,for16,for17,for18,for19,for20
       real gutfill,contwet,shdgrass,clutcha,clutchb
-      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI
+      real MSOIL,MSHSOI,PSOIL,PSHSOI,HSOIL,HSHSOI,fec,surv
      
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),FAECES(24),
      &    NWASTE(24),surviv(24),thermal_stages(8,6)
      & ,thermal_stages2(8,6),behav_stages(8,14),
      &behav_stages2(8,14),water_stages(8,8),
-     &water_stages2(8,8),surv(100),maxshades2(7300),arrhenius(8,5)
-     &,arrhenius2(8,5)
+     &water_stages2(8,8),maxshades2(7300),arrhenius(8,5)
+     &,arrhenius2(8,5),fec(100),surv(100),S_instar(4),S_instar2(4)
 
       INTEGER DEB1,breedact,breedactthres    
       INTEGER I,I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,Iclim,I66
@@ -137,7 +133,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       INTEGER J,JP,LIVE,Lometry,MICRO
       INTEGER NDAY,NM
       INTEGER nodnum,NON,NumFed,NumHrs
-      integer days
+      integer days,nn3
       integer TRANCT,census
       integer IT,SCENAR
       integer INTNUM,wingmod,wingcalc
@@ -149,7 +145,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       integer daycount,batch,photostart,photofinish,
      &photodirs,photodirf,breeding,dead,frogbreed,frogstage
       integer metab_mode,stages,minnode,wetmod,contonly,contype
-      integer deadead,startday,reset
+      integer deadead,startday,reset,feed_imago
 
       CHARACTER*130 labloc,labshd,metsun,metshd,label
       CHARACTER*1 BURROW,Dayact,Climb,CkGrShad,Crepus,SPEC,Rainact
@@ -213,17 +209,13 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
      &    hs(24),ms(24),cumbatch(24),q(24)
       DIMENSION repro(24),food(50)
       DIMENSION hour2(25)
-      DIMENSION fec(100)
-      DIMENSION environ2(24*7300,20),enbal2(24*7300,14),dep2(10)
-      DIMENSION METOUT2(24*7300,18),SHADMET2(24*7300,18),
-     &masbal2(24*7300,21),grassgrowths2(7300),grasstsdm2(7300),
+      DIMENSION dep2(10)
+      DIMENSION 
+     &grassgrowths2(7300),grasstsdm2(7300),
      &wetlandTemps2(24*7300),wetlandDepths2(24*7300)
-      DIMENSION SOIL22(24*7300,12),SHADSOIL2(24*7300,12),
-     &SOILMOIST2(24*7300,12),SHADMOIST2(24*7300,12),SOILPOT2(24*7300,12)
-     &,SHADPOT2(24*7300,12),HUMID2(24*7300,12),SHADHUMID2(24*7300,12)
-      DIMENSION debout2(24*7300,18),debmod2(93)
+      DIMENSION debmod2(91)
      &,deblast2(13),v_baby1(24),e_baby1(24),ectoinput2(127),
-     &rainfall2(7300),yearout2(80)
+     &yearout2(80)
       dimension yearsout2(20,45)
       DIMENSION customallom(8),etaO(4,3),JM_JO(4,4),shp(3),EH_baby1(24)    
 
@@ -335,14 +327,8 @@ C     NEED NON, # OF SOIL NODES,
       COMMON/REPYEAR/IYEAR,NYEAR
       COMMON/COUNTDAY/COUNTDAY,daycount
       COMMON/TRANSGUT/TRANS_START
-      COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
-     &,minED,annfood,food,longev,completion,complete,fec1,fec2,
-     &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,
-     &fec15,fec16,fec17,fec18,fec19,fec20,act1,act2,act3,act4,act5,act6,
-     &act7,act8,act9,act10,act11,act12,act13,act14,act15,act16,act17,
-     &act18,act19,act20,fec,surv,for1,for2,for3,for4,for5,for6,for7,for8
-     &,for9,for10,for11,for12,for13,for14,for15,for16,for17,for18,for19,
-     &for20
+      COMMON/DEBOUTT/fecundity,clutches,monrepro,svlrepro,monmature
+     &,minED,annfood,food,longev,completion,complete,fec,surv
       common/gut/gutfull,gutfill
       COMMON/ANNUALACT/ANNUALACT
       COMMON/z/tknest,Thconw
@@ -353,9 +339,8 @@ C     NEED NON, # OF SOIL NODES,
      &,lambda,breedrainthresh,daylengthstart,daylengthfinish,photostart
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
-     &,breedactthres,clutcha,clutchb    
-      COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
-     &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
+     &,breedactthres,clutcha,clutchb      
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
      &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
      &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
@@ -375,7 +360,7 @@ C     NEED NON, # OF SOIL NODES,
 
       OPEN(1,FILE='ectoinput.csv')
       read(1,*)LABEL
-      DO 11 i=1,126
+      DO 11 i=1,127
       read(1,*)label,ectoinput2(i)
 11    continue
       close(1)
@@ -386,8 +371,24 @@ c    read(1,*)ectoinput2(47)
 c    ectoinput2(48)=ectoinput2(47)
 
       nyear=int(ectoinput2(69))
-      days=365
+      days=int(ectoinput2(104))
+      nn3=nyear*days
 c      nyear=3
+      ALLOCATE ( environ2(24*nn3,20) )
+      ALLOCATE ( enbal2(24*nn3,14) )
+      ALLOCATE ( masbal2(24*nn3,21) )
+      ALLOCATE ( debout2(24*nn3,20) )
+      ALLOCATE ( rainfall2(nn3) )
+      ALLOCATE ( metout2(24*nn3,18) )
+      ALLOCATE ( shadmet2(24*nn3,18) )
+      ALLOCATE ( soil22(24*nn3,12) )
+      ALLOCATE ( shadsoil2(24*nn3,12) )
+      ALLOCATE ( soilmoist2(24*nn3,12) )
+      ALLOCATE ( shadmoist2(24*nn3,12) )
+      ALLOCATE ( soilpot2(24*nn3,12) )
+      ALLOCATE ( shadpot2(24*nn3,12) )
+      ALLOCATE ( humid2(24*nn3,12) )
+      ALLOCATE ( shadhumid2(24*nn3,12) )
 
       OPEN(1,FILE='metout.csv')
       read(1,*)LABEL
@@ -426,7 +427,7 @@ c      nyear=3
 
       OPEN(1,FILE='debmod.csv')
       read(1,*)LABEL
-      do 20 i=1,93
+      do 20 i=1,91
       read(1,*)label,debmod2(i)
 20    continue
       close(1)
@@ -439,6 +440,13 @@ c      nyear=3
 21    continue
       close(1)
 
+      OPEN(1,FILE='S_instar.csv')
+      read(1,*)LABEL
+      do 38 i=1,4
+      read(1,*)label,S_instar2(i)
+38    continue
+      close(1)
+      
       OPEN(1,FILE='rainfall.csv')
       read(1,*)LABEL
       do 22 i=1,days*nyear
@@ -564,11 +572,11 @@ c    ectoinput2(110)=19.4
 c    ectoinput2(111)=12.
 c    ectoinput2(112)=1863.5/24.
 
-      call ectotherm(ectoinput2,metout2,shadmet2,soil22,shadsoil2,
+      call ectotherm(nn3,ectoinput2,metout2,shadmet2,soil22,shadsoil2,
      &soilmoist2,shadmoist2,soilpot2,shadpot2,humid2,shadhumid2,
      &dep2,rainfall2,debmod2,deblast2,grassgrowths2,grasstsdm2
      &,wetlandTemps2,wetlandDepths2,arrhenius2,thermal_stages2,
-     &behav_stages2,water_stages2,maxshades2,environ2,enbal2,masbal2,
-     &debout2,yearout2,yearsout2)
+     &behav_stages2,water_stages2,maxshades2,S_instar2,environ2,enbal2
+     &,masbal2,debout2,yearout2,yearsout2)
       stop
       end

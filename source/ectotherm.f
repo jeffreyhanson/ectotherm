@@ -1,9 +1,9 @@
-      subroutine ectotherm(ectoinput1,metout1,shadmet1,soil11,
+      subroutine ectotherm(nn2,ectoinput1,metout1,shadmet1,soil11,
      &shadsoil1,soilmoist1,shadmoist1,soilpot1,shadpot1,humid1
      &,shadhumid1,dep1,rainfall1,debmod1,deblast1,grassgrowth1
      &,grasstsdm1,wetlandTemps1,wetlandDepths1,arrhenius1
-     &,thermal_stages1,behav_stages1,water_stages1,maxshades1,environ1
-     &,enbal1,masbal1,debout1,yearout,yearsout1)
+     &,thermal_stages1,behav_stages1,water_stages1,maxshades1,S_instar1
+     &,environ1,enbal1,masbal1,debout1,yearout,yearsout1)
           
 C    COPYRIGHT WARREN P. PORTER  15 April, 2003
 c    Modified by Michael R. Kearney 2011 to interface with R environment, 
@@ -24,21 +24,30 @@ C      MKS System of Units (J, M, KG, S, C, K, Pa)
 
       Implicit None
 
-      EXTERNAL FUN
-      EXTERNAL DSUB
-      EXTERNAL JAC
-      EXTERNAL FUNWING
+      EXTERNAL FUN,DSUB,JAC,FUNWING
              
       DOUBLE PRECISION Y,T,TOUT,RTOL,ATOL,RWORK     
       
-      double precision metout1,soilmoist1,shadmoist1,soilpot1,shadpot1,
-     &shadmet1,soil11,shadsoil1,dep1,environ1,enbal1,humid1,shadhumid1,
-     &rainfall1,ntry1,ectoinput1,yearout,masbal1,
-     &grassgrowth1,grasstsdm1,wetlandTemps1,wetlandDepths1,
+      double precision dep1,ntry1,yearout,ectoinput1,s_instar1,
      &thermal_stages1,behav_stages1,water_stages1,maxshades1,arrhenius1
 
-      double precision debmod1,debout1,deblast1,hs,
-     &yearsout1
+      INTEGER, INTENT(IN) :: nn2
+
+      double precision, DIMENSION(nn2*24,20),intent(inout) :: environ1,
+     & debout1
+      double precision, DIMENSION(nn2*24,14), intent(inout) :: enbal1
+      double precision, DIMENSION(nn2*24,21), intent(inout) :: masbal1     
+      double precision, DIMENSION(nn2), intent(in) :: rainfall1 
+      double precision, DIMENSION(nn2), intent(in) :: grassgrowth1
+      double precision, DIMENSION(nn2), intent(in) :: grasstsdm1
+      double precision, DIMENSION(nn2), intent(in) :: wetlanddepths1
+      double precision, DIMENSION(nn2), intent(in) :: wetlandtemps1
+      double precision, DIMENSION(nn2*24,18), intent(in) :: metout1,
+     & shadmet1
+      double precision, DIMENSION(nn2*24,12), intent(in) :: soil11,
+     &shadsoil1,soilmoist1,shadmoist1,soilpot1,shadpot1,humid1,
+     &shadhumid1     
+      double precision debmod1,deblast1,hs,yearsout1
 
       REAL ABSAN,ABSMAX,ABSMIN,ABSSB,Acthr,ACTLVL,e
       REAL ACTXBAS,AEFF,AEYES,AHEIT
@@ -116,16 +125,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &,ATSHADHUMID,p_B_past,cumbatch,wetfood,cumrepro,ms
       REAL fecundity,clutches,monrepro,svlrepro,monmature,minED
       real annualact,annfood,food
-      REAL act1,act2,act3,act4,act5,
-     &fec,lx,mx,rmax,R0,TT,tknest
-      REAL act6,act7,act8,act9,act10,fec6,fec7,fec8,fec9,fec10
-
-      real fec1,fec2,fec3,fec4,fec5
-      REAL act11,act12,act13,act14,act15,act16,act17,act18,act19,act20
-      REAL fec11,fec12,fec13,fec14,fec15,fec16,fec17,fec18,fec19,fec20
-      REAL degday1,degday2,degday3,degday4,degday5,degday6,degday7
-      REAL degday8,degday9,degday10,degday11,degday12,degday13,degday14
-      real degday15,degday16,degday17,degday18,degday19,degday20
+      REAL rmax,R0,TT,tknest
 
       REAL O2gas,CO2gas,N2gas,stage_rec
       REAL rainfall,rainthresh,contlast,mlength,flength,lengthday
@@ -140,11 +140,11 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &EH_baby_init,longev,surviv_init
 
       real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
-      real massleft,volumeleft,e_egg
+      real e_egg
       REAL v_init,E_init,E_H,drunk
       REAL kappa_X,kappa_X_P,mu_X,mu_P,enberr2,pond_depth
 
-      REAL debout,debfirst1,E_H_start,orig_clutchsize
+      REAL E_H_start,orig_clutchsize
       REAL ms_init,cumrepro_init,q_init,hs_init,E_H_init,potfreemass,
      &cumbatch_init,p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,s_G,orig_MsM
      &,k_Jref,lambda,daylengthstart,daylengthfinish,breedrainthresh
@@ -155,10 +155,10 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real H2O_URINE,H2O_FREE,H2O_FAECES,H2O_BalPast,twater
       real WETFOODFLUX,WETFAECESFLUX,URINEFLUX,H2O_Bal_hr,depress
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
-     &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26,surv,gam
+     &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26,s_j
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,gutfull,surviv
-      real flytime,flyspeed,rhref,wingtemp,E_Hmoult1,E_Hmet,E_Hecl
-      real p_Am1,p_AmIm,disc,shdgrass,clutcha,clutchb
+      real flytime,flyspeed,rhref,wingtemp
+      real y_EV_l,shdgrass,clutcha,clutchb
       real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
      &    E_Hpup,breedtempthresh,deathstage,prevstage,maxshades
       real ectoinput,debfirst,rainfall2,grassgrowth,grasstsdm,flymetab
@@ -166,30 +166,31 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real thermal_stages,stage,water_stages,behav_stages,repro,Thconw
       real arrhenius,raindrink,HC,convar,fieldcap,wilting,TOTLEN,AV,AT
 
-      real for1,for2,for3,for4,for5,for6,for7,for8,for9,for10,for11,
-     &for12,for13,for14,for15,for16,for17,for18,for19,for20
       real yMaxStg,yMaxWgt,yMaxLen,yTmax,yTmin,yMinRes,
      &yMaxDess,yMinShade,yMaxShade,yMinDep,yMaxDep,yBsk,yForage
      &,yDist,yFood,yDrink,yNWaste,yFeces,yO2,yClutch,yFec
       real tMaxStg,tMaxWgt,tMaxLen,tTmax,tTmin,tMinRes
      &,tMaxDess,tMinShade,tMaxShade,tMinDep,tMaxDep,tBsk,tForage
-     &,tDist,tFood,tDrink,tNWaste,tFeces,tO2,tClutch,tFec,Vb
+     &,tDist,tFood,tDrink,tNWaste,tFeces,tO2,tClutch,tFec,L_b
       real tDLay,tDEgg,tDHatch,tDStg1,tDStg2,tDStg3,tDStg4,tDStg5
      &,tDStg7,tDStg8,tMStg1,tMStg2,tMStg3,tMStg4,tMStg5,tMStg6,tMStg7,
      &tMStg8,tsurv,tovipsurv,tfit,newclutch,tDStg6
       real yDLay,yDEgg,yDHatch,yDStg1,yDStg2,yDStg3,yDStg4,yDStg5
      &,yDStg7,yDStg8,yMStg1,yMStg2,yMStg3,yMStg4,yMStg5,yMStg6,yMStg7,
-     &yMStg8,ysurv,yovipsurv,yfit,mi,ma,mh,yearfract,meanf,yDStg6
+     &yMStg8,ysurv,yovipsurv,yfit,mi,ma,mh,yearfract,yDStg6
      
-      real p_Am_acc,v_acc,p_Xm_acc
-
+      real p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar,s_instar
+      REAL, DIMENSION(100) :: ACT,FOR,DEGDAYS,LX,MX,FEC,SURV
+c      REAL, dimension(:), pointer :: FEC,SURV
+c      REAL, ALLOCATABLE, DIMENSION(:), TARGET :: FECS,SURVIVAL      
       DIMENSION MLO2(24),GH2OMET(24),debqmet(24),DRYFOOD(24),
      &FAECES(24),NWASTE(24),surviv(24),grassgrowth(7300)
      &,grasstsdm(7300),wetlandTemps(24*7300),wetlandDepths(24*7300)
      &,tbs(24*7300),thermal_stages1(8,6),thermal_stages(8,6),
      &behav_stages(8,14),water_stages(8,8),behav_stages1(8,14)
-     &,water_stages1(8,8),stage_rec(25),maxshades1(7300),
-     &maxshades(7300),arrhenius(8,5),arrhenius1(8,5)
+     &,water_stages1(8,8),stage_rec(25),maxshades1(7300),L_instar(5),
+     &maxshades(7300),arrhenius(8,5),arrhenius1(8,5),ectoinput1(127),
+     &s_instar(4),s_instar1(4)
 
       INTEGER HRCALL,DEB1,timeinterval,writecsv,II7
       INTEGER I,I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,Iclim,I66
@@ -201,7 +202,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       integer NDAYY,TRAN,TRANCT
       integer IT,SCENAR,SCENTOT,breedtempcum,census
       integer INTNUM,minnode,completion,complete
-      integer SoilNode
+      integer SoilNode,feed_imago
       integer julstart,hct,aestivate,aest
       integer goodsoil,monthly,julday,dayjul,feeding
       integer IYEAR,NYEAR,countday,trans_start,viviparous
@@ -223,7 +224,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       Character*1 Hourop,Dlenth,Transt,screen
       Character*1 tranin
       Character*1 inactive
-
+      character(len=20) str
 C   ******** IMPORTANT INFORMATION FOR LSODE NUMERICAL INTEGRATOR *****
 C    Minimum SIZE OF IWORK = 20            FOR MF = 10
 C    Minimum SIZE OF RWORK = 20 + 16*NEQ   FOR MF = 10 (NON-STIFF)
@@ -255,7 +256,6 @@ c    (25 hrs*7variables=175).
       DIMENSION DAY(7300),Tshski(25),Tshlow(25)
       DIMENSION TSOIL(25),TSHSOI(25),ZSOIL(10),DEPSEL(20*25*365)
       dimension Daymon(12),Tcores(25)
-      Dimension surv(100)
 C    2 COLUMNS, 25 ROWS EACH TABLE
       DIMENSION Enary1(25),Enary2(25),Enary3(25),Enary4(25)
       DIMENSION Enary5(25),Enary6(25),Enary7(25),Enary8(25)
@@ -283,24 +283,16 @@ C    2 COLUMNS, 25 ROWS EACH TABLE
       DIMENSION wetgonad(24),cumrepro(24),
      &    hs(24),ms(24),cumbatch(24),q(24)
       DIMENSION repro(24),food(50),Acthr(52)
-      DIMENSION hour2(25),ectoinput1(127)
+      DIMENSION hour2(25)
       DIMENSION ATSOIL(25,10),ATSHSOI(25,10),ATMOIST(25,10),
      & ATSHADMOIST(25,10),ATPOT(25,10),ATSHADPOT(25,10),ATHUMID(25,10)
      &,ATSHADHUMID(25,10)
-      DIMENSION fec(100),lx(100),mx(100)
 
-      DIMENSION environ1(24*7300,20),enbal1(24*7300,14),dep1(10)
-      DIMENSION METOUT1(24*7300,18),SHADMET1(24*7300,18),
-     &masbal1(24*7300,21),pond_env(20,365,25,2),debmod1(93)
-      DIMENSION SOIL11(24*7300,12),SHADSOIL1(24*7300,12),
-     & SOILMOIST1(24*7300,12),SHADMOIST1(24*7300,12),
-     &SOILPOT1(24*7300,12),SHADPOT1(24*7300,12),
-     &HUMID1(24*7300,12),SHADHUMID1(24*7300,12)
-      DIMENSION debout(24,9),debout1(24*7300,20)
-     &,deblast1(13),v_baby1(24),e_baby1(24),ntry1(24),
-     &rainfall1(7300),yearout(80),debfirst1(12),dayjul(24*7300),
-     &grassgrowth1(7300),wetlandTemps1(24*7300)
-     &,wetlandDepths1(24*7300),yearsout1(20,45)
+      DIMENSION dep1(10)
+      DIMENSION pond_env(20,365,25,2),debmod1(91)
+
+      DIMENSION deblast1(13),v_baby1(24),e_baby1(24),ntry1(24),
+     &yearout(80),dayjul(24*7300),yearsout1(20,45)
       DIMENSION customallom(8),etaO(4,3),JM_JO(4,4),shp(3),EH_baby1(24)
       dimension rainfall2(7300),debfirst(13),ectoinput(127)    
       DIMENSION MSOIL(25),MSHSOI(25),PSOIL(25),PSHSOI(25),HSOIL(25)
@@ -418,14 +410,8 @@ C     NEED NON, # OF SOIL NODES,
       COMMON/REPYEAR/IYEAR,NYEAR
       COMMON/COUNTDAY/COUNTDAY,daycount
       COMMON/TRANSGUT/TRANS_START
-      COMMON/DEBOUT/fecundity,clutches,monrepro,svlrepro,monmature
-     &,minED,annfood,food,longev,completion,complete,fec1,fec2,
-     &fec3,fec4,fec5,fec6,fec7,fec8,fec9,fec10,fec11,fec12,fec13,fec14,
-     &fec15,fec16,fec17,fec18,fec19,fec20,act1,act2,act3,act4,act5,act6,
-     &act7,act8,act9,act10,act11,act12,act13,act14,act15,act16,act17,
-     &act18,act19,act20,fec,surv,for1,for2,for3,for4,for5,for6,for7,for8
-     &,for9,for10,for11,for12,for13,for14,for15,for16,for17,for18,for19,
-     &for20
+      COMMON/DEBOUTT/fecundity,clutches,monrepro,svlrepro,monmature
+     &,minED,annfood,food,longev,completion,complete,fec,surv
       common/gut/gutfull,gutfill
       COMMON/ANNUALACT/ANNUALACT
       COMMON/z/tknest,Thconw
@@ -437,8 +423,7 @@ C     NEED NON, # OF SOIL NODES,
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb    
-      COMMON/DEBPAR3/metab_mode,stages,p_Am1,p_AmIm
-     &,disc,gam,E_Hmoult1,E_Hmet,E_Hecl,Vb
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar    
       COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
      &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
      &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
@@ -459,38 +444,39 @@ C     NEED NON, # OF SOIL NODES,
       common/thermal_stage/thermal_stages,behav_stages,water_stages
      &,arrhenius
       common/death/causedeath,deathstage
-      common/stage_r/stage_rec,f1count,counter,meanf
+      common/stage_r/stage_rec,f1count,counter
       common/metdep/depress,aestivate,aest
       common/soilmoistur/fieldcap,wilting,soilmoisture
-      common/accel/p_Am_acc,v_acc,p_Xm_acc
+      common/accel/p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar
+      
       writecsv=0
 
-      write(*,*) writecsv
+c      write(*,*) writecsv
       prevstage=0
 
       aest=0
+      maxshade=0.
+      pctdess=0.
       ectoinput=real(ectoinput1)
-c    debfirst=real(debfirst1)
 
       do 987 i=1,13
        debfirst(i)=real(deblast1(i),4)
 987   continue
-      rainfall2=real(rainfall1)
-      grassgrowth=real(grassgrowth1)
-      grasstsdm=real(grasstsdm1)
-      wetlandTemps=real(wetlandTemps1)
-      wetlandDepths=real(wetlandDepths1)
+      rainfall2(1:nn2)=real(rainfall1)
+      grassgrowth(1:nn2)=real(grassgrowth1)
+      grasstsdm(1:nn2)=real(grasstsdm1)
+      wetlandTemps(1:nn2*24)=real(wetlandTemps1)
+      wetlandDepths(1:nn2*24)=real(wetlandDepths1)
       thermal_stages=real(thermal_stages1)
       behav_stages=int(behav_stages1)
       water_stages=real(water_stages1)
       arrhenius=real(arrhenius1)
-
+      s_instar=real(S_instar1,4)
       maxshades=real(maxshades1)
       hourcount=0
       E_H_start=0
       breedact=0
       dessdeath=35.
-
       causedeath=0.
 
       deathstage=-1
@@ -528,29 +514,48 @@ c    debfirst=real(debfirst1)
       
       if(writecsv.gt.0)then
       OPEN (II5, FILE = 'yearout.csv')
-      write(II5,1115) "DEVTIME",",","BIRTHDAY",",","BIRTHMASS",",","MONM
-     &ATURE",",","MONREPRO",",","SVLREPRO",",","FECUNDITY",",","CLUTCHES
-     &",",","ANNUALACT",",","MINRESERVE",",","LASTFOOD",",","TOTFOOD","
-     &,","FEC1",",","FEC2",",","FEC3",",","FEC4",",","FEC5",",","FEC6","
-     &,","FEC7",",","FEC8",",","FEC9",",","FEC10",",","FEC11",",","FEC12
-     &",",","FEC13",",","FEC14",",","FEC15",",","FEC16",",","FEC17",","
-     &,"FEC18",",","FEC19",",","FEC20",",","ACT1",",","ACT2",",","ACT3",
-     &",","ACT4",",","ACT5",",","ACT6",",","ACT7",",","ACT8",",","ACT9",
-     &",","ACT10",",","ACT11",",","ACT12",",","ACT13",",","ACT14",",","A
-     &CT15",",","ACT16",",","ACT17",",","ACT18",",","ACT19",",","ACT20",
-     &",","MINTB",",","MAXTB",",","Pct_Dess",",","LifeSpan",",","GenTime
-     &",",","R0",",","rmax",",","SVL"
+      write(II5,1115) "DEVTIME",",","BIRTHDAY",",","BIRTHMASS",","
+     &,"MONMATURE",",","MONREPRO",",","SVLREPRO",",","FECUNDITY",","
+     &,"CLUTCHES",",","ANNUALACT",",","MINRESERVE",",","LASTFOOD",","
+     &,"TOTFOOD",",","FEC1",",","FEC2",",","FEC3",",","FEC4",",","FEC5"
+     &,",","FEC6",",","FEC7",",","FEC8",",","FEC9",",","FEC10",","
+     &,"FEC11",",","FEC12",",","FEC13",",","FEC14",",","FEC15",","
+     &,"FEC16",",","FEC17",",","FEC18",",","FEC19",",","FEC20",","
+     &,"ACT1",",","ACT2",",","ACT3",",","ACT4",",","ACT5",",","ACT6",","
+     &,"ACT7",",","ACT8",",","ACT9",",","ACT10",",","ACT11",",","ACT12"
+     &,",","ACT13",",","ACT14",",","ACT15",",","ACT16",",","ACT17",","
+     &,"ACT18",",","ACT19",",","ACT20",",","SUR1",",","SUR2",",","SUR3"
+     &,",","SUR4",",","SUR5"
+     &,",","SUR6",",","SUR7",",","SUR8",",","SUR9",",","SUR10",","
+     &,"SUR11",",","SUR12",",","SUR13",",","SUR14",",","SUR15",","
+     &,"SUR16",",","SUR17",",","SUR18",",","SUR19",",","SUR20",","
+     &,"MINTB",",","MAXTB",","
+     &,"Pct_Dess",",","LifeSpan",",","GenTime",",","R0",",","rmax",","
+     &,"SVL"
       endif
 
 1111  format(19(A8,A1),A8)
 1112  format(20(A13,A1),A13)
 1113  format(13(A8,A1),A8)
 1114  format(19(A13,A1),A13)
-1115  format(59(A13,A1),A13)
+1115  format(79(A13,A1),A13)
 
 c    ectoinput1(116)=1
+      timeinterval=int(ectoinput1(104))
 
       nyear=int(ectoinput1(69))
+C     ALLOCATE ( ACT(nyear) )
+C     ALLOCATE ( FOR(nyear) )
+C     ALLOCATE ( DEGDAYS(nyear) )
+C     ALLOCATE ( FECS(nyear) )
+C     ALLOCATE ( SURVIVAL(nyear) )
+C     ALLOCATE ( LX(nyear) )
+C     ALLOCATE ( MX(nyear) )
+C
+C     FECS(1:nyear)=0.
+C     SURVIVAL(1:nyear)=0.
+C     FEC => FECS
+C     SURV => SURVIVAL
 c    Setting print interval(min.)
       Tprint = 60.
 
@@ -589,7 +594,7 @@ c    first check if containter model is on (ectoinput(101)), then check if WET0D
 
 c    zeroing annual outputs of fecundity and activity
       do 5500 i=1,nyear
-       fec(i)=0
+       fec(i)=0.
        mx(i)=0.
        lx(i)=0.
        surv(i)=0.
@@ -598,66 +603,9 @@ c    zeroing annual outputs of fecundity and activity
       complete=0
       dead=0
       deadead=0
-      act1=0
-      act2=0
-      act3=0
-      act4=0
-      act5=0
-      act6=0
-      act7=0
-      act8=0
-      act9=0
-      act10=0
-      act11=0
-      act12=0
-      act13=0
-      act14=0
-      act15=0
-      act16=0
-      act17=0
-      act18=0
-      act19=0
-      act20=0
-      for1=0
-      for2=0
-      for3=0
-      for4=0
-      for5=0
-      for6=0
-      for7=0
-      for8=0
-      for9=0
-      for10=0
-      for11=0
-      for12=0
-      for13=0
-      for14=0
-      for15=0
-      for16=0
-      for17=0
-      for18=0
-      for19=0
-      for20=0
-      degday1=0
-      degday2=0
-      degday3=0
-      degday4=0
-      degday5=0
-      degday6=0
-      degday7=0
-      degday8=0
-      degday9=0
-      degday10=0
-      degday11=0
-      degday12=0
-      degday13=0
-      degday14=0
-      degday15=0
-      degday16=0
-      degday17=0
-      degday18=0
-      degday19=0
-      degday20=0
+      act(1:nyear)=0
+      for(1:nyear)=0
+      degdays(1:nyear)=0
       birth=0
       birthday=0
       maxtc=0
@@ -1468,31 +1416,16 @@ c     primary DEB parameters
        x_food = real(debmod1(79),4)
        metab_mode = int(debmod1(80))
        stages = int(debmod1(81))
-       p_Am1 = real(debmod1(82),4)
-       p_AmIm = real(debmod1(83),4)
-        disc = real(debmod1(84),4)
-       gam = real(debmod1(85),4)
-       startday = int(debmod1(86))
-       raindrink = int(debmod1(87))
-       reset = int(debmod1(88))
-       ma=real(debmod1(89),4)
-       mi=real(debmod1(90),4)
-       mh=real(debmod1(91),4)
-       aestivate=int(debmod1(92))
-       depress=real(debmod1(93),4)
-       if(deb1.eq.1)then
-       if(metab_mode.gt.0)then
-        E_Hmoult1=E_Hj
-c      E_Hmet=E_Hj
-        E_Hecl=E_Hp
-c      if((metab_mode.eq.1).or.(metab_mode.eq.3))then
-c       E_Hb = E_Hmoult1/gam**3.
-c      endif
-c      if((metab_mode.eq.2).or.(metab_mode.eq.4))then
-c       E_Hb = E_Hmoult1*(0.5)**3.
-c      endif
-       endif
-       endif
+       y_EV_l = real(debmod1(82),4)
+       s_j = real(debmod1(83),4)
+       startday = int(debmod1(84))
+       raindrink = int(debmod1(85))
+       reset = int(debmod1(86))
+       ma=real(debmod1(87),4)
+       mi=real(debmod1(88),4)
+       mh=real(debmod1(89),4)
+       aestivate=int(debmod1(90))
+       depress=real(debmod1(91),4)
 
 c     initial conditions or values from last day
 c     iyear=deblast1(1)
@@ -2356,10 +2289,10 @@ c      get the soil node and temperature for this hour at that depth
          newdep=depth
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
          goto 253
@@ -2371,7 +2304,6 @@ c      get the soil node and temperature for this hour at that depth
 
 c    check if aquatic stage of frog and, if so, make its environment water
       if((deb1.eq.1).and.(pond.eq.0).and.((frogbreed.eq.1).or.
-
      &    (frogbreed.eq.2)))then
        if(frogbreed.eq.1)then
         if(stage.le.1)then
@@ -2703,10 +2635,10 @@ c     too dehydrated for activity
          shdburrow=0
          if(shdburrow.eq.1)then
           shade=maxshd
-          Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+          Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
          else
           shade=refshd
-          Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+          Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
          endif
          DEPSEL(IHOUR) = newdep * (-1.0)
          goto 253
@@ -2729,10 +2661,10 @@ c     gut close to full - stay home
          tc_old=tc
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
 c       check if too cold in retreat so the animal needs to bask
@@ -2764,10 +2696,10 @@ c        not right rainfall, can't be active
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2783,13 +2715,13 @@ c          No burrow allowed
         else 
          IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
 C        Put animal in burrow, it's nighttime
-          Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM)
+          Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM)
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
          else
@@ -2812,10 +2744,10 @@ C      If crepuscular, check for direct sun; stay up if z(Ihour) = 90.0
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
              DEPSEL(IHOUR) = newdep * (-1.0)
             else
@@ -2833,10 +2765,10 @@ c        No crepuscular
           if((BURROW .eq. 'Y') .or. (BURROW .eq. 'y'))Then
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
            DEPSEL(IHOUR) = newdep * (-1.0)
           else
@@ -2856,10 +2788,10 @@ C      Sun above horizon and diurnal
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2893,10 +2825,10 @@ C      Nighttime: Activity OK
 C        Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
            DEPSEL(IHOUR) = newdep * (-1.0)
           else
@@ -2922,10 +2854,10 @@ C      Crepuscular environment OK
 C          Put animal in burrow, it's nighttime
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
             DEPSEL(IHOUR) = newdep * (-1.0)
            else
@@ -2943,10 +2875,10 @@ C      Not crepuscular, go to burrow environment, if burrow OK
         IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
         else
@@ -2959,10 +2891,10 @@ C     Not crepuscular, go to burrow environment, if burrow OK
        IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
         DEPSEL(IHOUR) = newdep * (-1.0)
        else
@@ -2979,10 +2911,10 @@ C    End of choices for nocturnal animal
         IF ((BURROW .EQ. 'Y') .OR. (BURROW .EQ. 'y'))THEN
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
          DEPSEL(IHOUR) = newdep * (-1.0)
         else
@@ -3315,10 +3247,10 @@ c      skip the thermoregulatory checks
        ELSE
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
         DEPSEL(IHOUR) = newdep *(-1.0)
         Acthr(Ihour) = 0.0
@@ -3410,10 +3342,10 @@ c        no chance the environment is too harsh: bail
          else
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
           go to 252
@@ -3464,10 +3396,10 @@ c        no other options.  Quit
           endif
         if(shdburrow.eq.1)then
       shade=maxshd
-         Call Seldep (TSHSOI,HSHSOI,ZSOIL,DEPTH,RELHUM)
+         Call Seldep (TSHSOI,HSHSOI,ZSOIL,RELHUM)
         else
       shade=refshd
-         Call Seldep (TSOIL,HSOIL,ZSOIL,DEPTH,RELHUM) 
+         Call Seldep (TSOIL,HSOIL,ZSOIL,RELHUM) 
         endif
           DEPSEL(IHOUR) = newdep * (-1.0)
           go to 252
@@ -3548,87 +3480,8 @@ c     Now rerun the numerical guessing with the new environment
 
          if((dead.eq.0).and.(deadead.eq.0))then
          annualact=annualact+1
-         if(iyear.eq.1)then
-         act1=act1+1
-          for1=for1+acthr(ihour)-1
-         endif
-         if(iyear.eq.2)then
-          act2=act2+1
-          for2=for2+acthr(ihour)-1
-         endif
-         if(iyear.eq.3)then
-          act3=act3+1
-          for3=for3+acthr(ihour)-1
-         endif
-         if(iyear.eq.4)then
-          act4=act4+1
-          for4=for4+acthr(ihour)-1
-         endif
-         if(iyear.eq.5)then
-          act5=act5+1
-          for5=for5+acthr(ihour)-1
-         endif
-         if(iyear.eq.6)then
-          act6=act6+1
-          for6=for6+acthr(ihour)-1
-         endif
-         if(iyear.eq.7)then
-          act7=act7+1
-          for7=for7+acthr(ihour)-1
-         endif
-         if(iyear.eq.8)then
-          act8=act8+1
-          for8=for8+acthr(ihour)-1
-         endif
-         if(iyear.eq.9)then
-          act9=act9+1
-          for9=for9+acthr(ihour)-1
-         endif
-         if(iyear.eq.10)then
-          act10=act10+1
-          for10=for10+acthr(ihour)-1
-         endif
-         if(iyear.eq.11)then
-         act11=act11+1
-          for11=for11+acthr(ihour)-1
-         endif
-         if(iyear.eq.12)then
-          act12=act12+1
-          for12=for12+acthr(ihour)-1
-         endif
-         if(iyear.eq.13)then
-          act13=act13+1
-          for13=for13+acthr(ihour)-1
-         endif
-         if(iyear.eq.14)then
-          act14=act14+1
-          for14=for14+acthr(ihour)-1
-         endif
-         if(iyear.eq.15)then
-          act15=act15+1
-          for15=for15+acthr(ihour)-1
-         endif
-         if(iyear.eq.16)then
-          act16=act16+1
-          for16=for16+acthr(ihour)-1
-         endif
-         if(iyear.eq.17)then
-          act17=act17+1
-          for17=for17+acthr(ihour)-1
-         endif
-         if(iyear.eq.18)then
-          act18=act18+1
-          for18=for18+acthr(ihour)-1
-         endif
-         if(iyear.eq.19)then
-          act19=act19+1
-          for19=for19+acthr(ihour)-1
-         endif
-         if(iyear.eq.20)then
-          act20=act20+1
-          for20=for20+acthr(ihour)-1
-         endif
-
+         act(iyear)=act(iyear+1)
+         for(iyear)=for(iyear)+acthr(ihour)-1
          endif
          if((dayact .eq. 'n') .or. (dayact .eq. 'N'))then
           if(z(ihour).lt. 90)then
@@ -3667,67 +3520,7 @@ c     for WST - get time within narrower thermal window
      &(RAINACT .eq. 'N'))).or.((rainfall.gt.rainthresh).and.((RAINACT 
      &.eq. 'Y') .or.(RAINACT .eq. 'y'))).or.((RAINACT 
      &.eq. 'n') .or.(RAINACT .eq. 'n')))then
-
-         if(iyear.eq.1)then
-         degday1=degday1+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.2)then
-          degday2=degday2+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.3)then
-          degday3=degday3+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.4)then
-          degday4=degday4+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.5)then
-          degday5=degday5+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.6)then
-          degday6=degday6+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.7)then
-          degday7=degday7+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.8)then
-          degday8=degday8+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.9)then
-          degday9=degday9+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.10)then
-          degday10=degday10+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.11)then
-         degday11=degday11+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.12)then
-          degday12=degday12+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.13)then
-          degday13=degday13+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.14)then
-          degday14=degday14+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.15)then
-          degday15=degday15+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.16)then
-          degday16=degday16+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.17)then
-          degday17=degday17+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.18)then
-          degday18=degday18+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.19)then
-          degday19=degday19+max(0.,(Tc-tbask)/24.)
-         endif
-         if(iyear.eq.20)then
-          degday20=degday20+max(0.,(Tc-tbask)/24.)
-         endif
+         degdays(iyear)=degdays(iyear)+max(0.,(Tc-tbask)/24.)
         endif
        endif
       endif
@@ -3743,7 +3536,9 @@ c     for WST - get time within narrower thermal window
 c    have TC, now call DEB model to get next hour's V, E, mass and repro (but don't call if it is hour 25, to avoid having an extra hour)
       if(live.eq.1)then
       if(deb1.eq.1)then
-
+      if(e_hp.eq.0)then
+          e_hp=0
+      endif
       if(ihour.lt.25)then
        if(metab_mode.gt.0)then
 
@@ -3751,6 +3546,9 @@ c    have TC, now call DEB model to get next hour's V, E, mass and repro (but do
        else
         call DEB(ihour)
        endif
+       if(daycount.eq.90)then
+           daycount=90
+      endif
        if(PTUREA.eq.0)then
         H2O_URINE=0
         URINEFLUX=NWASTE(ihour)
@@ -3820,7 +3618,7 @@ c       endif
         endif
         endif
         else
-        PctDess=0
+        PctDess=0.
         endif
 c      if(PctDess.gt.minwater)then
 c       funct=0
@@ -3963,9 +3761,11 @@ c     *  QIROUT,QCONV,QCOND,Wevap,shade,Enb
          enbal1(hct,13)=Enb
          enbal1(hct,14)=ntry
       if(writecsv.eq.2)then
-      write(II3,113)julday,",",iyear,",",daycount,",",Ihour
-     &,",",Tc,",",QSOLAR,",",QIRIN,",",QMETAB,",",QSEVAP,",",Q
-     &IROUT,",",QCONV,",",QCOND,",",Enb,",",ntry
+      write(II3,113)enbal1(hct,1),",",enbal1(hct,2),",",enbal1(hct,3)
+     &,",",enbal1(hct,4),",",enbal1(hct,5),",",enbal1(hct,6),","
+     &,enbal1(hct,7),",",enbal1(hct,8),",",enbal1(hct,9),","
+     &,enbal1(hct,10),",",enbal1(hct,11),",",enbal1(hct,12),","
+     &,enbal1(hct,13),",",enbal1(hct,14)
       endif
          if((iyear.eq.1).and.(daycount.eq.1).and.(ihour.eq.1))then
           mintc=tc
@@ -4354,8 +4154,8 @@ c     &    *E_m)/mu_E)*w_E)/d_V+debout1(i,11))
      &ut1(i,6),',',debout1(i,7),',',debout1(i,8),',',debou
      &t1(i,9),',',debout1(i,10),',',debout1(i,11),',',debo
      &ut1(i,12),',',debout1(i,13),',',debout1(i,14),',',de
-     &bout1(i,15),',',debout1(i,16),',',debout1(i,17),',',
-     &debout1(i,18),',',debout1(i,19),',',debout1(i,20)
+     &bout1(i,15),',',debout1(i,16),',',debout1(i,17),','
+     &,debout1(i,18),',',debout1(i,19),',',debout1(i,20)
       endif
          if(stage.eq.0)then
           devtime=devtime+(1./24.)
@@ -4600,7 +4400,7 @@ c      In preferred range, make animal active in full sun
           ENDIF
       Endif
       Else
-9989  continue
+
       If ((Crepus .eq. 'Y').or.(Crepus .eq. 'y'))then
        IF(ENARY2(I) .eq. 90)THEN
        If((SUNACT .le. TMAXPR) .and. (SUNACT .ge. TMINPR))THEN
@@ -4866,7 +4666,7 @@ c      file output at the moment.
 C      PRINT OUT ANSWERS AT THE END OF TIME INTERVAL, TPRINT
 c      WRITE(I2,130) T,(Y(NOD),NOD=1,NEQ)
            TRANCT = TRANCT + 1
-979        TCPAST = Y(1)
+979        TCPAST = real(Y(1),4)
 c    ***************end of final transient run*************************
       endif
 
@@ -5033,16 +4833,37 @@ c     &    *E_m)/mu_E)*w_E)/d_V+debout1(i,11))
        masbal1(i+24*(iday-1),3)=daycount
        masbal1(i+24*(iday-1),4)=i-24*(daycount-1)
        masbal1(i+24*(iday-1),5)=transient(i-24*(daycount-1))
-       masbal1(i+24*(iday-1),6)=QSOLAR
-       masbal1(i+24*(iday-1),7)=QIRIN
-       masbal1(i+24*(iday-1),8)=QMETAB
-       masbal1(i+24*(iday-1),9)=QSEVAP
-       masbal1(i+24*(iday-1),10)=QIROUT
-       masbal1(i+24*(iday-1),11)=QCONV
-       masbal1(i+24*(iday-1),12)=Wevap
-       masbal1(i+24*(iday-1),13)=Enb
-       masbal1(i+24*(iday-1),14)=ntry
-       masbal1(i+24*(iday-1),15)=H2O_Bal 
+       masbal1(i+24*(iday-1),6)=O2Flux
+       if(deb1.eq.1)then
+        masbal1(i+24*(iday-1),7)=CO2Flux
+        masbal1(i+24*(iday-1),8)=NWASTE(ihour)
+        masbal1(i+24*(iday-1),9)=H2O_FREE
+        masbal1(i+24*(iday-1),10)=GH2OMET(ihour)
+        masbal1(i+24*(iday-1),11)=dryfood(ihour)
+        masbal1(i+24*(iday-1),12)=WETFOODFLUX
+        masbal1(i+24*(iday-1),13)=FAECES(ihour)
+        masbal1(i+24*(iday-1),14)=WETFAECESFLUX
+        masbal1(i+24*(iday-1),15)=URINEFLUX 
+        masbal1(i+24*(iday-1),19)=H2O_Bal_hr
+        masbal1(i+24*(iday-1),20)=H2O_Bal 
+        masbal1(i+24*(iday-1),21)=gutfreemass
+       else
+        masbal1(i+24*(iday-1),7)=0
+        masbal1(i+24*(iday-1),8)=0
+        masbal1(i+24*(iday-1),9)=0
+        masbal1(i+24*(iday-1),10)=0
+        masbal1(i+24*(iday-1),11)=0
+        masbal1(i+24*(iday-1),12)=0
+        masbal1(i+24*(iday-1),13)=0
+        masbal1(i+24*(iday-1),14)=0
+        masbal1(i+24*(iday-1),15)=0 
+        masbal1(i+24*(iday-1),19)=0
+        masbal1(i+24*(iday-1),20)=0 
+        masbal1(i+24*(iday-1),21)=0
+       endif
+       masbal1(i+24*(iday-1),16)=WRESP*3600
+       masbal1(i+24*(iday-1),17)=WCUT*3600
+       masbal1(i+24*(iday-1),18)=WEVAP*3600
       if(writecsv.eq.2)then
       write(II2,112)masbal1(hct,1),",",masba
      &l1(hct,2),",",masbal1(hct,3),",",masba
@@ -5055,7 +4876,7 @@ c     &    *E_m)/mu_E)*w_E)/d_V+debout1(i,11))
      &,masbal1(hct,16),",",masbal1(hct,17),"
      &,",masbal1(hct,18),",",masbal1(hct,19)
      &,",",masbal1(hct,20),",",masbal1(hct,2
-     &1)  
+     &1)   
       endif 
 
        environ1(i+24*(iday-1),1)=julday
@@ -5127,50 +4948,6 @@ c         write(i10,*)'TMIN, TMAX =',TMINPR,TMAXPR
         itest=1
       ENDIF
       
-c21     FORMAT(1X,7F8.2,1F6.0,1I3)
-c22     FORMAT(1X,7E11.3)
-
-c25     FORMAT(1X,'G protein = ',1E12.3,' G fat = ',1E12.3,/1x,
-c     * 'Energy lost (J) = ',1E12.3,' Water lost (g) = ',1E12.3)
-c91     FORMAT(80A1)
-
-C      FORMAT OUTPUT BY MICROMETEOROLOGY PROGRAM FROM OSUB AS 'METOUT'
-c92     FORMAT(1F5.0,1F5.1,1F5.0,1E10.4,4F5.1,2E10.4)
-
-c93     FORMAT(1X,1F5.0,1F5.1,1F5.0,1F7.3,3F5.1,1F5.1,1F7.0,1F6.1)
-c94     FORMAT(' TIME TAIR   RH   VEL TSUBST ',
-c     *    'TSOIL1 TSOIL3  ZEN  SOLR TskyC')
-c95    FORMAT(1X,1F5.0,2F6.1,1F5.0,1F6.2,4F6.1,1E12.4,1F6.2,1F6.1,1F5.2,
-c     &1F5.0)
-c96    FORMAT(1X,'Hr Tc   Qsol      QIRin     Qmetab    Qsevap    '
-c     &,'QIRout    Qconv     Qcond     gH2O/s   %shade   Enb')
-c100    FORMAT(1X,1I5,7E12.3)
-c110    FORMAT(1A)
-c111    FORMAT(1A130)    
-c112    FORMAT(1X,1A130)    
-c113    FORMAT(20I4) 
-c114    FORMAT(8F10.4)   
-c115    FORMAT(1I2,1F5.1,8E10.2,1f5.0,1E11.2)   
-c116    FORMAT(1X,/) 
-c117    FORMAT(1X,1I4,2F10.3,1I4)          
-c118    FORMAT(1X,2I4,3F10.3)
-c119    FORMAT(1X,6F6.1)
-c120   FORMAT('Ihour Mon Amass Qmetab   Wevap     AirVol    CO2MOL',
-c     & '    Tskin Tc  KFlsh SkinW shade  Ta   Vel RH  Qsolar    z(i)',
-c     & '   Enb')
-c130    FORMAT(1X,1F5.0,1F7.2)
-c150    FORMAT(1X,1I5,7E12.3,1I4)
-c151    FORMAT(6E12.3,2E12.4,1E12.3,1E12.4)
-c300    FORMAT(1X,7E12.3)
-c990    FORMAT(2F10.2,1X,1F10.4)
-c991    FORMAT(1F6.2,1X,1F12.3,1X,1E12.4)        
-c992   FORMAT(2I3,1F8.3,4E10.3,2F5.1,1f5.2,1F6.1,2f6.1,
-c     & 1F5.1,1F4.0,1E10.3,1F5.1,1e11.3)
-c210    FORMAT(130A1)
-c212    FORMAT(I4,I4,I4,I4,1F10.2,1F10.2,1F10.2,1F10.2,1F10.2,1F13.2,
-c     & 1F13.2,1F10.4,1F10.3,1F10.3)
-
-
 c    causedeath    
 c    0    no death
 c    1    cold
@@ -5227,24 +5004,23 @@ c    6    pond dry
        yearsout1(iyear,45)=deathstage
 
       if(writecsv.ge.1)then
-        if(iyear.eq.1)then
          II7=7
-         OPEN (II7, FILE = 'yearout1.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
+         OPEN (II7, FILE = 'yearsout'//trim(str(iyear))//'.csv')
+      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",","
+     &,"Tmax",",","Tmin",",","MinRes",",","MaxDess",","
+     &,"MinShade",",","MaxShade",",","MinDep",",","MaxDep"
+     &,",","Bsk",",","Forage",",","Dist",",","Food",","
+     &,"Drink",",","NWaste",",","Feces",",","O2",",","Clutch"
+     &,",","Fec",",","CauseDeath",",","tLay",",","tEgg",","
+     &,"tStg1",",","tStg2",",","tStg3",",","tStg4",","
+     &,"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1"
+     &,",","mStg2",",","mStg3",",","mStg4",",","mStg5",","
+     &,"mStg6",",","mStg7",",","mStg8",",","surv",","
+     &,"ovipsurv",",","fit",",","deathstage"
+      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,","
+     &,yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
+     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk
+     &,",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
      &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
      &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
      &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
@@ -5253,511 +5029,8 @@ c    6    pond dry
      &v,",",yovipsurv,",",yfit,",",deathstage
          close(ii7)
         endif
-        if(iyear.eq.2)then
-         II7=7
-         OPEN (II7, FILE = 'yearout2.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.3)then
-         II7=7
-         OPEN (II7, FILE = 'yearout3.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.4)then
-         II7=7
-         OPEN (II7, FILE = 'yearout4.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.5)then
-         II7=7
-         OPEN (II7, FILE = 'yearout5.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.6)then
-         II7=7
-         OPEN (II7, FILE = 'yearout6.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.7)then
-         II7=7
-         OPEN (II7, FILE = 'yearout7.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.8)then
-         II7=7
-         OPEN (II7, FILE = 'yearout8.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.9)then
-         II7=7
-         OPEN (II7, FILE = 'yearout9.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.10)then
-         II7=7
-         OPEN (II7, FILE = 'yearout10.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.11)then
-         II7=7
-         OPEN (II7, FILE = 'yearout11.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.12)then
-         II7=7
-         OPEN (II7, FILE = 'yearout12.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.13)then
-         II7=7
-         OPEN (II7, FILE = 'yearout13.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.14)then
-         II7=7
-         OPEN (II7, FILE = 'yearout14.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.15)then
-         II7=7
-         OPEN (II7, FILE = 'yearout15.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.16)then
-         II7=7
-         OPEN (II7, FILE = 'yearout16.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.17)then
-         II7=7
-         OPEN (II7, FILE = 'yearout17.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.18)then
-         II7=7
-         OPEN (II7, FILE = 'yearout18.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.19)then
-         II7=7
-         OPEN (II7, FILE = 'yearout19.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-            if(iyear.eq.20)then
-         II7=7
-         OPEN (II7, FILE = 'yearout20.csv')
-      write(II7,1118)"MaxStg",",","MaxWgt",",","MaxLen",",
-     &","Tmax",",","Tmin",",","MinRes",",","MaxDess",",",
-     &"MinShade",",","MaxShade",",","MinDep",",","MaxDep",
-     &",","Bsk",",","Forage",",","Dist",",","Food",",",
-     &"Drink",",","NWaste",",","Feces",",","O2",",","Clutch
-     &",",","Fec",",","CauseDeath",",","tLay",",","tEgg",",    
-     &","tStg1",",","tStg2",",","tStg3",",","tStg4",",",
-     &"tStg5",",","tStg6",",","tStg7",",","tStg8",",","mStg1",
-     &",","mStg2",",","mStg3",",","mStg4",",","mStg5",",",
-     &"mStg6",",","mStg7",",","mStg8",",","surv",",",
-     &"ovipsurv",",","fit",",","deathstage"
-      write(II7,1117)yMaxStg,",",yMaxWgt,",",yMaxLen,",",
-     &yTmax,",",yTmin,",",yMinRes,",",yMaxDess,",",yMinSh
-     &ade,",",yMaxShade,",",yMinDep,",",yMaxDep,",",yBsk,
-     &",",yForage,",",yDist,",",yFood,",",yDrink,",",yNWa
-     &ste,",",yFeces,",",yO2,",",yClutch,",",yFec,",",caus
-     &edeath,",",ydLay,",",ydEgg,",",ydStg1,",",ydStg2,","
-     &,ydStg3,",",ydStg4,",",ydStg5,",",ydStg6,",",ydStg7,"
-     &,",ydStg8,",",ymStg1,",",ymStg2,",",ymStg3,",",ymStg4
-     &,",",ymStg5,",",ymStg6,",",ymStg7,",",ymStg8,",",ysur
-     &v,",",yovipsurv,",",yfit,",",deathstage
-         close(ii7)
-        endif
-       endif
-      causedeath=0
-      deathstage=-1
-      ymaxdess=0.
-      if(dead.eq.1)then
-      max_pctdess=0.
-      endif
       endif
 
-c1117    format(1F1.0,A,4(1F8.3,A),1F20.10,A,5(1F8.3,A),2F4.0,A,6(1F8.3,A)
-c     &,1F8.0,A,1F8.0)
 1117  format(43(F20.10,A),1F20.10)
 1118  format(43(A13,A1),A13)
 
@@ -5806,160 +5079,21 @@ c     check to see if just container model is running or whether to start again 
        endif
       endif
 
-c    mi=0
-c    ma=1e-5
-
-c    calculate life table and rmax
+c     calculate life table and rmax
       do 1010 i=1,nyear
-      if(i.lt.nyear)then
-      yearfract=1
-      else
-      yearfract=longev-aint(longev)
-      endif
-c    account for non-senescent mortality via paramteres mi, ma and mh by multiplying senescence by these values
+       if(i.lt.nyear)then
+        yearfract=1
+       else
+        yearfract=longev-aint(longev)
+       endif
+c      account for non-senescent mortality via paramteres mi, ma and mh by multiplying senescence by these values
+       if(for(i).eq.0)then
+        surv(i)=surv(i)*mh*yearfract
+       else
+        surv(i)=surv(i)*(1-mi)**(8760-for(1))*(1-ma)**for(1)*mh
+     &   *yearfract
+       endif
        if(i.eq.1)then
-        if(for1.eq.0)then
-         surv(i)=surv(i)*mh*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for1)*(1-ma)**for1*mh*yearfract
-        endif
-       endif
-       if(i.eq.2)then
-        if(for2.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for2)*(1-ma)**for2*yearfract
-        endif
-       endif
-       if(i.eq.3)then
-        if(for3.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for3)*(1-ma)**for3*yearfract
-        endif
-       endif
-       if(i.eq.4)then
-        if(for4.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for4)*(1-ma)**for4*yearfract
-        endif
-       endif
-       if(i.eq.5)then
-        if(for5.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for5)*(1-ma)**for5*yearfract
-        endif
-       endif
-       if(i.eq.6)then
-        if(for6.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for6)*(1-ma)**for6*yearfract
-        endif
-       endif
-       if(i.eq.7)then
-        if(for7.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for7)*(1-ma)**for7*yearfract
-        endif
-       endif
-       if(i.eq.8)then
-        if(for8.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for8)*(1-ma)**for8*yearfract
-        endif
-       endif
-       if(i.eq.9)then
-        if(for9.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for9)*(1-ma)**for9*yearfract
-        endif
-       endif
-       if(i.eq.10)then
-        if(for10.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for10)*(1-ma)**for10*yearfract
-        endif
-       endif
-       if(i.eq.11)then
-        if(for11.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for11)*(1-ma)**for11*yearfract
-        endif
-       endif
-       if(i.eq.12)then
-        if(for12.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for12)*(1-ma)**for12*yearfract
-        endif
-       endif
-       if(i.eq.13)then
-        if(for13.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for13)*(1-ma)**for13*yearfract
-        endif
-       endif
-       if(i.eq.14)then
-        if(for14.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for14)*(1-ma)**for14*yearfract
-        endif
-       endif
-       if(i.eq.15)then
-        if(for15.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for15)*(1-ma)**for15*yearfract
-        endif
-       endif
-       if(i.eq.16)then
-        if(for16.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for16)*(1-ma)**for16*yearfract
-        endif
-       endif
-       if(i.eq.17)then
-        if(for17.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for17)*(1-ma)**for17*yearfract
-        endif
-       endif
-       if(i.eq.18)then
-        if(for18.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for18)*(1-ma)**for18*yearfract
-        endif
-       endif
-       if(i.eq.19)then
-        if(for19.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for19)*(1-ma)**for19*yearfract
-        endif
-       endif
-       if(i.eq.20)then
-        if(for20.eq.0)then
-         surv(i)=surv(i)*yearfract
-        else
-         surv(i)=surv(i)*(1-mi)**(8760-for20)*(1-ma)**for20*yearfract
-        endif
-       endif
-
-       if(i.eq.1)then
-c      the *(Thconw/1.12) part is to penalize hatchling survival proportional to z, with no penalty for the max size (1.12)
         lx(i) = surv(i)
        else
         lx(i) = surv(i)*lx(i-1)
@@ -5969,11 +5103,11 @@ c      the *(Thconw/1.12) part is to penalize hatchling survival proportional to
        TT=TT+i*lx(i)*mx(i)*1.
 1010  continue
       if(R0.gt.0)then
-      TT=TT/R0
-      rmax=log(R0)/TT
+       TT=TT/R0
+       rmax=log(R0)/TT
       else
-      TT=0
-      R0=0
+       TT=0
+       R0=0
       endif
 
       yearout(1)=devtime
@@ -5986,95 +5120,19 @@ c      the *(Thconw/1.12) part is to penalize hatchling survival proportional to
       yearout(8)=clutches    
       yearout(9)=annualact
       if(deb1.eq.1)then
-      yearout(10)=minED
+       yearout(10)=minED
       else
-      yearout(10)=0
+       yearout(10)=0
       endif
       yearout(11)=food(nyear)/1000
       yearout(12)=annfood/1000
       if(frogbreed.lt.4)then
-      yearout(13)=fec(1)
-      yearout(14)=fec(2)
-      yearout(15)=fec(3)
-      yearout(16)=fec(4)
-      yearout(17)=fec(5)
-      yearout(18)=fec(6)
-      yearout(19)=fec(7)
-      yearout(20)=fec(8)
-      yearout(21)=fec(9)
-      yearout(22)=fec(10)
-      yearout(23)=fec(11)
-      yearout(24)=fec(12)
-      yearout(25)=fec(13)
-      yearout(26)=fec(14)
-      yearout(27)=fec(15)
-      yearout(28)=fec(16)
-      yearout(29)=fec(17)
-      yearout(30)=fec(18)
-      yearout(31)=fec(19)
-      yearout(32)=fec(20)
+       yearout(13:13+nyear)=fec(1:nyear)
       else
-      yearout(13)=degday1
-      yearout(14)=degday2
-      yearout(15)=degday3
-      yearout(16)=degday4
-      yearout(17)=degday5
-      yearout(18)=degday6
-      yearout(19)=degday7
-      yearout(20)=degday8
-      yearout(21)=degday9
-      yearout(22)=degday10
-      yearout(23)=degday11
-      yearout(24)=degday12
-      yearout(25)=degday13
-      yearout(26)=degday14
-      yearout(27)=degday15
-      yearout(28)=degday16
-      yearout(29)=degday17
-      yearout(30)=degday18
-      yearout(31)=degday19
-      yearout(32)=degday20
+       yearout(13:13+nyear)=degdays(1:nyear)
       endif
-      yearout(33)=act1
-      yearout(34)=act2
-      yearout(35)=act3
-      yearout(36)=act4
-      yearout(37)=act5
-      yearout(38)=act6
-      yearout(39)=act7
-      yearout(40)=act8
-      yearout(41)=act9
-      yearout(42)=act10
-      yearout(43)=act11
-      yearout(44)=act12
-      yearout(45)=act13
-      yearout(46)=act14
-      yearout(47)=act15
-      yearout(48)=act16
-      yearout(49)=act17
-      yearout(50)=act18
-      yearout(51)=act19
-      yearout(52)=act20
-      yearout(53)=surv(1)
-      yearout(54)=surv(2)
-      yearout(55)=surv(3)
-      yearout(56)=surv(4)
-      yearout(57)=surv(5)
-      yearout(58)=surv(6)
-      yearout(59)=surv(7)
-      yearout(60)=surv(8)
-      yearout(61)=surv(9)
-      yearout(62)=surv(10)
-      yearout(63)=surv(11)
-      yearout(64)=surv(12)
-      yearout(65)=surv(13)
-      yearout(66)=surv(14)
-      yearout(67)=surv(15)
-      yearout(68)=surv(16)
-      yearout(69)=surv(17)
-      yearout(70)=surv(18)
-      yearout(71)=surv(19)
-      yearout(72)=surv(20)
+      yearout(33:33+nyear)=act(1:nyear)
+      yearout(53:53+nyear)=surv(1:nyear)
       yearout(73)=mintc
       yearout(74)=maxtc
       yearout(75)=Max_PctDess
@@ -6088,8 +5146,8 @@ c      the *(Thconw/1.12) part is to penalize hatchling survival proportional to
       write(II5,115)yearout(1),",",yearout(2),",",year
      &out(3),",",yearout(4),",",yearout(5),",",yearout(
      &6),",",yearout(7),",",yearout(8),",",yearout(9),"
-     &,",yearout(10),",",yearout(11),",",yearout(12),",
-     &",yearout(13),",",yearout(14),",",yearout(15),","
+     &,",yearout(10),",",yearout(11),",",yearout(12),"
+     &,",yearout(13),",",yearout(14),",",yearout(15),","
      &,yearout(16),",",yearout(17),",",yearout(18),",",
      &yearout(19),",",yearout(20),",",yearout(21),",",y
      &earout(22),",",yearout(23),",",yearout(24),",",ye
@@ -6101,29 +5159,23 @@ c      the *(Thconw/1.12) part is to penalize hatchling survival proportional to
      &(40),",",yearout(41),",",yearout(42),",",yearout(
      &43),",",yearout(44),",",yearout(45),",",yearout(4
      &6),",",yearout(47),",",yearout(48),",",yearout(49)
-     &,",",yearout(50),",",yearout(51),",",yearout(52),
-     &",",yearout(53),",",yearout(54),",",yearout(55),",
-     &",yearout(56),",",yearout(57),",",yearout(58),",",
-     &yearout(59),",",yearout(60),",",yearout(61),",",ye
-
+     &,",",yearout(50),",",yearout(51),",",yearout(52)
+     &,",",yearout(53),",",yearout(54),",",yearout(55),"
+     &,",yearout(56),",",yearout(57),",",yearout(58),","
+     &,yearout(59),",",yearout(60),",",yearout(61),",",ye
      &arout(62),",",yearout(63),",",yearout(64),",",year
-
      &out(65),",",yearout(66),",",yearout(67),",",yearou
-
      &t(68),",",yearout(69),",",yearout(70),",",yearout(
-
      &71),",",yearout(72),",",yearout(73),",",yearout(74
-
-     &),",",yearout(75),",",yearout(76),",",yearout(77),
-
-     &",",yearout(78),",",yearout(79),",",yearout(80)
+     &),",",yearout(75),",",yearout(76),",",yearout(77)
+     &,",",yearout(78),",",yearout(79),",",yearout(80)
       endif
 
 111   format(19(1F8.3,A),1F8.3)
-112   format(20(1F8.3,A),1F8.3)
-113   format(4(I10,A),9(1F8.3,A),I10)
-114   format(4(1F8.3,A),2(E8.3,A),13(1E8.3,A),1F8.3)
-115   format(79(1F10.3,A),1F10.3)    
+112   format(20(ES20.10E5,A),ES20.10E5)
+113   format(13(ES20.10E5,A),ES20.10E5)
+114   format(4(1F8.3,A),ES20.10E5,A,ES20.10E5,A,13(1E8.3,A),1F8.3)
+115   format(79(1F15.3,A),1F10.3)    
 c    write(*,*)area,tc    
 c    close(i10)
 c    close(i4)
@@ -6138,7 +5190,14 @@ c    close(i4)
 
       if(writecsv.gt.0)then
       close (II5)
-
       endif
+c      deallocate(ACT,DEGDAYS,FOR,FECS,SURVIVAL,LX,MX,ENVIRON1)
 200    RETURN 
       end
+      
+      character(len=20) function str(k)
+c!   "Convert an integer to string."
+      integer, intent(in) :: k
+      write (str, *) k
+      str = adjustl(str)
+      end function str               
