@@ -4,6 +4,9 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
 
       Implicit None
 
+      double precision v_init,E_init,Vold_init,Vpup_init,Epup_init,s_j
+     & ,L_b,cumrepro_init,cumbatch_init
+
       real E_baby,V_baby,V_pres,EH_baby    
       real dVdt,dEdt,E_pres,e_baby_init,EH_baby_init
       REAL zfact
@@ -15,7 +18,7 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
       REAL w_E,mu_E,mu_V,w_V,M_V,E_egg
       REAL E_M,E_G,kappa
       REAL d_V,S_instar
-      REAL eggdryfrac,L_b
+      REAL eggdryfrac
       REAL g,E_scaled,V_max,L_T,L_pres,L_max,scaled_l
       REAL dLdt,v_temp,Sc,dUEdt,E_temp,U_H_pres,dUHdt,dE_Hdt,E_H_pres
 
@@ -23,8 +26,8 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &,prevdaylength,lat,k_J,kappa_X,kappa_X_P,mu_X,mu_P
 
       real lambda,funct
-      REAL v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,
-     &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,halfsat,x_food,
+      REAL ms_init,q_init,hs_init,
+     &p_Mref,vdotref,h_aref,maxmass,halfsat,x_food,
      &v_baby_init,v_init_baby,k_Jref,s_G,surviv_init,p_Xmref,E_H_start
       REAL andens_deb,delta_deb,clutchsize,msm,E_Hb,E_Hp,E_Hj,E_H_init
       real breedrainthresh,w_N,w_P,w_X,TWING,clutcha,clutchb
@@ -33,7 +36,7 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &photodirs,photodirf,frogbreed,frogstage,metamorph
       integer metab_mode,stages,breedact,breedactthres
       real y_EV_l
-      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,s_j
+      real E_Hpup_init
       dimension S_instar(4)
       Common/Treg/Tc,TWING
 
@@ -45,11 +48,13 @@ c    Michael Kearney's implementation of Kooijman's k-rule DEB model, based on e
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb
-      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
-      COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
-     &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
-     &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
-     &Vold_init,Vpup_init,Epup_init,E_Hpup_init,p_Xmref
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,S_instar
+      COMMON/DEBPAR4/s_j,L_b
+      COMMON/DEBINIT1/v_init,E_init,cumrepro_init,cumbatch_init,
+     & Vold_init,Vpup_init,Epup_init
+      COMMON/DEBINIT2/ms_init,q_init,hs_init,p_Mref,vdotref,h_aref,
+     &e_baby_init,v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,
+     &halfsat,x_food,E_Hpup_init,p_Xmref  
       common/debbaby/v_baby,e_baby,EH_baby
       common/vivip/viviparous,pregnant
       COMMON/BREEDER/breeding

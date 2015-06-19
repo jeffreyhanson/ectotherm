@@ -5,7 +5,7 @@
       DOUBLE PRECISION T,hs
       
       double precision grassgrowths2,dep2,ectoinput2,yearout2,grasstsdm2
-     &,wetlandTemps2,wetlandDepths2,thermal_stages2,S_instar2,
+     &,wetlandTemps2,wetlandDepths2,thermal_stages2,S_instar2,Tc,
      &behav_stages2,water_stages2,yearsout2,maxshades2,arrhenius2
 
                
@@ -14,6 +14,9 @@
      & ,masbal2,debout2,metout2,shadmet2,soil22,shadsoil2,soilmoist2,
      &shadmoist2,soilpot2,shadpot2,humid2,shadhumid2
       double precision, DIMENSION(:), ALLOCATABLE :: rainfall2
+      
+      double precision vold,ED,V,v_init,E_init,Vold_init,Vpup_init
+     &,Epup_init,s_j,L_b,cumrepro_init,cumbatch_init
       
       REAL ABSAN,ABSMAX,ABSMIN,ABSSB,Acthr,ACTLVL
       REAL ACTXBAS,AEFF,AEYES,AHEIT
@@ -40,7 +43,7 @@
       Real QMETAB,Qresp,Qsevap,QSOL,QSOLAR,QSOLR,Qsolrf
       Real R,Refshd,RH,RELHUM,RQ
       Real Shade,SIG,SkinW,soil2,SOIL3,SPHEAT,SUBTK
-      Real TA,Taloc,Tannul,TC,TCORES
+      Real TA,Taloc,Tannul,TCORES
       Real TDIGPR,TEIN
       Real TEVP,TIME,Tlung,TMAXPR,TMET,TMINPR,TNRG
       Real Tshski,Tshlow,Tskin,TOBJ,TR,TREF
@@ -76,7 +79,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       Real daydis
       Real SkinT
       Real Maxshd
-      REAL V,ED,WETMASS,WETSTORAGE,WETGONAD
+      REAL WETMASS,WETSTORAGE,WETGONAD
      &    ,svl
       REAL p_B_past,cumbatch,wetfood,cumrepro,ms
       REAL fecundity,clutches,monrepro,svlrepro,monmature,minED
@@ -97,12 +100,12 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
 
       real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
       real e_egg
-      REAL v_init,E_init,E_H
-      REAL kappa_X,kappa_X_P,mu_X,mu_P,conthole,L_b
+      REAL E_H
+      REAL kappa_X,kappa_X_P,mu_X,mu_P,conthole
 
       REAL Thconw
-      REAL ms_init,cumrepro_init,q_init,hs_init,E_H_init,
-     &cumbatch_init,p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,E_H_start
+      REAL ms_init,q_init,hs_init,E_H_init,
+     &p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,E_H_start
      &,k_Jref,lambda,daylengthstart,daylengthfinish,breedrainthresh
       real customallom,gutfreemass,shp,s_G,p_Xmref,potfreemass
       real etaO,JM_JO,O2FLUX,CO2FLUX,GH2OMET,MLO2,debqmet
@@ -113,8 +116,8 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &    ,phimin,phimax,TWING,F12,F32,F42,F52,f23,f24,f25,f26,surviv
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,longev,gutfull
       real rhref,repro,raindrink,orig_clutchsize
-      real y_EV_l,s_j,S_instar
-      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
+      real y_EV_l,S_instar
+      real E_Hpup_init,Vpup,Epup,
      &E_Hpup,surviv_init,halfsat,x_food,tbask,temerge,arrhenius
       real thermal_stages,stage,behav_stages,water_stages,orig_MsM
       real gutfill,contwet,shdgrass,clutcha,clutchb
@@ -340,11 +343,13 @@ C     NEED NON, # OF SOIL NODES,
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb      
-      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
-      COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
-     &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
-     &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
-     &Vold_init,Vpup_init,Epup_init,E_Hpup_init,p_Xmref
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,S_instar
+      COMMON/DEBPAR4/s_j,L_b
+      COMMON/DEBINIT1/v_init,E_init,cumrepro_init,cumbatch_init,
+     & Vold_init,Vpup_init,Epup_init
+      COMMON/DEBINIT2/ms_init,q_init,hs_init,p_Mref,vdotref,h_aref,
+     &e_baby_init,v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,
+     &halfsat,x_food,E_Hpup_init,p_Xmref     
       Common/Airgas/O2gas,CO2gas,N2gas
       common/ctmaxmin/ctmax,ctmin,ctmincum,ctminthresh,ctkill
       common/julday/julday,monthly

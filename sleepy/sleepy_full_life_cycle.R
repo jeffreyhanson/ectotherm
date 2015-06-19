@@ -100,13 +100,13 @@ ctminthresh<-12 #number of consecutive hours below CTmin that leads to death
 ctkill<-0 #if 1, animal dies when it hits critical thermal limits
 TPREF<-33.5 # preferred body temperature (animal will attempt to regulate as close to this value as possible)
 DELTAR<-0.1 # degrees C, temperature difference between expired and inspired air
-skinwet<-0.19 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
+skinwet<-0.2 # estimated from data in Bently 1959 at 23 degrees and 34.5 degrees #0.2#0.35 # %, of surface area acting like a free water surface (e.g. most frogs are 100% wet, many lizards less than 5% wet)
 extref<-20. # %, oxygen extraction efficiency (need to check, but based on 35 deg C for a number of reptiles, from Perry, S.F., 1992. Gas exchange strategies in reptiles and the origin of the avian lung. In: Wood, S.C., Weber, R.E., Hargens, A.R., Millard, R.W. (Eds.), Physiological Adaptations in Vertebrates: Respiration, Circulation, andMetabo -  lism. Marcel Dekker, Inc., New York, pp. 149-167.)
 PFEWAT<-73. # %, fecal water (from Shine's thesis, mixed diet 75% clover, 25% mealworms)
 PTUREA<-0. # %, water in excreted nitrogenous waste
 FoodWater<-82#82 # 82%, water content of food (from Shine's thesis, clover)
-minwater<-10 # %, minimum tolerated dehydration (% of wet mass) - prohibits foraging if greater than this
-raindrink<-5. # daily rainfall (mm) required for animal to rehydrate from drinking (zero means standing water always available)
+minwater<-7 # %, minimum tolerated dehydration (% of wet mass) - prohibits foraging if greater than this
+raindrink<-2.5 # daily rainfall (mm) required for animal to rehydrate from drinking (zero means standing water always available)
 gutfill<-75. # % gut fill at which satiation occurs - if greater than 100%, animal always tries to forage
 
 # behavioural traits
@@ -153,26 +153,26 @@ MR_2<-0.8
 MR_3<-0.038
 
 ################### Dynamic Enregy Budget Model Parameters ################
-
+debpars<-as.data.frame(read.csv('c:/DEB/SleepyLizards/Munns Data/new_add_my_pet/DEB_pars_Tiliqua_rugosa.csv',header=FALSE))$V1
 fract<-1
 f<-1.
 MsM<-186.03*6. # J/cm3 produces a stomach volume of 5.3 cm3/100 g, as measured for Disosaurus dorsalis, adjusted for Egernia cunninghami
-z<-7.174*fract
-delta<- 0.217
-kappa_X<-0.85#0.85
-v_dotref<-0.05591/24.
-kappa<-0.8501 
-p_Mref<-45.14/24.
-E_G<-7189
-k_R<-0.95
-k_J<-0.00628/24.
-E_Hb<-6.533e+04*fract^3
+z<-debpars[8]*fract
+delta<-debpars[9]
+kappa_X<-debpars[11]#0.85
+v_dotref<-debpars[13]/24.
+kappa<-debpars[14]
+p_Mref<-debpars[16]/24.
+E_G<-debpars[19]
+k_R<-debpars[15]
+k_J<-debpars[18]/24.
+E_Hb<-debpars[20]*fract^3
 E_Hj<-E_Hb*fract^3
-E_Hp<-1.375e+05*fract^3
-h_aref<-3.61e-13/(24.^2) #3.61e-11/(24.^2) 
-s_G<-0.01
+E_Hp<-debpars[21]*fract^3
+h_aref<-debpars[22]/(24.^2) #3.61e-11/(24.^2) 
+s_G<-debpars[23]
 
-E_Egg<-1.04e+06*fract^3# J, initial energy of one egg # this includes the residual yolk, which is eaten upon hatching
+E_Egg<-debpars[24]*fract^3# J, initial energy of one egg 
 E_m<-(p_Mref*z/kappa)/v_dotref
 p_Xm<-13290#12420 # J/h.cm2, maximum intake rate when feeding
 p_Am<-v_dotref*E_m
@@ -181,20 +181,19 @@ X<-11.7#3#11.7 # max food density J/cm2, approximation based on 200 Tetragonia b
 wilting<-0.11
 
 # for insect model
-metab_mode<-0 # 0 = off, 1 = holometabolous with Dyar's rule scaling, 2 = holometabolous linear scaling, 3 = hemimetabolous with Dyar's rule scaling, 4 = hemimetabolous linear scaling
-stages<-8 # number of stages (max = 8) = number of instars plus 1 for egg + 1 for pupa + 1 for imago
-p_Am1<-0.9296852/24*100
-p_AmIm<-2.068836/24*100
-disc<-0.0307
-gam<-1.6
+metab_mode<-0 # 0 = off, 1 = hemimetabolus model (to do), 2 = holometabolous model
+stages<-7 # number of stages (max = 8) = number of instars plus 1 for egg + 1 for pupa + 1 for imago
+y_EV_l<-0.95 # mol/mol, yield of imago reserve on larval structure
+S_instar<-c(2.660,2.310,1.916,0) # -, stress at instar n: L_n^2/ L_n-1^2
+s_j<-0.999 # -, reprod buffer/structure at pupation as fraction of max
 
 # these next five parameters control the thermal response, effectively generating a thermal response curve
-T_REF<-20 # degrees C, reference temperature - correction factor is 1 for this temperature
-TA<-7130
-TAL<-5.305e+04
-TAH<-9.076e+04
-TL<-288.
-TH<-315.
+T_REF<-debpars[1]-273 # degrees C, reference temperature - correction factor is 1 for this temperature
+TA<-debpars[2]
+TAL<-debpars[5]
+TAH<-debpars[6]
+TL<-debpars[3]
+TH<-debpars[4]
 
 # life-stage specific parameters
 arrhenius<-matrix(data = 0, nrow = 8, ncol = 5)
@@ -202,7 +201,7 @@ arrhenius[,1]<-TA # critical thermal minimum
 arrhenius[,2]<-TAL # critical thermal maximum
 arrhenius[,3]<-TAH # voluntary thermal minimum
 arrhenius[,4]<-TL # voluntary thermal maximum
-arrhenius[,5]<-TH # basking threshold 
+arrhenius[,5]<-TH # basking threshold  
 
 thermal_stages<-matrix(data = 0, nrow = 8, ncol = 6)
 thermal_stages[,1]<-ctmin # critical thermal minimum
@@ -298,11 +297,11 @@ v_init<-3e-9
 E_init<-E_Egg/v_init
 E_H_init<-0
 stage<-0
-v_init<-(3.82^3)*fract^3 #hatchling
+v_init<-(debpars[25]^3)*fract^3 #hatchling
 E_init<-E_m
 E_H_init<-E_Hb+5
 stage<-1
-# v_init<-(7.063^3)*fract^3*0.85
+# v_init<-(debpars[26]^3)*fract^3*0.85
 # E_init<-E_m
 # E_H_init<-E_Hp+1
 # stage<-3

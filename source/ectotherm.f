@@ -31,6 +31,9 @@ C      MKS System of Units (J, M, KG, S, C, K, Pa)
       double precision dep1,ntry1,yearout,ectoinput1,s_instar1,
      &thermal_stages1,behav_stages1,water_stages1,maxshades1,arrhenius1
 
+      double precision vold,ED,V,p_Am_acc,v_acc,p_Xm_acc,L_instar,L_b,
+     &L_j,ER,vpup,epup,v_init,E_init,Vold_init,Vpup_init,Epup_init,s_j
+     &,cumrepro_init,cumbatch_init
       INTEGER, INTENT(IN) :: nn2
 
       double precision, DIMENSION(nn2*24,20),intent(inout) :: environ1,
@@ -119,7 +122,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       Real EggSoil,EggShsoi,INTERP
       Real Shd,Maxshd,maxshade
       real depmax
-      REAL V,ED,WETMASS,WETSTORAGE,WETGONAD,contref,contwet
+      REAL WETMASS,WETSTORAGE,WETGONAD,contref,contwet
      &    ,svl
       REAL ATSOIL,ATSHSOI,ATMOIST,ATSHADMOIST,ATPOT,ATSHADPOT,ATHUMID
      &,ATSHADHUMID,p_B_past,cumbatch,wetfood,cumrepro,ms
@@ -141,12 +144,12 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
 
       real CONTH,CONTW,CONTVOL,CONTDEP,CONTDEPTH
       real e_egg
-      REAL v_init,E_init,E_H,drunk
+      REAL E_H,drunk
       REAL kappa_X,kappa_X_P,mu_X,mu_P,enberr2,pond_depth
 
       REAL E_H_start,orig_clutchsize
-      REAL ms_init,cumrepro_init,q_init,hs_init,E_H_init,potfreemass,
-     &cumbatch_init,p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,s_G,orig_MsM
+      REAL ms_init,q_init,hs_init,E_H_init,potfreemass,
+     &p_Mref,vdotref,h_aref,E_Hb,E_Hp,E_Hj,s_G,orig_MsM
      &,k_Jref,lambda,daylengthstart,daylengthfinish,breedrainthresh
       real customallom,gutfreemass,shp,halfsat,x_food,p_Xmref
       real etaO,JM_JO,O2FLUX,CO2FLUX,GH2OMET,MLO2,debqmet
@@ -155,12 +158,11 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
       real H2O_URINE,H2O_FREE,H2O_FAECES,H2O_BalPast,twater
       real WETFOODFLUX,WETFAECESFLUX,URINEFLUX,H2O_Bal_hr,depress
       real rho1_3,trans1,aref,bref,cref,phi,F21,f31,f41,f51,sidex,WQSOL
-     &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26,s_j
+     &    ,phimin,phimax,twing,F12,F32,F42,F52,f23,f24,f25,f26
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,gutfull,surviv
       real flytime,flyspeed,rhref,wingtemp
-      real y_EV_l,shdgrass,clutcha,clutchb
-      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
-     &    E_Hpup,breedtempthresh,deathstage,prevstage,maxshades
+      real y_EV_l,shdgrass,clutcha,clutchb,maxshades
+      real E_Hpup_init,E_Hpup,breedtempthresh,deathstage,prevstage
       real ectoinput,debfirst,rainfall2,grassgrowth,grasstsdm,flymetab
       real continit,wetlandTemps,wetlandDepths,conthole,tbs,causedeath
       real thermal_stages,stage,water_stages,behav_stages,repro,Thconw
@@ -171,7 +173,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &,yDist,yFood,yDrink,yNWaste,yFeces,yO2,yClutch,yFec
       real tMaxStg,tMaxWgt,tMaxLen,tTmax,tTmin,tMinRes
      &,tMaxDess,tMinShade,tMaxShade,tMinDep,tMaxDep,tBsk,tForage
-     &,tDist,tFood,tDrink,tNWaste,tFeces,tO2,tClutch,tFec,L_b
+     &,tDist,tFood,tDrink,tNWaste,tFeces,tO2,tClutch,tFec
       real tDLay,tDEgg,tDHatch,tDStg1,tDStg2,tDStg3,tDStg4,tDStg5
      &,tDStg7,tDStg8,tMStg1,tMStg2,tMStg3,tMStg4,tMStg5,tMStg6,tMStg7,
      &tMStg8,tsurv,tovipsurv,tfit,newclutch,tDStg6
@@ -179,7 +181,7 @@ c    100% Shade micromet variables; same order as those in the sun, but not dime
      &,yDStg7,yDStg8,yMStg1,yMStg2,yMStg3,yMStg4,yMStg5,yMStg6,yMStg7,
      &yMStg8,ysurv,yovipsurv,yfit,mi,ma,mh,yearfract,yDStg6
      
-      real p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar,s_instar
+      real s_instar
       REAL, DIMENSION(100) :: ACT,FOR,DEGDAYS,LX,MX,FEC,SURV
 c      REAL, dimension(:), pointer :: FEC,SURV
 c      REAL, ALLOCATABLE, DIMENSION(:), TARGET :: FECS,SURVIVAL      
@@ -212,7 +214,7 @@ c      REAL, ALLOCATABLE, DIMENSION(:), TARGET :: FECS,SURVIVAL
      &,microf2,II1,II2,II3,II4,II5
       integer tester,wingmod,wingcalc,birth,microyear,aquatic,pond
       integer flight,flyer,flytest,ctmincum,ctminthresh,ctkill
-      integer metab_mode,stages,deadead,startday,reset,forage
+      integer metab_mode,stages,deadead,startday,reset,forage,pupate
       integer hourcount,wetmod,contonly,contype,shdburrow,stage3,tranny
 
       integer dehydrated,f1count,counter,soilmoisture,grasshade
@@ -423,11 +425,13 @@ C     NEED NON, # OF SOIL NODES,
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb    
-      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar    
-      COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
-     &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
-     &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
-     &Vold_init,Vpup_init,Epup_init,E_Hpup_init,p_Xmref
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,S_instar
+      COMMON/DEBPAR4/s_j,L_b   
+      COMMON/DEBINIT1/v_init,E_init,cumrepro_init,cumbatch_init,
+     & Vold_init,Vpup_init,Epup_init
+      COMMON/DEBINIT2/ms_init,q_init,hs_init,p_Mref,vdotref,h_aref,
+     &e_baby_init,v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,
+     &halfsat,x_food,E_Hpup_init,p_Xmref  
       Common/Airgas/O2gas,CO2gas,N2gas
       common/ctmaxmin/ctmax,ctmin,ctmincum,ctminthresh,ctkill
       common/julday/julday,monthly
@@ -447,9 +451,9 @@ C     NEED NON, # OF SOIL NODES,
       common/stage_r/stage_rec,f1count,counter
       common/metdep/depress,aestivate,aest
       common/soilmoistur/fieldcap,wilting,soilmoisture
-      common/accel/p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar
+      common/accel/p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar,ER
       
-      writecsv=0
+      writecsv=2
 
 c      write(*,*) writecsv
       prevstage=0
@@ -1417,7 +1421,7 @@ c     primary DEB parameters
        metab_mode = int(debmod1(80))
        stages = int(debmod1(81))
        y_EV_l = real(debmod1(82),4)
-       s_j = real(debmod1(83),4)
+       s_j = debmod1(83)
        startday = int(debmod1(84))
        raindrink = int(debmod1(85))
        reset = int(debmod1(86))
@@ -1427,11 +1431,17 @@ c     primary DEB parameters
        aestivate=int(debmod1(90))
        depress=real(debmod1(91),4)
 
+      L_b=0.0611
+      L_instar(1)=S_instar(1)**0.5*L_b
+      do 89 j=2,(stages-4)
+        L_instar(j)=S_instar(j)**0.5*L_instar(j-1)
+89    continue   
+
 c     initial conditions or values from last day
 c     iyear=deblast1(1)
        countday=int(deblast1(2))
-       v_init=real(deblast1(3),4)
-       E_init=real(deblast1(4),4)
+       v_init=deblast1(3)
+       E_init=deblast1(4)
        ms_init=real(deblast1(5),4)
        cumrepro_init=real(deblast1(6),4)
        q_init=real(deblast1(7),4)
@@ -2631,7 +2641,7 @@ c    endif
 c     too dehydrated for activity
         dehydrated=1
         If ((Burrow .eq. 'Y') .or. (Burrow .eq. 'y')) then
-         minnode=9
+         minnode=8
          shdburrow=0
          if(shdburrow.eq.1)then
           shade=maxshd

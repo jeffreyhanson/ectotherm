@@ -119,9 +119,11 @@ NicheMapR_ecto <- function(niche) {
   hum.names<-c("JULDAY","TIME",paste("RH",DEP,"cm", sep = ""))
   colnames(humid)<-hum.names
   colnames(shadhumid)<-hum.names  
-      soilpotb<-soilpot
-  soilmoistb<-soilmoist
   } # end vlsci check
+  if(soilmoisture==1){
+  soilpotb<-soilpot
+  soilmoistb<-soilmoist
+  }
   # habitat
   ALT<-ectoin[1] # altitude (m)
   OBJDIS<-1.0 # distance from object (e.g. bush)
@@ -222,20 +224,20 @@ NicheMapR_ecto <- function(niche) {
 
   lat<-ectoin[4]
   if(soilmoisture==1){
-  humid[,3:9]<-metout[,5]/100
-  shadhumid[,3:9]<-shadmet[,5]/100
-  humid[,10:12]<-0.8
-  shadhumid[,10:12]<-0.8
+  humid[,3:9]<-metout[,5]/100 # assume ambient humidity down to 30cm
+  shadhumid[,3:9]<-shadmet[,5]/100 # assume ambient humidity down to 30cm
+  humid[,10:12]<-0.8 # assume higher humidity in burrow, 60cm and lower
+  shadhumid[,10:12]<-0.8 # assume higher humidity in burrow, 60cm and lower
     
     
   grassgrowths<-as.data.frame(soilpotb)
   soilmoist2b<-as.data.frame(soilmoistb)
   soilmoist2b<-subset(soilmoist2b,TIME==720)
   grassgrowths<-subset(grassgrowths,TIME==720)
-  grassgrowths<-grassgrowths$PT5cm
+  grassgrowths<-grassgrowths$PT5cm # assume plant growth driven by 5cm depth
     
     grow<-grassgrowths
-    grow[grow>-1500]<-1
+    grow[grow>-1500]<-1 # find times when below permanent wilting point
     grow[grow<=-1500]<-0
     counter<-0
     grow2<-grow*0
@@ -255,26 +257,26 @@ NicheMapR_ecto <- function(niche) {
         }
       }
      grow3<-grow2
-     grow3[grow3<7]<-0
-     grow3[grow3>0]<-1
+     grow3[grow3<7]<-0 # use one week in a row as time required for plats to come back after PWP has been hit
+     grow3[grow3>0]<-1 # make vector of 0 and 1 where 1 means plants could have come back from drought
     
   soilmoist2b<-soilmoist2b$WC5cm
   grassgrowths<-as.data.frame(cbind(grassgrowths,soilmoist2b))
   colnames(grassgrowths)<-c('pot','moist')
-  grassgrowths$pot[grassgrowths$pot>-200]<-FoodWater
-  grassgrowths$moist<-grassgrowths$moist*100
+  grassgrowths$pot[grassgrowths$pot>-200]<-FoodWater # assume plants start wilting at about 2 bar, but above this they are at max water content
+  grassgrowths$moist<-grassgrowths$moist*100 # convert to percent
   potmult<-grassgrowths$pot
   potmult[potmult!=82]<-0
   potmult[potmult!=0]<-1  
-  wilting<-subset(grassgrowths,pot==FoodWater)
-  wilting<-min(wilting$moist)
+  wilting<-subset(grassgrowths,pot==FoodWater) # find soil moisture range corresponding to values above the wilting point
+  wilting<-min(wilting$moist) # get the min soil moisture at which plants aren't wilting
   grassgrowths<-grassgrowths$moist
-  grassgrowths[grassgrowths>wilting]<-FoodWater
-  minmoist<-min(grassgrowths[grassgrowths<FoodWater])
+  grassgrowths[grassgrowths>wilting]<-FoodWater # now have vector of either max plant water content or soil moisture content - need to convert the latter into a smooth decline to zero from max value
+  #minmoist<-min(grassgrowths[grassgrowths<FoodWater])
   minmoist<-0
-  grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater
+  grassgrowths[grassgrowths<FoodWater]<-(grassgrowths[grassgrowths<FoodWater]-minmoist)/(wilting-minmoist)*FoodWater # for just the values less than max water content, make them equal to the 
   grassgrowths<-grassgrowths/100*grow3
-  grassgrowths<-c(grassgrowths,rep(0,nrow(metout)/24-length(grassgrowths)))
+  #grassgrowths<-c(grassgrowths,rep(0,nrow(metout)/24-length(grassgrowths))) # this was to ensure a vector of 20 years x 24 hours, but not needed anymore
   #grassgrowths[grassgrowths<FoodWater/100]<-0
   grasstsdms<-grassgrowths
   #minmoist<-min(grassgrowths)
@@ -306,9 +308,8 @@ NicheMapR_ecto <- function(niche) {
     contwet<- 2 # percent wet value for container
   }
   
-  ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade)
+  ectoinput<-as.matrix(c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade))
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,clutch_ab[2],batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,clutch_ab[1],frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,y_EV_l,s_j,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
-  
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
   
   origjulday<-metout[,1]
@@ -368,8 +369,6 @@ NicheMapR_ecto <- function(niche) {
   }
   
   ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES,S_instar=S_instar)
-  #ecto<-list(ectoinput=ectoinput,metout=metout,shadmet=shadmet,soil=soil,shadsoil=shadsoil,DEP=DEP,RAINFALL=RAINFALL,iyear=iyear,countday=countday,debmod=debmod,deblast=deblast,grassgrowths=grassgrowths,grasstsdms=grasstsdms,wetlandTemps=wetlandTemps,wetlandDepths=wetlandDepths,arrhenius=arrhenius,thermal_stages=thermal_stages,behav_stages=behav_stages,water_stages=water_stages,MAXSHADES=MAXSHADES)
-
   if(vlsci==1){
     setwd("/vlsci/VR0212/shared/NicheMapR_Working/ectotherm")
     source('NicheMapR_ecto.R')
