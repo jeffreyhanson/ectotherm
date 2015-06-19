@@ -1,0 +1,20 @@
+#!/bin/bash
+#SBATCH --job-name="sleepy"
+#SBATCH --time=0-5:15:00
+#### Make array * tasks = 1000
+### use array 0 to n - 1
+#   SBATCH --array=0-99
+#   SBATCH --ntasks=10
+#SBATCH --array=0-99
+#SBATCH --ntasks=10
+#SBATCH --mem-per-cpu=32768
+
+module load R-intel
+cd /vlsci/VR0212/shared/NicheMapR_Working/projects/sleepy/
+
+for i in `seq 1 $SLURM_NTASKS`
+do
+    srun --nodes=1 --ntasks=1 --cpus-per-task=1 R --no-save --args $(($SLURM_ARRAY_TASK_ID*$SLURM_NTASKS+$i)) 0 < sleepy_soilmoist.R &
+done
+# IMPORTANT must wait for all to finish, or all get killed
+wait
