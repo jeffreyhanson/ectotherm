@@ -8,11 +8,14 @@ c      EXTERNAL JAC
 c    EXTERNAL GUT
 
       DOUBLE PRECISION dVdt,dqdt,rdot,dhsds,Sc,dUedt,E_temp,dEdt,dE_Hdt
-     &    ,dUHdt,dsurvdt,hs
+     &    ,dUHdt,dsurvdt,hs,vpup,epup,v_init,E_init,Vold_init,Vpup_init
+     &,Epup_init,s_j,L_b,cumrepro_init,cumbatch_init
+     
+      double precision vold,ED,V
 
       REAL SVL,v_baby,e_baby,EH_baby,v_baby1,e_baby1,EH_baby1,funct    
-      REAL E_pres,ED,V,V_pres,gutfull
-      REAL v_init,E_init,ms_init,dldt,V_temp,v_baby_init,EH_baby_init
+      REAL E_pres,V_pres,gutfull
+      REAL ms_init,dldt,V_temp,v_baby_init,EH_baby_init
       REAL e_baby_init,e_init_baby,v_init_baby,wetstorage,wetgonad
       REAL wetfood,E_scaled,U_H_pres,V_max,k_Mdot,surviv_init
       REAL E_H_pres,E_H_init,E_H,E_Hj,wetmass
@@ -26,7 +29,7 @@ c    EXTERNAL GUT
       REAL d_V,p_B_past,GH2OMET
       REAL q,h_a,ms,ms_pres,dmsdt,MsM,ms_past
       REAL PI,eggdryfrac,hs_pres,q_pres
-      REAL G,orig_MsM
+      REAL G,orig_MsM,curbatch
       REAL QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       REAL AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
       REAL Tc,depsel,tcores,orig_clutchsize
@@ -36,8 +39,8 @@ c    EXTERNAL GUT
       REAL acthr,actxbas,thconw,cumrepro_temp
       REAL TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask,temerge
       real ctmin,ctmax,eggsoil
-      REAL cumrepro_init,q_init,hs_init,
-     &cumbatch_init,p_Mref,vdotref,h_aref,maxmass,p_Xmref,
+      REAL q_init,hs_init,
+     &p_Mref,vdotref,h_aref,maxmass,p_Xmref,
      &k_Jref,k_J,batchprep,s_G,potfreemass
       REAL andens_deb,delta_deb,daylengthstart,
      &daylengthfinish,lengthday,lengthdaydir,prevdaylength,lat
@@ -55,12 +58,12 @@ c    EXTERNAL GUT
      &,f61,TQSOL,A1,A2,A3,A4,A4b,A5,A6,f13,f14,f15,f16,longev,h_w
       real rhref,E_Hecl,newclutch,depress,surviv
       real y_EV_l
-      real Vold_init,Vpup_init,Epup_init,E_Hpup_init,Vold,Vpup,Epup,
-     &    E_Hpup,E_H_start,breedtempthresh,s_j,repro
+      real E_Hpup_init,
+     &    E_Hpup,E_H_start,breedtempthresh,repro
       real rainfall2,debfirst,ectoinput,grassgrowth,grasstsdm,raindrink
       real wetlandTemps,wetlandDepths,conthole,pond_env,tbs,stage
       real fieldcap,wilting
-      real S_instar,L_b
+      real S_instar
       real gutfill,contwet,shdgrass,clutcha,clutchb
       REAL, dimension(100) :: FEC,SURV
       
@@ -72,7 +75,7 @@ c    EXTERNAL GUT
       integer DEB1,inwater,aquatic,feeding,ctmincum,ctminthresh,ctkill
       integer metab_mode,stages,deadead,startday,reset,wetmod,contonly
       integer contype,firstday,completion,complete,waiting,breedact
-      integer breedactthres,breedtempcum,aestivate
+      integer breedactthres,breedtempcum,aestivate,nobreed
 
       character*1 transt,dlenth
 
@@ -116,10 +119,11 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/DEBOUTT/fecundity,clutches,monrepro,svlrepro,monmature
      &,minED,annfood,food,longev,completion,complete,fec,surv
       common/gut/gutfull,gutfill
-      COMMON/DEBINIT/v_init,E_init,ms_init,cumrepro_init,q_init,
-     &hs_init,cumbatch_init,p_Mref,vdotref,h_aref,e_baby_init,
-     &v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,halfsat,x_food,
-     &Vold_init,Vpup_init,Epup_init,E_Hpup_init,p_Xmref
+      COMMON/DEBINIT1/v_init,E_init,cumrepro_init,cumbatch_init,
+     & Vold_init,Vpup_init,Epup_init
+      COMMON/DEBINIT2/ms_init,q_init,hs_init,p_Mref,vdotref,h_aref,
+     &e_baby_init,v_baby_init,EH_baby_init,k_Jref,s_G,surviv_init,
+     &halfsat,x_food,E_Hpup_init,p_Xmref
       COMMON/z/tknest,Thconw
       Common/Behav3/Acthr,ACTXBAS
       common/julday/julday,monthly
@@ -131,7 +135,8 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
      &,photofinish,lengthday,photodirs,photodirf,lengthdaydir
      &,prevdaylength,lat,frogbreed,frogstage,metamorph
      &,breedactthres,clutcha,clutchb
-      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,s_j,L_b,S_instar
+      COMMON/DEBPAR3/metab_mode,stages,y_EV_l,S_instar
+      COMMON/DEBPAR4/s_j,L_b
       COMMON/TPREFR/TMAXPR,TMINPR,TDIGPR,ACTLVL,AMTFUD,XBAS,TPREF,tbask
      &,temerge
       common/vivip/viviparous,pregnant
@@ -143,7 +148,7 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
       COMMON/EGGSOIL/EGGSOIL
       Common/Usropt/Transt,Dlenth
       common/fileio/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,I66
-      COMMON/BREEDER/breeding
+      COMMON/BREEDER/breeding,nobreed
       COMMON/ARRHEN/T_A,TAL,TAH,TL,TH,T_ref
       COMMON/REVAP1/Tlung,DELTAR,EXTREF,RQ,MR_1,MR_2,MR_3,DEB1
       COMMON/pond/inwater,aquatic,twater,pond_depth,feeding,pond_env
@@ -188,6 +193,7 @@ c      COMMON/WDSUB1/ANDENS,ASILP,EMISSB,EMISSK,FLUID,G,IHOUR
 c    check if first day of simulation
       if((daycount.eq.1).and.(hour.eq.1))then
        firstday=1
+       nobreed=365*24
       else
        firstday=0
       endif
@@ -204,14 +210,7 @@ c    check if first day of simulation
        endif
       endif
 
-c     for water pythons
-      if(clutcha.gt.0)then
-       clutchsize=FLOOR(clutcha*(SVL(hour)/10)-clutchb)
-      endif
-c      clutch size below for sleepy lizards
-      if(SVL(hour).lt.300)then
-       clutchsize=1
-      endif
+
       
       if((daycount.lt.startday).or.((countday.lt.startday).and.
      &    (v_init.le.3e-9)).or.(deadead.eq.1))then
@@ -246,6 +245,17 @@ c    check if start of a new day
        q_pres = q(hour-1)
        hs_pres = real(hs(hour-1),4)
        surviv_pres = surviv(hour-1)
+      endif
+
+c    svl in mm
+      svl(hour) = V_pres**
+     &    (0.3333333333333)/delta_deb*10
+c     for size-dependent clutch
+      if((clutcha.gt.0).and.(pregnant.eq.0))then
+       clutchsize=FLOOR(clutcha*(SVL(hour)/10)-clutchb)
+      endif
+      if(clutchsize.gt.orig_clutchsize)then
+       clutchsize=orig_clutchsize
       endif
 
       E_H_start = E_H_init
@@ -384,7 +394,10 @@ c    call subroutine that assesses photoperiod cues on breeding
      &daylengthstart,daylengthfinish,photodirs,photodirf,prevdaylength,
      &lat,firstday,breedact,breedactthres,tbs,hour,
      &breedtempthresh,breedtempcum,daycount)
-
+      if(nobreed.lt.4320)then
+       breeding=0
+      endif
+      nobreed=nobreed+1
 c    call subroutine (for frogs at this stage) that assesses if user wants cumulative resets of development after metamorphosis
       CALL DEVRESET(dead,E_H_pres,E_Hb,frogbreed,breeding,
      &conth,contdep,stage,frogstage,reset,complete,waiting,
@@ -777,6 +790,15 @@ c       otherwise start it filling up
          cumbatch(hour) = cumbatch(hour-1)+p_B
       endif
 
+      if((breeding.eq.1).and.(pregnant.eq.0))then
+       do while (cumbatch(hour)+cumrepro(hour) <= clutchsize*E_egg)
+        clutchsize=clutchsize-1
+       end do
+      if(clutchsize.lt.1)then
+        clutchsize=1
+      endif
+      endif
+      clutchenergy = E_egg*clutchsize
       if(stage.eq.2)then
        if(cumbatch(hour).lt.0.1*clutchenergy)then
           stage=3
@@ -833,7 +855,7 @@ c    svl in mm
        endif
       endif
       
-      if((cumbatch(hour).gt.clutchenergy).or.(pregnant.eq.1))then
+      if((cumbatch(hour).ge.clutchenergy).or.(pregnant.eq.1))then
 c       for variable clutch size from repro and batch buffers
 c    if((cumbatch(hour).gt.clutchenergy).or.(pregnant.eq.1).or
 c     &.((viviparous.eq.1).and.(cumbatch(hour)+cumrepro(hour).gt.
@@ -876,6 +898,7 @@ c        then remove what is needed from the repro buffer and add it to the batc
          endif
          cumbatch(hour) = cumbatch(hour)-clutchenergy
          repro(hour)=1
+         nobreed=0
          pregnant=0
          v_baby=v_init_baby
          e_baby=e_init_baby

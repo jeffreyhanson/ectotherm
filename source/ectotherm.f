@@ -213,7 +213,7 @@ c      REAL, ALLOCATABLE, DIMENSION(:), TARGET :: FECS,SURVIVAL
      &photodirs,photodirf,breeding,dead,frogbreed,frogstage,micros2
      &,microf2,II1,II2,II3,II4,II5
       integer tester,wingmod,wingcalc,birth,microyear,aquatic,pond
-      integer flight,flyer,flytest,ctmincum,ctminthresh,ctkill
+      integer flight,flyer,flytest,ctmincum,ctminthresh,ctkill,nobreed
       integer metab_mode,stages,deadead,startday,reset,forage,pupate
       integer hourcount,wetmod,contonly,contype,shdburrow,stage3,tranny
 
@@ -407,7 +407,7 @@ C     NEED NON, # OF SOIL NODES,
       COMMON/DEBRESP/MLO2,GH2OMET,debqmet,MLO2_init,GH2OMET_init,
      &    debqmet_init,dryfood,faeces,nwaste
       COMMON/DEBMOD2/REPRO,orig_clutchsize,newclutch,orig_MsM
-      COMMON/BREEDER/breeding
+      COMMON/BREEDER/breeding,nobreed
       common/debmass/etaO,JM_JO
       COMMON/REPYEAR/IYEAR,NYEAR
       COMMON/COUNTDAY/COUNTDAY,daycount
@@ -453,7 +453,7 @@ C     NEED NON, # OF SOIL NODES,
       common/soilmoistur/fieldcap,wilting,soilmoisture
       common/accel/p_Am_acc,v_acc,p_Xm_acc,L_j,L_instar,ER
       
-      writecsv=2
+      writecsv=0
 
 c      write(*,*) writecsv
       prevstage=0
@@ -484,7 +484,7 @@ c      write(*,*) writecsv
       causedeath=0.
 
       deathstage=-1
-
+      nobreed=0
       dehydrated=0
       II1=1
       II2=2

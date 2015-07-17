@@ -4,10 +4,10 @@ c    Michael Kearney's implementation of Maino's body condition (reserve density
 c    for insects - 26 Dec 2013           
 
       Implicit None
-c
+
 c      EXTERNAL JAC
 c    EXTERNAL GUT
-      external dget_aELE,SOLOUT
+
 c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       DOUBLE PRECISION dVdt,dqdt,rdot,dhsds,Sc,dUedt,E_temp,dEdt,dE_Hdt
      &    ,dUHdt,dsurvdt,hs,v_pres,vold,e_pres,p_C,e_scaled,p_G,p_R,dLdt
@@ -81,7 +81,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       integer DEB1,inwater,aquatic,feeding,ctmincum,ctminthresh,ctkill
       integer metab_mode,stages,wetmod,contonly,contype
       integer breedact,breedactthres,waiting,breedtempcum,census
-      integer prevdead,f1count,counter,soilmoisture,j
+      integer prevdead,f1count,counter,soilmoisture,j,nobreed
 
       character*1 transt,dlenth
 
@@ -104,13 +104,6 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       DIMENSION L_instar(5)
 
       Data PI/3.14159/
-
-      REAL*8 WORK,IWORK,RPAR,RTOL,ATOL,IPAR,YY,XEND
-      INTEGER NDGL,NRDENS,LWORK,LIWORK,N,IOUT,ITOL,IDID
-        PARAMETER (NDGL=4,NRDENS=4)
-        PARAMETER (LWORK=8*NDGL+5*NRDENS+21,LIWORK=NRDENS+21)
-        DIMENSION YY(NDGL),WORK(LWORK),IWORK(LIWORK),RPAR(8),RTOL(1),
-     &   ATOL(1),IPAR(1)
 
       COMMON/FUN1/QSOLAR,QIRIN,QMETAB,QRESP,QSEVAP,QIROUT,QCONV,QCOND
       COMMON/FUN2/AMASS,RELHUM,ATOT,FATOSK,FATOSB,EMISAN,SIG,Flshcond
@@ -163,7 +156,7 @@ c      DOUBLE PRECISION Y,YDOT,T,TOUT,RTOL,ATOL,RWORK
       COMMON/EGGSOIL/EGGSOIL
       Common/Usropt/Transt,Dlenth
       common/fileio/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I15,I21,I22,I66
-      COMMON/BREEDER/breeding
+      COMMON/BREEDER/breeding,nobreed
       COMMON/ARRHEN/T_A,TAL,TAH,TL,TH,T_ref
       COMMON/REVAP1/Tlung,DELTAR,EXTREF,RQ,MR_1,MR_2,MR_3,DEB1
       COMMON/pond/inwater,aquatic,twater,pond_depth,feeding,pond_env
@@ -279,7 +272,7 @@ c    check if start of a new day
 
 c    set body temperature
       Tb = Tc
-c      Tb = 15.
+      Tb = 15.
 
       if((frogbreed.eq.1).or.(frogbreed.eq.2))then
        contdep=pond_env(iyear,countday,hour,2)
@@ -583,78 +576,9 @@ c        Equation 2.10 DEB3
 
       if((stage.gt.0).and.(stage.lt.(stages-2)))then
 c     larva
-       kT_E=vdotref/L_b*Tcorr
-       L_pres=Vold_pres**(1./3.)
-       E_M=(p_Am/vdotref)
-       g=E_G/(kappa*E_M)
-       e_scaled=E_pres/E_m
-       rdot=(e_scaled*kT_E-g*kT_Mdot)/(e_scaled+g)
-       p_C=(E_pres*Vold_pres)*(kT_E-rdot)
-       p_G=kappa*p_C-pT_M*Vold_pres
-       p_J=E_H_pres*kT_J
-       p_R=(1-kappa)*p_C-p_J
-
-C --- DIMENSION OF THE SYSTEM
-        N=NDGL
-C --- OUTPUT ROUTINE (AND DENSE OUTPUT) IS USED DURING INTEGRATION
-        IOUT=0
-C --- INITIAL VALUES AND ENDPOINT OF INTEGRATION
-       
-      RPAR(1)=f
-      RPAR(2)=kT_Mdot
-      RPAR(3)=vdotref/L_b*Tcorr
-      RPAR(4)=p_J
-      RPAR(5)=(p_Mref*zfact/kappa)/L_b*Tcorr
-      RPAR(6)=E_m
-      RPAR(7)=g
-      RPAR(8)=kappa
-      
-      if(hour.eq.1)then
-       if(ms_init.gt.0.0000001*MsM*Vold_pres)then
-       RPAR(1)=f
-       else
-       RPAR(1)=0
-       endif
-      else
-       if(ms(hour-1).gt.0.0000001*MsM*Vold_pres)then
-c        Equation 2.10 DEB3
-       RPAR(1)=f
-       else
-       RPAR(1)=0
-       endif
-      endif
-      
-        X=0.0D0
-        YY(1)=0.0D0
-        YY(2)=E_pres*vold_pres
-        YY(3)=L_pres
-        YY(4)=ER_old*vold_pres
-        XEND=1.D+00
-C --- REQUIRED (RELATIVE AND ABSOLUTE) TOLERANCE
-        ITOL=0
-        RTOL(1)=1.0D-3
-        ATOL(1)=RTOL(1)
-C --- DEFAULT VALUES FOR PARAMETERS
-        DO 10 I=1,20
-        IWORK(I)=0
-  10    WORK(I)=0.D0  
-C --- DENSE OUTPUT IS USED FOR THE TWO POSITION COORDINATES 1 AND 2
-        IWORK(5)=NRDENS
-        IWORK(21)=1
-        IWORK(22)=2
-        IWORK(23)=3
-        IWORK(24)=4    
-C --- CALL OF THE SUBROUTINE DOPRI5   
-        CALL DOPRI5(N,dget_aELE,X,YY,XEND,
-     &              RTOL,ATOL,ITOL,
-     &              SOLOUT,IOUT,
-     &              WORK,LWORK,IWORK,LIWORK,RPAR,IPAR,IDID)
-      vold_pres=YY(3)**3.
-      ER_old=YY(4)/YY(3)**3.
-      ER=ER_old
-      dE_Hdt=0
-      p_B=0.
-      vold(hour)=vold_pres
+      dEdt=0.
+      steps=5000.
+       do 880 i=1,int(steps)
        if(ER_old.lt.E_Rj)then     
         v_acc = vdotref*(vold_pres**(1./3.)/L_b)
         p_Am_acc = (p_Mref*zfact/kappa)*(vold_pres**(1./3.)/L_b)
@@ -667,53 +591,36 @@ c       keep track of length at end of acceleration
         V_max=(kappa*pT_Am/pT_M)**(3.)
         L_max = V_max**(1./3.)
         L_j = vold_pres**(1./3.)
-      endif      
-      
-C     dEdt=0.
-C     steps=6000.
-C      do 880 i=1,int(steps)
-C      if(ER_old.lt.E_Rj)then     
-C       v_acc = vdotref*(vold_pres**(1./3.)/L_b)
-C       p_Am_acc = (p_Mref*zfact/kappa)*(vold_pres**(1./3.)/L_b)
-C       p_Xm_acc = p_Xmref*(vold_pres**(1./3.)/L_b)
-C       vTdot = v_acc*Tcorr
-C       pT_Am = p_Am_acc*Tcorr
-C       pT_Xm = p_Xm_acc*Tcorr
-Cc       keep track of length at end of acceleration   
-C       E_M = p_Am_acc/v_acc 
-C       V_max=(kappa*pT_Am/pT_M)**(3.)
-C       L_max = V_max**(1./3.)
-C       L_j = vold_pres**(1./3.)
-C     endif
-C      kT_E=vdotref/L_b*Tcorr
-C      L_pres=Vold_pres**(1./3.)
-C      E_M=(p_Am/vdotref)
-C      g=E_G/(kappa*E_M)
-C      e_scaled=E_pres/E_m
-C      rdot=(e_scaled*kT_E/steps-g*kT_Mdot/steps)/(e_scaled+g)
-C      p_C=(E_pres*Vold_pres)*(kT_E/steps-rdot)
-C      dEdt1=f*p_Am/L_b*Tcorr/steps-E_pres*vTdot/steps/L_pres
-C      dLdt=rdot*L_pres/3
-C      Vold_pres=(Vold_pres**(1./3.)+dLdt)**3
-C      p_G=kappa*p_C-pT_M*Vold_pres
-C      p_J=E_H_pres*kT_J/steps
-C      p_R=(1-kappa)*p_C-p_J
-C      dER=p_R/V_pres-rdot*ER_old
-C      if(ER_old.lt.E_Rj)then
-C       ER_old=ER_old+dER
-C      endif   
-C     e_pres=e_pres+dEdt1
-C     dEdt=dEdt+dEdt1       
-C880   continue
-C     vold(hour)=vold_pres
-C     ER=ER_old
-C     dE_Hdt=0
-C     p_B=0.
-C     p_C=p_C*steps
-C     p_R=p_R*steps
-C     p_J=p_J*steps
-C     p_G=p_G*steps
-C     rdot=rdot*steps
+      endif
+       kT_E=vdotref/L_b*Tcorr
+       L_pres=Vold_pres**(1./3.)
+       E_M=(p_Am/vdotref)
+       g=E_G/(kappa*E_M)
+       e_scaled=E_pres/E_m
+       rdot=(e_scaled*kT_E/steps-g*kT_Mdot/steps)/(e_scaled+g)
+       p_C=(E_pres*Vold_pres)*(kT_E/steps-rdot)
+       dEdt1=f*p_Am/L_b*Tcorr/steps-E_pres*vTdot/steps/L_pres
+       dLdt=rdot*L_pres/3
+       Vold_pres=(Vold_pres**(1./3.)+dLdt)**3
+       p_G=kappa*p_C-pT_M*Vold_pres
+       p_J=E_H_pres*kT_J/steps
+       p_R=(1-kappa)*p_C-p_J
+       dER=p_R/V_pres-rdot*ER_old
+       if(ER_old.lt.E_Rj)then
+        ER_old=ER_old+dER
+       endif   
+      e_pres=e_pres+dEdt1
+      dEdt=dEdt+dEdt1       
+880   continue
+      vold(hour)=vold_pres
+      ER=ER_old
+      dE_Hdt=0
+      p_B=0.
+      p_C=p_C*steps
+      p_R=p_R*steps
+      p_J=p_J*steps
+      p_G=p_G*steps
+      rdot=rdot*steps
       endif 
  
       if(stage.eq.(stages-2))then
@@ -992,11 +899,7 @@ c     sum structures
        if(stage.eq.0)then
         ED(hour)=E_pres
        else
-       if((stage.gt.0).and.(stage.lt.(stages-2)))then
-        ED(hour) = yy(2)/yy(3)**3.
-        else
         ED(hour) = E_pres+dEdt
-       endif
        endif
       endif
 
