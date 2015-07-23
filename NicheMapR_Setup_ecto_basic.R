@@ -1,9 +1,11 @@
 NicheMapR_ecto <- function(niche) {
   
 enberr<-0.0002 # tolerance for energy balance solution
-write_input<-0 # write input into 'csv input' folder? (1 yes, 0 no)
+write_input<-1 # write input into 'csv input' folder? (1 yes, 0 no)
 longlat<-c(read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[3,2],read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[4,2]) # get longitude and latitude from microclimate output
 nyears<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[8,2]-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[7,2]+1 # number of years the simulation runs for 
+RAINFALL<-as.numeric(as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2])
+timeinterval<-nrow(as.data.frame(RAINFALL))/nyears  
 SUBTK<-2.79 # substrate thermal conductivity (W/mC)
 # 'custallom' below operates if lometry=5, and consists of 4 pairs of values representing 
 # the parameters a and b of a relationship AREA=a*mass^b, where AREA is in cm2 and mass is in g.
@@ -294,8 +296,7 @@ s_j<-0.999 # -, reprod buffer/structure at pupation as fraction of max
   
 
   
-  RAINFALL<-as.numeric(as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2])
-  timeinterval<-nrow(as.data.frame(RAINFALL))/nyears  
+
   REFL<-rep(0.18,timeinterval*nyears) # substrate reflectances 
 
   ectoin<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[,-1]
@@ -471,7 +472,7 @@ s_j<-0.999 # -, reprod buffer/structure at pupation as fraction of max
     conthole<-0#2.8 # daily loss of height (mm) due to 'hole' in container (e.g. infiltration to soil, drawdown from water tank)
     contwet<- 2 # percent wet value for container
   }
-  ectoinput<-c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade)
+  ectoinput<-as.matrix(c(ALT,FLTYPE,OBJDIS,OBJL,PCTDIF,EMISSK,EMISSB,ABSSB,shade,enberr,AMASS,EMISAN,absan,RQ,rinsul,lometry,live,TIMBAS,Flshcond,Spheat,Andens,ABSMAX,ABSMIN,FATOSK,FATOSB,FATOBJ,TMAXPR,TMINPR,DELTAR,SKINW,spec,xbas,extref,TPREF,ptcond,skint,gas,transt,soilnode,o2max,ACTLVL,tannul,nodnum,tdigpr,maxshd,minshd,ctmax,ctmin,behav,julday,actrainthresh,viviparous,pregnant,conth,contw,contlast,tranin,tcinit,nyears,lat,rainmult,julstart,monthly,customallom,MR_1,MR_2,MR_3,DEB,tester,rho1_3,trans1,aref,bref,cref,phi,wings,phimax,phimin,shape_a,shape_b,shape_c,minwater,microyear,container,flyer,flyspeed,timeinterval,maxdepth,ctminthresh,ctkill,gutfill,mindepth,TBASK,TEMERGE,p_Xm,SUBTK,flymetab,continit,wetmod,contonly,conthole,contype,shdburrow,breedtempthresh,breedtempcum,contwet,fieldcap,wilting,soilmoisture,grasshade))
   debmod<-c(clutchsize,andens_deb,d_V,eggdryfrac,mu_X,mu_E,mu_V,mu_P,T_REF,z,kappa,kappa_X,p_Mref,v_dotref,E_G,k_R,MsM,delta,h_aref,V_init_baby,E_init_baby,k_J,E_Hb,E_Hj,E_Hp,clutch_ab[2],batch,breedrainthresh,photostart,photofinish,daylengthstart,daylengthfinish,photodirs,photodirf,clutch_ab[1],frogbreed,frogstage,etaO,JM_JO,E_Egg,kappa_X_P,PTUREA1,PFEWAT1,wO,w_N,FoodWater1,f,s_G,K,X,metab_mode,stages,y_EV_l,s_j,startday,raindrink,reset,ma,mi,mh,aestivate,depress)
   deblast<-c(iyear,countday,v_init,E_init,ms_init,cumrepro_init,q_init,hs_init,cumbatch_init,V_baby_init,E_baby_init,E_H_init,stage)
   
@@ -491,6 +492,7 @@ s_j<-0.999 # -, reprod buffer/structure at pupation as fraction of max
     write.csv(behav_stages, file = "csv input/behav_stages.csv")
     write.csv(water_stages, file = "csv input/water_stages.csv")
     write.csv(MAXSHADES, file = "csv input/Maxshades.csv")
+    write.csv(S_instar, file = "csv input/S_instar.csv")
     write.table(metout2[(seq(1,nyears*timeinterval*24)),], file = "csv input/metout.csv",sep=",",row.names=FALSE)
     write.table(shadmet2[(seq(1,nyears*timeinterval*24)),], file = "csv input/shadmet.csv",sep=",",row.names=FALSE)
     write.table(soil2[(seq(1,nyears*timeinterval*24)),], file = "csv input/soil.csv",sep=",",row.names=FALSE)
