@@ -1,7 +1,7 @@
 NicheMapR_ecto <- function(niche) {
   
 enberr<-0.0002 # tolerance for energy balance solution
-write_input<-1 # write input into 'csv input' folder? (1 yes, 0 no)
+write_input<-0 # write input into 'csv input' folder? (1 yes, 0 no)
 longlat<-c(read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[3,2],read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[4,2]) # get longitude and latitude from microclimate output
 nyears<-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[8,2]-read.csv(file=paste(microin,'ectoin.csv',sep=""),sep=",")[7,2]+1 # number of years the simulation runs for 
 RAINFALL<-as.numeric(as.matrix(read.csv(file=paste(microin,'rainfall.csv',sep=""),sep=","))[,2])
